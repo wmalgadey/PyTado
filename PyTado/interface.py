@@ -231,7 +231,7 @@ class Tado:
 
         cmd = 'zones/%i/schedule/activeTimetable' % (zone)
 
-        data = self._apiCall(cmd, "GET", {}, True)
+        data = self._apiCall(cmd, "GET", {}, False)
 
         if "id" in data:
             return Tado.Timetable(data["id"])
