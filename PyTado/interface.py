@@ -317,8 +317,8 @@ class Tado:
         """Gets getAppUsers data"""
         # pylint: disable=C0103
 
-        cmd = 'getAppUsers'
-        data = self._mobile_apiCall(cmd)
+        cmd = "users"
+        data = self._apiCall(cmd)
         return data
 
     def getAppUsersRelativePositions(self):
