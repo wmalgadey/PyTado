@@ -5,6 +5,7 @@ PyTado interface implementation for mytado.com
 import logging
 import json
 import datetime
+import requests
 from requests import Session
 
 
@@ -37,7 +38,7 @@ class Tado:
     DEVICE_DOMAIN = 'devices'
 
     # 'Private' methods for use in class, Tado mobile API V1.9.
-    def _mobile_apiCall(self, cmd):
+    def _mobile_apiCall(self, cmd, retries=1):
         # pylint: disable=C0103
 
         self._refresh_token()
@@ -47,7 +48,19 @@ class Tado:
                           cmd)
 
         url = '%s%s' % (self.mobi2url, cmd)
-        response = self._http_session.request("get", url, headers=self.headers, timeout=self.timeout)
+
+        while retries >= 0:
+            try:
+                response = self._http_session.request("get", url, headers=self.headers, timeout=self.timeout)
+                break
+            except requests.exceptions.ConnectionError as e:
+                if retries > 0:
+                    _LOGGER.debug("ConnectionError: %s", e)
+                    self._http_session.close()
+                    self._http_session = Session()
+                    retries = retries - 1
+                else:
+                    raise e
 
         if self._debugCalls:
             _LOGGER.debug("mobile api: %s, response: %s",
@@ -56,7 +69,7 @@ class Tado:
         return response.json()
 
     # 'Private' methods for use in class, Tado API V2.
-    def _apiCall(self, cmd, method="GET", data=None, plain=False, domain=HOME_DOMAIN, device_id=None):
+    def _apiCall(self, cmd, method="GET", data=None, plain=False, domain=HOME_DOMAIN, device_id=None, retries=1):
         # pylint: disable=C0103
 
         self._refresh_token()
@@ -78,9 +91,21 @@ class Tado:
             url = '%s%s/%s/%s' % (self.api2url, domain, device_id, cmd)
         else:
             url = '%s%s/%i/%s' % (self.api2url, domain, self.id, cmd)
-        response = self._http_session.request(method, url, timeout=self.timeout,
-                                    headers=headers,
-                                    data=data)
+
+        while retries >= 0:
+            try:
+                response = self._http_session.request(method, url, timeout=self.timeout,
+                                        headers=headers,
+                                        data=data)
+                break
+            except requests.exceptions.ConnectionError as e:
+                if retries > 0:
+                    _LOGGER.debug("ConnectionError: %s", e)
+                    self._http_session.close()
+                    self._http_session = Session()
+                    retries = retries - 1
+                else:
+                    raise e
 
         if self._debugCalls:
             _LOGGER.debug("api call: %s: %s, response %s",
