@@ -262,7 +262,7 @@ class Tado:
 
         cmd = 'zones/%i/schedule/activeTimetable' % (zone)
 
-        data = self._apiCall(cmd, "PUT", {'id': id }, True)
+        data = self._apiCall(cmd, "PUT", {'id': id }, False)
         return data
 
     def getSchedule(self, zone, id, day=None):
