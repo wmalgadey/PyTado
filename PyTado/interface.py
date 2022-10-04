@@ -127,7 +127,7 @@ class Tado:
                                      headers={'Content-Type': 'application/json',
                                               'Referer' : 'https://my.tado.com/'})
 
-        _LOGGER.info("api call result: %s", response.text)
+        _LOGGER.debug("api call result: %s", response.text)
         self._setOAuthHeader(response.json())
 
     def _loginV2(self, username, password):
