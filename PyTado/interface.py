@@ -390,6 +390,12 @@ class Tado:
         payload = { "homePresence": "AWAY" }
         data = self._apiCall(cmd, "PUT", payload)
         return data
+
+    def setAuto(self):
+        """Sets HomeState to AUTO """
+        cmd = 'presenceLock'
+        data = self._apiCall(cmd, "DELETE", {}, True)
+        return data
     
     def getWindowState(self, zone):
         """Returns the state of the window for Zone zone"""
