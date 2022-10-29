@@ -13,12 +13,11 @@ from enum import IntEnum
 from .zone import TadoZone
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.addHandler(logging.FileHandler(
-    filename='/updates-notifications/' + __name__+'.log',
-    mode='a',
-    encoding='utf-8'))
-_LOGGER.setLevel(logging.DEBUG)
-_LOGGER.info("Logger ready")
+# _LOGGER.addHandler(logging.FileHandler(
+#     filename=<path_to_log_file>/' + __name__+'.log',
+#     mode='a',
+#     encoding='utf-8'))
+# _LOGGER.setLevel(logging.DEBUG)
 
 
 class Tado:
@@ -358,32 +357,33 @@ class Tado:
     def setZoneOverlay(self, zone, overlayMode, setTemp=None, duration=None, deviceType='HEATING', power="ON", mode=None, fanSpeed=None, swing=None, light=None):
         """set current overlay for a zone"""
         # pylint: disable=C0103
-
-        _LOGGER.debug("-> setZoneOverlay")
-        params = {
-            "zone": zone,
-            "overlayMode": overlayMode,
-            "setTemp": setTemp,
-            "duration": duration,
-            "deviceType": deviceType,
-            "power": power,
-            "mode": mode,
-            "fanSpeed": fanSpeed,
-            "swing": swing
-        }
-        _LOGGER.debug("--> parameters: ")
-        _LOGGER.debug(json.dumps(params, indent=2))
+        if self._debugCalls:
+            _LOGGER.debug("-> setZoneOverlay")
+            params = {
+                "zone": zone,
+                "overlayMode": overlayMode,
+                "setTemp": setTemp,
+                "duration": duration,
+                "deviceType": deviceType,
+                "power": power,
+                "mode": mode,
+                "fanSpeed": fanSpeed,
+                "swing": swing
+            }
+            _LOGGER.debug("--> parameters: ")
+            _LOGGER.debug(json.dumps(params, indent=2))
 
         cmd = 'zones/%i/overlay' % zone
 
         capabilities = self.getCapabilities(zone)
 
-        _LOGGER.debug('Capabilities for zone ' + str(zone) + ':')
-        _LOGGER.debug(json.dumps(capabilities, indent=2))
+        if self._debugCalls:
+            _LOGGER.debug('Capabilities for zone ' + str(zone) + ':')
+            _LOGGER.debug(json.dumps(capabilities, indent=2))
 
         if mode not in capabilities.keys() and power != 'OFF':
-            _LOGGER.debug("mode not in supported modes -> " +
-                          str(mode) + " not supported")
+            _LOGGER.warn("mode not in supported modes -> " +
+                         str(mode) + " not supported")
             return None
 
         # General configuration
@@ -397,9 +397,10 @@ class Tado:
         else:
             settings = capabilities.get(mode)
             post_data["setting"]["mode"] = mode if mode is not None else 'HEAT'
-            _LOGGER.debug('Available settings for zone ' +
-                          str(zone) + ' - mode ' + str(mode) + ':')
-            _LOGGER.debug(json.dumps(settings, indent=2))
+            if self._debugCalls:
+                _LOGGER.debug('Available settings for zone ' +
+                              str(zone) + ' - mode ' + str(mode) + ':')
+                _LOGGER.debug(json.dumps(settings, indent=2))
 
             current_state = self.getZoneState(zone)
             for setting in settings:
@@ -419,11 +420,12 @@ class Tado:
                     case "light":
                         post_data["setting"]["light"] = light if light is not None and light in settings["light"] else 'ON'
 
-            if duration is not None and overlayMode == 'TIMER':
-                post_data["termination"]["durationInSeconds"] = duration
+            if overlayMode == 'TIMER':
+                post_data["termination"]["durationInSeconds"] = duration if duration is not None else 3600
 
-        _LOGGER.debug("data sent in the PUT overlay")
-        _LOGGER.debug(json.dumps(post_data, indent=2))
+        if self._debugCalls:
+            _LOGGER.debug("data sent in the PUT overlay")
+            _LOGGER.debug(json.dumps(post_data, indent=2))
 
         data = self._apiCall(cmd, "PUT", post_data)
         return data
