@@ -11,3 +11,5 @@ dist/
 
 PyCharms
 .idea/
+test_v3.py
+.vscode/launch.json
