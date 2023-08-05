@@ -1,0 +1,80 @@
+{
+    "lastUpdated": "2023-08-05T19:50:21Z",
+    "runningTimes": [
+        {
+            "endTime": "2023-08-02 00:00:00",
+            "runningTimeInSeconds": 0,
+            "startTime": "2023-08-01 00:00:00",
+            "zones": [
+                {
+                    "id": 1,
+                    "runningTimeInSeconds": 1
+                },
+                {
+                    "id": 2,
+                    "runningTimeInSeconds": 2
+                },
+                {
+                    "id": 3,
+                    "runningTimeInSeconds": 3
+                },
+                {
+                    "id": 4,
+                    "runningTimeInSeconds": 4
+                }
+            ]
+        },
+        {
+            "endTime": "2023-08-03 00:00:00",
+            "runningTimeInSeconds": 0,
+            "startTime": "2023-08-02 00:00:00",
+            "zones": [
+                {
+                    "id": 1,
+                    "runningTimeInSeconds": 5
+                },
+                {
+                    "id": 2,
+                    "runningTimeInSeconds": 6
+                },
+                {
+                    "id": 3,
+                    "runningTimeInSeconds": 7
+                },
+                {
+                    "id": 4,
+                    "runningTimeInSeconds": 8
+                }
+            ]
+        },
+        {
+            "endTime": "2023-08-04 00:00:00",
+            "runningTimeInSeconds": 0,
+            "startTime": "2023-08-03 00:00:00",
+            "zones": [
+                {
+                    "id": 1,
+                    "runningTimeInSeconds": 9
+                },
+                {
+                    "id": 2,
+                    "runningTimeInSeconds": 10
+                },
+                {
+                    "id": 3,
+                    "runningTimeInSeconds": 11
+                },
+                {
+                    "id": 4,
+                    "runningTimeInSeconds": 12
+                }
+            ]
+        }
+    ],
+    "summary": {
+        "endTime": "2023-08-06 00:00:00",
+        "meanInSecondsPerDay": 24,
+        "startTime": "2023-08-01 00:00:00",
+        "totalRunningTimeInSeconds": 120
+    }
+}
