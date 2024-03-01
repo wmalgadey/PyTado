@@ -509,7 +509,8 @@ class Tado:
 
     # <editor-fold desc="Deprecated">
     def setZoneOverlay(self, zone, overlayMode, setTemp=None, duration=None, deviceType='HEATING', power="ON",
-                       mode=None, fanSpeed=None, swing=None):
+                       mode=None, fanSpeed=None, swing=None, fanLevel=None, verticalSwing=None,
+                         horizontalSwing=None):
         """Set current overlay for a zone (Deprecated)"""
         warnings.warn("The 'setZoneOverlay' method is deprecated, "
                       "use 'set_zone_overlay' instead", DeprecationWarning, 2)
@@ -522,12 +523,17 @@ class Tado:
             power=power,
             mode=mode,
             fan_speed=fanSpeed,
-            swing=swing)
+            swing=swing,
+            fan_level=fanLevel,
+            vertical_swing=verticalSwing,
+            horizontal_swing=horizontalSwing
+        )
 
     # </editor-fold>
 
     def set_zone_overlay(self, zone, overlay_mode, set_temp=None, duration=None, device_type='HEATING', power="ON",
-                         mode=None, fan_speed=None, swing=None):
+                         mode=None, fan_speed=None, swing=None, fan_level=None, vertical_swing=None,
+                         horizontal_swing=None):
         """
         Set current overlay for a zone
         """
@@ -541,8 +547,15 @@ class Tado:
             post_data["setting"]["temperature"] = {"celsius": set_temp}
             if fan_speed is not None:
                 post_data["setting"]["fanSpeed"] = fan_speed
+            elif fan_level is not None:
+                post_data["setting"]["fanLevel"] = fan_level
             if swing is not None:
                 post_data["setting"]["swing"] = swing
+            else:
+                if vertical_swing is not None:
+                    post_data["setting"]["verticalSwing"] = vertical_swing
+                if horizontal_swing is not None:
+                    post_data["setting"]["horizontalSwing"] = horizontal_swing
 
         if mode is not None:
             post_data["setting"]["mode"] = mode
@@ -554,6 +567,7 @@ class Tado:
         request.command = f"zones/{zone:d}/overlay"
         request.action = Action.CHANGE
         request.payload = post_data
+        print(post_data)
 
         return self.http.request(request)
 
