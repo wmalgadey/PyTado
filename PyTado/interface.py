@@ -567,7 +567,6 @@ class Tado:
         request.command = f"zones/{zone:d}/overlay"
         request.action = Action.CHANGE
         request.payload = post_data
-        print(post_data)
 
         return self.http.request(request)
 
