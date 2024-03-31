@@ -83,6 +83,14 @@ class Http:
     # Id
     id = 0
 
+    # Request Header Information
+    request_headers = {
+        'Content-Type': 'application/json',
+        'Origin': 'https://app.tado.com',
+        'Referer': 'https://app.tado.com/',
+        'User-Agent' : 'PyTado'
+    }
+
     __username = None
     __password = None
 
@@ -213,10 +221,7 @@ class Http:
             params=data,
             timeout=self.timeout,
             data=json.dumps({}).encode('utf8'),
-            headers={
-                'Content-Type': 'application/json',
-                'Referer': 'https://app.tado.com/'
-            }
+            headers=self.request_headers
         )
 
         self.__set_oauth_header(response.json())
@@ -239,10 +244,7 @@ class Http:
                                         params=data,
                                         timeout=self.timeout,
                                         data=json.dumps({}).encode('utf8'),
-                                        headers={
-                                            'Content-Type': 'application/json',
-                                            'Referer': 'https://app.tado.com/'
-                                        }
+                                        headers=headers=self.request_headers
                                         )
         if response.status_code == 400:
             raise TadoWrongCredentialsException("Your username or password is invalid")
