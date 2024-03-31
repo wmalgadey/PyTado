@@ -244,7 +244,7 @@ class Http:
                                         params=data,
                                         timeout=self.timeout,
                                         data=json.dumps({}).encode('utf8'),
-                                        headers=headers=self.request_headers
+                                        headers=self.request_headers
                                         )
         if response.status_code == 400:
             raise TadoWrongCredentialsException("Your username or password is invalid")
