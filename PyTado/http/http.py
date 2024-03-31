@@ -6,6 +6,7 @@ import json
 import logging
 import pprint
 from datetime import datetime, timedelta
+from dataclasses import dataclass, asdict
 
 try:
     from enum import StrEnum, ReprEnum
@@ -64,6 +65,15 @@ class TadoResponse:
     todo: implement response parser"""
     pass
 
+@dataclass
+class RequestHeader:
+    content_type: str = "application/json"
+    origin: str = "https://app.tado.com"
+    referer: str = "https://app.tado.com"
+    user_agent: str = "PyTado"
+
+    def dict(self):
+        return {k.replace("_", "-"): str(v) for k, v in asdict(self).items()}
 
 class Http:
     """API Request Class"""
@@ -84,17 +94,12 @@ class Http:
     id = 0
 
     # Request Header Information
-    request_headers = {
-        'Content-Type': 'application/json',
-        'Origin': 'https://app.tado.com',
-        'Referer': 'https://app.tado.com/',
-        'User-Agent' : 'PyTado'
-    }
+    __request_header = None
 
     __username = None
     __password = None
 
-    def __init__(self, username=None, password=None, http_session=session, debug=False):
+    def __init__(self, username=None, password=None, http_session=session, debug=False, request_headers: RequestHeader=RequestHeader()):
         self.log = Logger(__name__)
         if debug:
             self.log.setLevel(logging.DEBUG)
@@ -106,6 +111,7 @@ class Http:
         self.headers = {"Referer": "https://app.tado.com/"}
         self.__username = username
         self.__password = password
+        self.__request_header = request_headers
         self.__login()
 
     def __log_response(self, response: Response, *args, **kwargs):
@@ -221,7 +227,7 @@ class Http:
             params=data,
             timeout=self.timeout,
             data=json.dumps({}).encode('utf8'),
-            headers=self.request_headers
+            headers=self.__request_header.dict()
         )
 
         self.__set_oauth_header(response.json())
@@ -244,7 +250,7 @@ class Http:
                                         params=data,
                                         timeout=self.timeout,
                                         data=json.dumps({}).encode('utf8'),
-                                        headers=self.request_headers
+                                        headers=self.__request_header.dict()
                                         )
         if response.status_code == 400:
             raise TadoWrongCredentialsException("Your username or password is invalid")
