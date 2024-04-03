@@ -10,6 +10,7 @@ authors = [
     { name = "Chris Jewell", email = "chrism0dwk@gmail.com" },
     { name = "w.malgadey", email = "w.malgadey@gmail.com" },
 ]
+dependencies = ["requests"]
 requires-python = ">=3.12"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -23,7 +24,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
 ]
-dynamic = ["dependencies"]
 
 [project.urls]
 GitHub = "https://github.com/wmalgadey/PyTado"
@@ -37,9 +37,6 @@ pytado = "pytado.__main__:main"
 [tool.setuptools]
 platforms = ["any"]
 zip-safe = false
-
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
 
 [tool.black]
 line-length = 80
