@@ -2,28 +2,21 @@
 Do all the API HTTP heavy lifting in this file
 """
 
+import enum
 import json
-import logging
 import pprint
 from datetime import datetime, timedelta
+from typing import Any
 
-try:
-    from enum import StrEnum, ReprEnum
-except ImportError:
-    from PyTado.polyfill import (
-        StrEnum,
-        ReprEnum,
-    )  # polyfilling StrEnum and ReprEnum for older versions
-from enum import Enum
-
-import requests.exceptions
-from requests import Request, Response, Session
+import requests
 
 from PyTado.exceptions import TadoWrongCredentialsException
 from PyTado.logging import Logger
 
+_LOGGER = Logger(__name__)
 
-class Endpoint(StrEnum):
+
+class Endpoint(enum.StrEnum):
     """Endpoint URL Enum"""
 
     API = "https://my.tado.com/api/v2/"
@@ -31,7 +24,7 @@ class Endpoint(StrEnum):
     EIQ = "https://energy-insights.tado.com/api/"
 
 
-class Domain(StrEnum):
+class Domain(enum.StrEnum):
     """API Request Domain Enum"""
 
     HOME = "homes"
@@ -39,7 +32,7 @@ class Domain(StrEnum):
     ME = "me"
 
 
-class Action(StrEnum):
+class Action(enum.StrEnum):
     """API Request Action Enum"""
 
     GET = "GET"
@@ -48,7 +41,7 @@ class Action(StrEnum):
     CHANGE = "PUT"
 
 
-class Mode(Enum):
+class Mode(enum.Enum):
     """API Response Format Enum"""
 
     OBJECT = 1
@@ -58,13 +51,13 @@ class Mode(Enum):
 class TadoRequest:
     """Data Container"""
 
-    endpoint = Endpoint.API
-    command = None
-    action = Action.GET
-    payload = None
-    domain = Domain.HOME
-    device = None
-    mode = Mode.OBJECT
+    endpoint: Endpoint = Endpoint.API
+    command: str | None = None
+    action: Action = Action.GET
+    payload: dict[str, Any] | None = None
+    domain: Domain = Domain.HOME
+    device: int | None = None
+    mode: Mode = Mode.OBJECT
 
 
 class TadoResponse:
@@ -74,138 +67,125 @@ class TadoResponse:
     pass
 
 
+_DEFAULT_TIMEOUT = 10
+_DEFAULT_RETRIES = 5
+
+
 class Http:
     """API Request Class"""
 
-    log = None
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        http_session: requests.Session | None = None,
+    ):
+        self._refresh_at = datetime.now() + timedelta(minutes=5)
+        self._session = http_session or requests.Session()
+        self._session.hooks["response"].append(self._log_response)
+        self._headers = {"Referer": "https://app.tado.com/"}
+        self._username = username
+        self._password = password
+        self._id, self._token_refresh = self._login()
 
-    # OAuth Data
-    refresh_token = None
-    refresh_at = ""
-
-    # requests.py session object
-    session = ""
-
-    # Parameters
-    timeout = 10
-    retries = 5
-
-    # Id
-    id = 0
-
-    __username = None
-    __password = None
-
-    def __init__(self, username=None, password=None, http_session=session, debug=False):
-        self.log = Logger(__name__)
-        if debug:
-            self.log.setLevel(logging.DEBUG)
-        else:
-            self.log.setLevel(logging.WARNING)
-        self.refresh_at = datetime.now() + timedelta(minutes=5)
-        self.session = http_session if http_session else Session()
-        self.session.hooks["response"].append(self.__log_response)
-        self.headers = {"Referer": "https://app.tado.com/"}
-        self.__username = username
-        self.__password = password
-        self.__login()
-
-    def __log_response(self, response: Response, *args, **kwargs):
+    def _log_response(self, response: requests.Response, *args, **kwargs):
         og_request_method = response.request.method
         og_request_url = response.request.url
         og_request_headers = response.request.headers
         response_status = response.status_code
-        self.log.debug(
+        _LOGGER.debug(
             f"\nRequest:\n\tMethod:{og_request_method}\n\tURL: {og_request_url}\n\t"
             f"Headers: {pprint.pformat(og_request_headers)}\n"
             f"Response:\n\tStatusCode: {response_status}\n\tData: {response.json()}"
         )
 
-    def request(self, request: TadoRequest):
+    def request(self, request: TadoRequest) -> dict[str, Any]:
         """Request something from the API with a TadoRequest"""
-        self.__refresh_token()
+        self._refresh_token()
 
-        headers = self.headers
+        headers = self._headers
 
-        data = self.__configure_payload(headers, request)
+        data = self._configure_payload(headers, request)
 
-        url = self.__configure_url(request)
+        url = self._configure_url(request)
 
-        http_request = Request(request.action, url, headers=headers, data=data)
+        http_request = requests.Request(
+            request.action, url, headers=headers, data=data
+        )
         prepped = http_request.prepare()
 
-        _retries = self.retries
+        retries = _DEFAULT_RETRIES
 
-        response = None
-        while _retries >= 0:
+        while retries >= 0:
             try:
-                response = self.session.send(prepped)
+                response = self._session.send(prepped)
                 break
             except TadoWrongCredentialsException as e:
-                self.log.error(f"Credentials Exception: {e}")
+                _LOGGER.error("Credentials Exception: %s", e)
                 raise e
             except requests.exceptions.ConnectionError as e:
-                if _retries > 0:
-                    self.log.warning(f"Connection error: {e}")
-                    self.session.close()
-                    self.session = Session()
-                    _retries -= 1
+                if retries > 0:
+                    _LOGGER.warning("Connection error: %s", e)
+                    self._session.close()
+                    self._session = requests.Session()
+                    retries -= 1
                 else:
-                    self.log.error(
-                        f"Connection failed after {self.retries} retries: {e}"
+                    _LOGGER.error(
+                        "Connection failed after %d retries: %s",
+                        _DEFAULT_RETRIES,
+                        e,
                     )
                     raise e
 
         if response.text is None or response.text == "":
-            return
+            return {}
 
         return response.json()
 
-    def __configure_url(self, request):
+    def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
-            url = f"{Endpoint.MOBILE}{request.command}"
+            url = f"{request.endpoint}{request.command}"
         elif request.domain == Domain.DEVICES:
-            url = (
-                f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
-            )
+            url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
         else:
-            url = f"{request.endpoint}{request.domain}/{self.id:d}/{request.command}"
+            url = f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
         return url
 
-    def __configure_payload(self, headers, request):
-        data = None
-        if request.payload is not None:
-            if request.mode == Mode.PLAIN:
-                headers["Content-Type"] = "text/plain;charset=UTF-8"
-            else:
-                headers["Content-Type"] = "application/json;charset=UTF-8"
-            headers["Mime-Type"] = "application/json;charset=UTF-8"
-            data = json.dumps(request.payload).encode("utf8")
-        return data
+    def _configure_payload(
+        self, headers: dict[str, str], request: TadoRequest
+    ) -> bytes:
+        if request.payload is None:
+            return b""
 
-    def __set_oauth_header(self, data):
+        if request.mode == Mode.PLAIN:
+            headers["Content-Type"] = "text/plain;charset=UTF-8"
+        else:
+            headers["Content-Type"] = "application/json;charset=UTF-8"
+        headers["Mime-Type"] = "application/json;charset=UTF-8"
+        return json.dumps(request.payload).encode("utf8")
+
+    def _set_oauth_header(self, data: dict[str, Any]) -> str:
 
         access_token = data["access_token"]
         expires_in = float(data["expires_in"])
         refresh_token = data["refresh_token"]
 
-        self.refresh_token = refresh_token
-        self.refresh_at = datetime.now()
-        self.refresh_at = self.refresh_at + timedelta(seconds=expires_in)
-        """
-        we subtract 30 seconds from the correct refresh time
-        then we have a 30 seconds timespan to get a new refresh_token
-        """
-        self.refresh_at = self.refresh_at + timedelta(seconds=-30)
+        self._token_refresh = refresh_token
+        self._refresh_at = datetime.now()
+        self._refresh_at = self._refresh_at + timedelta(seconds=expires_in)
+        # we subtract 30 seconds from the correct refresh time
+        # then we have a 30 seconds timespan to get a new refresh_token
+        self._refresh_at = self._refresh_at - timedelta(seconds=30)
 
-        self.headers["Authorization"] = "Bearer " + access_token
+        self._headers["Authorization"] = "Bearer " + access_token
+        return refresh_token
 
-    def __refresh_token(self):
+    def _refresh_token(self) -> None:
 
-        if self.refresh_at >= datetime.now():
-            return False
+        if self._refresh_at >= datetime.now():
+            return
 
         url = "https://auth.tado.com/oauth/token"
         data = {
@@ -213,17 +193,17 @@ class Http:
             "client_secret": "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc",
             "grant_type": "refresh_token",
             "scope": "home.user",
-            "refresh_token": self.refresh_token,
+            "refresh_token": self._token_refresh,
         }
-        self.session.close()
-        self.session = Session()
-        self.session.hooks["response"].append(self.__log_response)
+        self._session.close()
+        self._session = requests.Session()
+        self._session.hooks["response"].append(self._log_response)
 
-        response = self.session.request(
+        response = self._session.request(
             "post",
             url,
             params=data,
-            timeout=self.timeout,
+            timeout=_DEFAULT_TIMEOUT,
             data=json.dumps({}).encode("utf8"),
             headers={
                 "Content-Type": "application/json",
@@ -231,11 +211,11 @@ class Http:
             },
         )
 
-        self.__set_oauth_header(response.json())
+        self._set_oauth_header(response.json())
 
-    def __login(self):
+    def _login(self) -> tuple[int, str] | None:
 
-        headers = self.headers
+        headers = self._headers
         headers["Content-Type"] = "application/json"
 
         url = "https://auth.tado.com/oauth/token"
@@ -243,16 +223,16 @@ class Http:
             "client_id": "tado-web-app",
             "client_secret": "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc",
             "grant_type": "password",
-            "password": self.__password,
+            "password": self._password,
             "scope": "home.user",
-            "username": self.__username,
+            "username": self._username,
         }
 
-        response = self.session.request(
+        response = self._session.request(
             "post",
             url,
             params=data,
-            timeout=self.timeout,
+            timeout=_DEFAULT_TIMEOUT,
             data=json.dumps({}).encode("utf8"),
             headers={
                 "Content-Type": "application/json",
@@ -260,15 +240,17 @@ class Http:
             },
         )
         if response.status_code == 400:
-            raise TadoWrongCredentialsException("Your username or password is invalid")
+            raise TadoWrongCredentialsException(
+                "Your username or password is invalid"
+            )
 
         if response.status_code == 200:
-            self.__set_oauth_header(response.json())
-            self.__get_id()
+            refresh_token = self._set_oauth_header(response.json())
+            id_ = self._get_id()
+        return id_, refresh_token
 
-    def __get_id(self):
-        if self.id == 0:
-            request = TadoRequest()
-            request.action = Action.GET
-            request.domain = Domain.ME
-            self.id = self.request(request)["homes"][0]["id"]
+    def _get_id(self) -> int:
+        request = TadoRequest()
+        request.action = Action.GET
+        request.domain = Domain.ME
+        return self.request(request)["homes"][0]["id"]

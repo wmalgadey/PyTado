@@ -45,7 +45,9 @@ CONST_HORIZONTAL_SWING_RIGHT = "RIGHT"
 CONST_OVERLAY_TADO_MODE = (
     "NEXT_TIME_BLOCK"  # wait until tado changes the mode automatic
 )
-CONST_OVERLAY_MANUAL = "MANUAL"  # the user has change the temperature or mode manually
+CONST_OVERLAY_MANUAL = (
+    "MANUAL"  # the user has change the temperature or mode manually
+)
 CONST_OVERLAY_TIMER = "TIMER"  # the temperature will be reset after a timespan
 
 # Heat always comes first since we get the
@@ -84,7 +86,11 @@ TADO_HVAC_ACTION_TO_MODES = {
 }
 
 # These modes will not allow a temp to be set
-TADO_MODES_WITH_NO_TEMP_SETTING = [CONST_MODE_AUTO, CONST_MODE_DRY, CONST_MODE_FAN]
+TADO_MODES_WITH_NO_TEMP_SETTING = [
+    CONST_MODE_AUTO,
+    CONST_MODE_DRY,
+    CONST_MODE_FAN,
+]
 
 DEFAULT_TADO_PRECISION = 0.1
 
