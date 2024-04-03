@@ -18,16 +18,16 @@ class Logger(logging.Logger):
 
         @staticmethod
         def _filter(s):
-            _patterns = [
+            patterns = [
                 r"'Bearer [\w-]*\.[\w-]*\.[\w-]*'",
                 r"'access_token': '[\w-]*\.[\w-]*\.[\w-]*'",
                 r"'refresh_token': '[\w-]*\.[\w-]*\.[\w-]*'",
                 r"\?.*",
             ]
             try:
-                for pattern in _patterns:
+                for pattern in patterns:
                     s = re.sub(pattern, r"<MASKED>", s)
-            except (KeyError, TypeError, ValueError) as e:
+            except (KeyError, TypeError, ValueError):
                 pass
             return s
 
@@ -35,14 +35,16 @@ class Logger(logging.Logger):
             """
             Do the actual filtering
             """
-            original = logging.Formatter.format(self, record)  # call parent method
+            original = logging.Formatter.format(
+                self, record
+            )  # call parent method
             return self._filter(original)
 
     def __init__(self, name: str, level=logging.NOTSET):
         super().__init__(name)
-        _log_sh = logging.StreamHandler()
-        _log_fmt = self.SensitiveFormatter(
+        log_sh = logging.StreamHandler()
+        log_fmt = self.SensitiveFormatter(
             fmt="%(name)s :: %(levelname)-8s :: %(message)s"
         )
-        _log_sh.setFormatter(_log_fmt)
-        self.addHandler(_log_sh)
+        log_sh.setFormatter(log_fmt)
+        self.addHandler(log_sh)

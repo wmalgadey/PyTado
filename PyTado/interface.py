@@ -4,6 +4,7 @@ PyTado interface implementation for app.tado.com
 
 import enum
 import datetime
+from typing import Any
 
 from .exceptions import TadoNotSupportedException
 from .http import Action, Domain, Endpoint, Http, Mode, TadoRequest
@@ -72,12 +73,12 @@ class Tado:
 
         return self._http.request(request)
 
-    def get_zone_state(self, zone):
+    def get_zone_state(self, zone: int) -> TadoZone:
         """
         Gets current state of Zone as a TadoZone object.
         """
 
-        return TadoZone(self.get_state(zone), zone)
+        return TadoZone.from_data(zone, self.get_state(zone))
 
     def get_zone_states(self):
         """
@@ -176,7 +177,7 @@ class Tado:
             "humidity": data["humidity"]["percentage"],
         }
 
-    def get_timetable(self, zone):
+    def get_timetable(self, zone: int) -> Timetable:
         """
         Get the Timetable type currently active
         """
@@ -186,10 +187,10 @@ class Tado:
         request.mode = Mode.PLAIN
         data = self._http.request(request)
 
-        if "id" in data:
-            return Tado.Timetable(data["id"])
+        if "id" not in data:
+            raise Exception(f'Returned data did not contain "id" : {str(data)}')
 
-        raise Exception(f'Returned data did not contain "id" : {str(data)}')
+        return Timetable(data["id"])
 
     def get_historic(self, zone, date):
         """
@@ -207,60 +208,48 @@ class Tado:
         )
         return self._http.request(request)
 
-    def set_timetable(self, zone, _id):
+    def set_timetable(self, zone: int, timetable: Timetable) -> None:
         """
         Set the Timetable type currently active
         id = 0 : ONE_DAY (MONDAY_TO_SUNDAY)
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
-
-        # Type checking
-        if not isinstance(_id, Tado.Timetable):
-            raise TypeError("id must be an instance of Tado.Timetable")
-
         request = TadoRequest()
         request.command = f"zones/{zone:d}/schedule/activeTimetable"
         request.action = Action.CHANGE
-        request.payload = {"id": _id}
+        request.payload = {"id": timetable}
         request.mode = Mode.PLAIN
 
-        return self._http.request(request)
+        self._http.request(request)
 
-    def get_schedule(self, zone, _id, day=None):
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day=None
+    ) -> dict[str, Any]:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
         """
-
-        # Type checking
-        if not isinstance(_id, Tado.Timetable):
-            raise TypeError("id must be an instance of Tado.Timetable")
         request = TadoRequest()
         if day:
             request.command = (
-                f"zones/{zone:d}/schedule/timetables/{_id:d}/blocks/{day}"
+                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
             )
         else:
             request.command = (
-                f"zones/{zone:d}/schedule/timetables/{_id:d}/blocks"
+                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks"
             )
         request.mode = Mode.PLAIN
 
         return self._http.request(request)
 
-    def set_schedule(self, zone, _id, day, data):
+    def set_schedule(self, zone, timetable: Timetable, day, data):
         """
         Set the schedule for a zone, day is required
         """
-
-        # Type checking
-        if not isinstance(_id, Tado.Timetable):
-            raise TypeError("id must be an instance of Tado.Timetable")
-
         request = TadoRequest()
         request.command = (
-            f"zones/{zone:d}/schedule/timetables/{_id:d}/blocks/{day}"
+            f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
         )
         request.action = Action.CHANGE
         request.payload = data
@@ -405,7 +394,7 @@ class Tado:
         request.action = Action.CHANGE
         request.payload = {"homePresence": presence}
 
-        return self._http.request(request)
+        self._http.request(request)
 
     def set_auto(self) -> None:
         """
