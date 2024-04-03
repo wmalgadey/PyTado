@@ -1,4 +1,5 @@
 """Adapter to represent a tado zones and state."""
+
 import logging
 
 from .const import (
@@ -198,12 +199,12 @@ class TadoZone:
     def available(self):
         """Device is available and link is up."""
         return self._available
-        
+
     @property
     def default_overlay_termination_type(self):
         """Zone default overlay type."""
         return self._default_overlay_termination_type
-        
+
     @property
     def default_overlay_termination_duration(self):
         """Zone default overlay duration."""
@@ -330,7 +331,9 @@ class TadoZone:
                 and "type" in data["overlay"]["termination"]
             ):
                 self._overlay_termination_type = data["overlay"]["termination"]["type"]
-                self._overlay_termination_timestamp = data["overlay"]["termination"].get('expiry',None)
+                self._overlay_termination_timestamp = data["overlay"][
+                    "termination"
+                ].get("expiry", None)
         else:
             self._current_hvac_mode = CONST_MODE_SMART_SCHEDULE
 
@@ -338,9 +341,11 @@ class TadoZone:
             data["connectionState"]["value"] if "connectionState" in data else None
         )
         self._available = self._link != CONST_LINK_OFFLINE
-        
+
         if "terminationCondition" in data:
-            self._default_overlay_termination_type = data["terminationCondition"].get('type',None)
-            self._default_overlay_termination_duration = data["terminationCondition"].get('durationInSeconds',None)
-            
-            
+            self._default_overlay_termination_type = data["terminationCondition"].get(
+                "type", None
+            )
+            self._default_overlay_termination_duration = data[
+                "terminationCondition"
+            ].get("durationInSeconds", None)

@@ -10,7 +10,10 @@ from datetime import datetime, timedelta
 try:
     from enum import StrEnum, ReprEnum
 except ImportError:
-    from PyTado.polyfill import StrEnum, ReprEnum  # polyfilling StrEnum and ReprEnum for older versions
+    from PyTado.polyfill import (
+        StrEnum,
+        ReprEnum,
+    )  # polyfilling StrEnum and ReprEnum for older versions
 from enum import Enum
 
 import requests.exceptions
@@ -22,6 +25,7 @@ from PyTado.logging import Logger
 
 class Endpoint(StrEnum):
     """Endpoint URL Enum"""
+
     API = "https://my.tado.com/api/v2/"
     MOBILE = "https://my.tado.com/mobile/1.9/"
     EIQ = "https://energy-insights.tado.com/api/"
@@ -29,6 +33,7 @@ class Endpoint(StrEnum):
 
 class Domain(StrEnum):
     """API Request Domain Enum"""
+
     HOME = "homes"
     DEVICES = "devices"
     ME = "me"
@@ -36,6 +41,7 @@ class Domain(StrEnum):
 
 class Action(StrEnum):
     """API Request Action Enum"""
+
     GET = "GET"
     SET = "POST"
     RESET = "DELETE"
@@ -44,12 +50,14 @@ class Action(StrEnum):
 
 class Mode(Enum):
     """API Response Format Enum"""
+
     OBJECT = 1
     PLAIN = 2
 
 
 class TadoRequest:
     """Data Container"""
+
     endpoint = Endpoint.API
     command = None
     action = Action.GET
@@ -62,11 +70,13 @@ class TadoRequest:
 class TadoResponse:
     """Unimplemented Response Container
     todo: implement response parser"""
+
     pass
 
 
 class Http:
     """API Request Class"""
+
     log = None
 
     # OAuth Data
@@ -94,7 +104,7 @@ class Http:
             self.log.setLevel(logging.WARNING)
         self.refresh_at = datetime.now() + timedelta(minutes=5)
         self.session = http_session if http_session else Session()
-        self.session.hooks['response'].append(self.__log_response)
+        self.session.hooks["response"].append(self.__log_response)
         self.headers = {"Referer": "https://app.tado.com/"}
         self.__username = username
         self.__password = password
@@ -121,11 +131,7 @@ class Http:
 
         url = self.__configure_url(request)
 
-        http_request = Request(request.action,
-                               url,
-                               headers=headers,
-                               data=data
-                               )
+        http_request = Request(request.action, url, headers=headers, data=data)
         prepped = http_request.prepare()
 
         _retries = self.retries
@@ -145,7 +151,9 @@ class Http:
                     self.session = Session()
                     _retries -= 1
                 else:
-                    self.log.error(f"Connection failed after {self.retries} retries: {e}")
+                    self.log.error(
+                        f"Connection failed after {self.retries} retries: {e}"
+                    )
                     raise e
 
         if response.text is None or response.text == "":
@@ -157,7 +165,9 @@ class Http:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{Endpoint.MOBILE}{request.command}"
         elif request.domain == Domain.DEVICES:
-            url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
+            url = (
+                f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
+            )
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
         else:
@@ -168,18 +178,18 @@ class Http:
         data = None
         if request.payload is not None:
             if request.mode == Mode.PLAIN:
-                headers['Content-Type'] = 'text/plain;charset=UTF-8'
+                headers["Content-Type"] = "text/plain;charset=UTF-8"
             else:
-                headers['Content-Type'] = 'application/json;charset=UTF-8'
-            headers['Mime-Type'] = 'application/json;charset=UTF-8'
-            data = json.dumps(request.payload).encode('utf8')
+                headers["Content-Type"] = "application/json;charset=UTF-8"
+            headers["Mime-Type"] = "application/json;charset=UTF-8"
+            data = json.dumps(request.payload).encode("utf8")
         return data
 
     def __set_oauth_header(self, data):
 
-        access_token = data['access_token']
-        expires_in = float(data['expires_in'])
-        refresh_token = data['refresh_token']
+        access_token = data["access_token"]
+        expires_in = float(data["expires_in"])
+        refresh_token = data["refresh_token"]
 
         self.refresh_token = refresh_token
         self.refresh_at = datetime.now()
@@ -190,33 +200,35 @@ class Http:
         """
         self.refresh_at = self.refresh_at + timedelta(seconds=-30)
 
-        self.headers['Authorization'] = 'Bearer ' + access_token
+        self.headers["Authorization"] = "Bearer " + access_token
 
     def __refresh_token(self):
 
         if self.refresh_at >= datetime.now():
             return False
 
-        url = 'https://auth.tado.com/oauth/token'
-        data = {'client_id': 'tado-web-app',
-                'client_secret': 'wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc',
-                'grant_type': 'refresh_token',
-                'scope': 'home.user',
-                'refresh_token': self.refresh_token}
+        url = "https://auth.tado.com/oauth/token"
+        data = {
+            "client_id": "tado-web-app",
+            "client_secret": "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc",
+            "grant_type": "refresh_token",
+            "scope": "home.user",
+            "refresh_token": self.refresh_token,
+        }
         self.session.close()
         self.session = Session()
-        self.session.hooks['response'].append(self.__log_response)
+        self.session.hooks["response"].append(self.__log_response)
 
         response = self.session.request(
             "post",
             url,
             params=data,
             timeout=self.timeout,
-            data=json.dumps({}).encode('utf8'),
+            data=json.dumps({}).encode("utf8"),
             headers={
-                'Content-Type': 'application/json',
-                'Referer': 'https://app.tado.com/'
-            }
+                "Content-Type": "application/json",
+                "Referer": "https://app.tado.com/",
+            },
         )
 
         self.__set_oauth_header(response.json())
@@ -224,26 +236,29 @@ class Http:
     def __login(self):
 
         headers = self.headers
-        headers['Content-Type'] = 'application/json'
+        headers["Content-Type"] = "application/json"
 
-        url = 'https://auth.tado.com/oauth/token'
-        data = {'client_id': 'tado-web-app',
-                'client_secret': 'wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc',
-                'grant_type': 'password',
-                'password': self.__password,
-                'scope': 'home.user',
-                'username': self.__username}
+        url = "https://auth.tado.com/oauth/token"
+        data = {
+            "client_id": "tado-web-app",
+            "client_secret": "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc",
+            "grant_type": "password",
+            "password": self.__password,
+            "scope": "home.user",
+            "username": self.__username,
+        }
 
-        response = self.session.request("post",
-                                        url,
-                                        params=data,
-                                        timeout=self.timeout,
-                                        data=json.dumps({}).encode('utf8'),
-                                        headers={
-                                            'Content-Type': 'application/json',
-                                            'Referer': 'https://app.tado.com/'
-                                        }
-                                        )
+        response = self.session.request(
+            "post",
+            url,
+            params=data,
+            timeout=self.timeout,
+            data=json.dumps({}).encode("utf8"),
+            headers={
+                "Content-Type": "application/json",
+                "Referer": "https://app.tado.com/",
+            },
+        )
         if response.status_code == 400:
             raise TadoWrongCredentialsException("Your username or password is invalid")
 
@@ -256,4 +271,4 @@ class Http:
             request = TadoRequest()
             request.action = Action.GET
             request.domain = Domain.ME
-            self.id = self.request(request)['homes'][0]['id']
+            self.id = self.request(request)["homes"][0]["id"]

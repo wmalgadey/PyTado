@@ -1,3 +1,3 @@
 # Tado control module
 
-__all__ = ['Tado']
+__all__ = ["Tado"]

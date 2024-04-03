@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PyTado"
+version = "0.17.5"
+description = "PyTado from chrism0dwk, modfied by w.malgadey, diplix, michaelarnauts, LenhartStephan, splifter, syssi, andersonshatch, Yippy, p0thi, Coffee2CodeNL, chiefdragon"
+authors = [
+    { name = "Chris Jewell", email = "chrism0dwk@gmail.com" },
+    { name = "w.malgadey", email = "w.malgadey@gmail.com" },
+]
+dependencies = ["requests"]
+requires-python = ">=3.12"
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["tado"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Home Automation",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+GitHub = "https://github.com/wmalgadey/PyTado"
+
+[project.optional-dependencies]
+dev = ["black"]
+
+[project.scripts]
+pytado = "pytado.__main__:main"
+
+[tool.setuptools]
+platforms = ["any"]
+zip-safe = false
+
+[tool.black]
+line-length = 80
+target-version = ['py312']

@@ -10,6 +10,7 @@ class Logger(logging.Logger):
     """
     This class strips out sensitive information from logs
     """
+
     class SensitiveFormatter(logging.Formatter):
         """
         Formatter that removes sensitive information in logs.
@@ -21,7 +22,7 @@ class Logger(logging.Logger):
                 r"'Bearer [\w-]*\.[\w-]*\.[\w-]*'",
                 r"'access_token': '[\w-]*\.[\w-]*\.[\w-]*'",
                 r"'refresh_token': '[\w-]*\.[\w-]*\.[\w-]*'",
-                r"\?.*"
+                r"\?.*",
             ]
             try:
                 for pattern in _patterns:
@@ -40,6 +41,8 @@ class Logger(logging.Logger):
     def __init__(self, name: str, level=logging.NOTSET):
         super().__init__(name)
         _log_sh = logging.StreamHandler()
-        _log_fmt = self.SensitiveFormatter(fmt='%(name)s :: %(levelname)-8s :: %(message)s')
+        _log_fmt = self.SensitiveFormatter(
+            fmt="%(name)s :: %(levelname)-8s :: %(message)s"
+        )
         _log_sh.setFormatter(_log_fmt)
         self.addHandler(_log_sh)
