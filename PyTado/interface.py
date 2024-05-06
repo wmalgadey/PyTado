@@ -2,15 +2,26 @@
 PyTado interface implementation for app.tado.com
 """
 
+import enum
 import datetime
-import logging
-import warnings
-from enum import IntEnum
+from typing import Any
 
 from .exceptions import TadoNotSupportedException
-from PyTado.http import Action, Domain, Endpoint, Http, Mode, TadoRequest
-from PyTado.logging import Logger
+from .http import Action, Domain, Endpoint, Http, Mode, TadoRequest
 from .zone import TadoZone
+
+
+class Timetable(enum.IntEnum):
+    """Timetable Enum"""
+
+    ONE_DAY = 0
+    THREE_DAY = 1
+    SEVEN_DAY = 2
+
+
+class Presence(enum.StrEnum):
+    HOME = "HOME"
+    AWAY = "AWAY"
 
 
 class Tado:
@@ -19,38 +30,17 @@ class Tado:
                    t.getClimate(1) # Get climate, zone 1.
     """
 
-    class Timetable(IntEnum):
-        """Timetable Enum"""
-        ONE_DAY = 0
-        THREE_DAY = 1
-        SEVEN_DAY = 2
-
-    log = None
-    http = None
-
-    # Track whether the user's Tado instance supports auto-geofencing,
-    # set to None until explicitly set
-    __auto_geofencing_supported = None
-
-    def __init__(self, username, password, http_session=None, debug=False):
+    def __init__(self, username: str, password: str, http_session=None):
         """Class Constructor"""
 
-        self.log = Logger(__name__)
-        if debug:
-            self.log.setLevel(logging.DEBUG)
-        else:
-            self.log.setLevel(logging.WARNING)
-
-        self.http = Http(username=username, password=password, http_session=http_session, debug=debug)
-
-    # <editor-fold desc="Deprecated">
-    def getMe(self):
-        """Gets home information. (deprecated)"""
-        warnings.warn("The 'getMe' method is deprecated, "
-                      "use 'get_me' instead", DeprecationWarning, 2)
-        return self.get_me()
-
-    # </editor-fold>
+        self._http = Http(
+            username=username,
+            password=password,
+            http_session=http_session,
+        )
+        # Track whether the user's Tado instance supports auto-geofencing,
+        # set to None until explicitly set
+        self._auto_geofencing_supported = None
 
     def get_me(self):
         """
@@ -61,16 +51,7 @@ class Tado:
         request.action = Action.GET
         request.domain = Domain.ME
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getDevices(self):
-        """Gets device information. (deprecated)"""
-        warnings.warn("The 'getDevices' method is deprecated, "
-                      "use 'get_devices' instead", DeprecationWarning, 2)
-        return self.get_devices()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_devices(self):
         """
@@ -80,16 +61,7 @@ class Tado:
         request = TadoRequest()
         request.command = "devices"
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getZones(self):
-        """Gets zones information. (deprecated)"""
-        warnings.warn("The 'getZones' method is deprecated, "
-                      "use 'get_zones' instead", DeprecationWarning, 2)
-        return self.get_zones()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_zones(self):
         """
@@ -99,32 +71,14 @@ class Tado:
         request = TadoRequest()
         request.command = "zones"
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def getZoneState(self, zone):
-        """Gets current state of Zone as a TadoZone object. (deprecated)"""
-        warnings.warn("The 'getZoneState' method is deprecated, "
-                      "use 'get_zone_state' instead", DeprecationWarning, 2)
-        return self.get_zone_state(zone)
-
-    # </editor-fold>
-
-    def get_zone_state(self, zone):
+    def get_zone_state(self, zone: int) -> TadoZone:
         """
         Gets current state of Zone as a TadoZone object.
         """
 
-        return TadoZone(self.get_state(zone), zone)
-
-    # <editor-fold desc="Deprecated">
-    def getZoneStates(self):
-        """Gets current states of all zones. (deprecated)"""
-        warnings.warn("The 'getZoneStates' method is deprecated, "
-                      "use 'get_zone_states' instead", DeprecationWarning, 2)
-        return self.get_zone_states()
-
-    # </editor-fold>
+        return TadoZone.from_data(zone, self.get_state(zone))
 
     def get_zone_states(self):
         """
@@ -134,16 +88,7 @@ class Tado:
         request = TadoRequest()
         request.command = "zoneStates"
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getState(self, zone):
-        """Gets current state of Zone. (deprecated)"""
-        warnings.warn("The 'getState' method is deprecated, "
-                      "use 'get_state' instead", DeprecationWarning, 2)
-        return self.get_state(zone)
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_state(self, zone):
         """
@@ -152,18 +97,12 @@ class Tado:
 
         request = TadoRequest()
         request.command = f"zones/{zone}/state"
-        data = {**self.http.request(request), **self.get_zone_overlay_default(zone)}
+        data = {
+            **self._http.request(request),
+            **self.get_zone_overlay_default(zone),
+        }
 
         return data
-
-    # <editor-fold desc="Deprecated">
-    def getHomeState(self):
-        """Gets current state of Home. (deprecated)"""
-        warnings.warn("The 'getHomeState' method is deprecated, "
-                      "use 'get_home_state' instead", DeprecationWarning, 2)
-        return self.get_home_state()
-
-    # </editor-fold>
 
     def get_home_state(self):
         """
@@ -175,63 +114,47 @@ class Tado:
         # {"presence":"HOME","showHomePresenceSwitchButton":true}.
         # With an auto assist skill, a different button is present depending
         # on geofencing state - showSwitchToAutoGeofencingButton is present
-        # when auto geofencing has been disabled due to the user selecting a 
+        # when auto geofencing has been disabled due to the user selecting a
         # mode manually:
-        # {'presence': 'HOME', 'presenceLocked': True, 
+        # {'presence': 'HOME', 'presenceLocked': True,
         # 'showSwitchToAutoGeofencingButton': True}
-        # showSwitchToAutoGeofencingButton is NOT present when auto 
+        # showSwitchToAutoGeofencingButton is NOT present when auto
         # geofencing has been enabled:
         # {'presence': 'HOME', 'presenceLocked': False}
-        # In both scenarios with the auto assist skill, 'presenceLocked' 
-        # indicates whether presence is current locked (manually set) to 
+        # In both scenarios with the auto assist skill, 'presenceLocked'
+        # indicates whether presence is current locked (manually set) to
         # HOME or AWAY or not locked (automatically set based on geolocation)
 
         request = TadoRequest()
         request.command = "state"
-        data = self.http.request(request)
+        data = self._http.request(request)
 
         # Check whether Auto Geofencing is permitted via the presence of
         # showSwitchToAutoGeofencingButton or currently enabled via the
         # presence of presenceLocked = False
         if "showSwitchToAutoGeofencingButton" in data:
-            self.__auto_geofencing_supported = data['showSwitchToAutoGeofencingButton']
+            self._auto_geofencing_supported = data[
+                "showSwitchToAutoGeofencingButton"
+            ]
         elif "presenceLocked" in data:
-            if not data['presenceLocked']:
-                self.__auto_geofencing_supported = True
+            if not data["presenceLocked"]:
+                self._auto_geofencing_supported = True
             else:
-                self.__auto_geofencing_supported = False
+                self._auto_geofencing_supported = False
         else:
-            self.__auto_geofencing_supported = False
+            self._auto_geofencing_supported = False
 
         return data
-
-    # <editor-fold desc="Deprecated">
-    def getAutoGeofencingSupported(self):
-        """Return whether the Tado Home supports auto geofencing (deprecated)"""
-        warnings.warn("The 'getAutoGeofencingSupported' method is deprecated, "
-                      "use 'get_auto_geofencing_supported' instead", DeprecationWarning, 2)
-        return self.get_auto_geofencing_supported()
-
-    # </editor-fold>
 
     def get_auto_geofencing_supported(self):
         """
         Return whether the Tado Home supports auto geofencing
         """
 
-        if self.__auto_geofencing_supported is None:
+        if self._auto_geofencing_supported is None:
             self.get_home_state()
 
-        return self.__auto_geofencing_supported
-
-    # <editor-fold desc="Deprecated">
-    def getCapabilities(self, zone):
-        """Gets current capabilities of Zone zone. (deprecated)"""
-        warnings.warn("The 'getCapabilities' method is deprecated, "
-                      "use 'get_capabilities' instead", DeprecationWarning, 2)
-        return self.get_capabilities(zone)
-
-    # </editor-fold>
+        return self._auto_geofencing_supported
 
     def get_capabilities(self, zone):
         """
@@ -241,36 +164,20 @@ class Tado:
         request = TadoRequest()
         request.command = f"zones/{zone:d}/capabilities"
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getClimate(self, zone):
-        """Gets temp (centigrade) and humidity (% RH) for Zone zone. (deprecated)"""
-        warnings.warn("The 'getClimate' method is deprecated, "
-                      "use 'get_climate' instead", DeprecationWarning, 2)
-        return self.get_climate(zone)
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_climate(self, zone):
         """
         Gets temp (centigrade) and humidity (% RH) for zone.
         """
 
-        data = self.get_state(zone)['sensorDataPoints']
-        return {'temperature': data['insideTemperature']['celsius'],
-                'humidity': data['humidity']['percentage']}
+        data = self.get_state(zone)["sensorDataPoints"]
+        return {
+            "temperature": data["insideTemperature"]["celsius"],
+            "humidity": data["humidity"]["percentage"],
+        }
 
-    # <editor-fold desc="Deprecated">
-    def getTimetable(self, zone):
-        """Get the Timetable type currently active (Deprecated)"""
-        warnings.warn("The 'getTimetable' method is deprecated, "
-                      "use 'get_timetable' instead", DeprecationWarning, 2)
-        return self.get_timetable(zone)
-
-    # </editor-fold>
-
-    def get_timetable(self, zone):
+    def get_timetable(self, zone: int) -> Timetable:
         """
         Get the Timetable type currently active
         """
@@ -278,21 +185,12 @@ class Tado:
         request = TadoRequest()
         request.command = f"zones/{zone:d}/schedule/activeTimetable"
         request.mode = Mode.PLAIN
-        data = self.http.request(request)
+        data = self._http.request(request)
 
-        if "id" in data:
-            return Tado.Timetable(data["id"])
+        if "id" not in data:
+            raise Exception(f'Returned data did not contain "id" : {str(data)}')
 
-        raise Exception(f"Returned data did not contain \"id\" : {str(data)}")
-
-    # <editor-fold desc="Deprecated">
-    def getHistoric(self, zone, date):
-        """Gets historic information on given date for zone. (Deprecated)"""
-        warnings.warn("The 'getHistoric' method is deprecated, "
-                      "use 'get_historic' instead", DeprecationWarning, 2)
-        return self.get_historic(zone, date)
-
-    # </editor-fold>
+        return Timetable(data["id"])
 
     def get_historic(self, zone, date):
         """
@@ -300,108 +198,64 @@ class Tado:
         """
 
         try:
-            day = datetime.datetime.strptime(date, '%Y-%m-%d')
+            day = datetime.datetime.strptime(date, "%Y-%m-%d")
         except ValueError:
             raise ValueError("Incorrect date format, should be YYYY-MM-DD")
 
         request = TadoRequest()
-        request.command = f"zones/{zone:d}/dayReport?date={day.strftime('%Y-%m-%d')}"
-        return self.http.request(request)
+        request.command = (
+            f"zones/{zone:d}/dayReport?date={day.strftime('%Y-%m-%d')}"
+        )
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setTimetable(self, zone, _id):
-        """Set the Timetable type currently active (Deprecated)
-           id = 0 : ONE_DAY (MONDAY_TO_SUNDAY)
-           id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
-           id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)"""
-        warnings.warn("The 'setTimetable' method is deprecated, "
-                      "use 'set_timetable' instead", DeprecationWarning, 2)
-        return self.set_timetable(zone, _id)
-
-    # </editor-fold>
-
-    def set_timetable(self, zone, _id):
+    def set_timetable(self, zone: int, timetable: Timetable) -> None:
         """
         Set the Timetable type currently active
         id = 0 : ONE_DAY (MONDAY_TO_SUNDAY)
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
-
-        # Type checking
-        if not isinstance(_id, Tado.Timetable):
-            raise TypeError('id must be an instance of Tado.Timetable')
-
         request = TadoRequest()
-        request.command = f'zones/{zone:d}/schedule/activeTimetable'
+        request.command = f"zones/{zone:d}/schedule/activeTimetable"
         request.action = Action.CHANGE
-        request.payload = {'id': _id}
+        request.payload = {"id": timetable}
         request.mode = Mode.PLAIN
 
-        return self.http.request(request)
+        self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def getSchedule(self, zone, _id, day=None):
-        """Get the JSON representation of the schedule for a zone. Zone has 3 different schedules,
-        one for each timetable (see setTimetable) """
-        warnings.warn("The 'getSchedule' method is deprecated, "
-                      "use 'get_schedule' instead", DeprecationWarning, 2)
-        return self.get_schedule(zone, _id, day)
-
-    # </editor-fold>
-
-    def get_schedule(self, zone, _id, day=None):
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day=None
+    ) -> dict[str, Any]:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
         """
-
-        # Type checking
-        if not isinstance(_id, Tado.Timetable):
-            raise TypeError('id must be an instance of Tado.Timetable')
         request = TadoRequest()
         if day:
-            request.command = f'zones/{zone:d}/schedule/timetables/{_id:d}/blocks/{day}'
+            request.command = (
+                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+            )
         else:
-            request.command = f'zones/{zone:d}/schedule/timetables/{_id:d}/blocks'
+            request.command = (
+                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks"
+            )
         request.mode = Mode.PLAIN
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setSchedule(self, zone, _id, day, data):
-        """Set the schedule for a zone, day is required"""
-        warnings.warn("The 'setSchedule' method is deprecated, "
-                      "use 'set_schedule' instead", DeprecationWarning, 2)
-        return self.set_schedule(zone, _id, day, data)
-
-    # </editor-fold>
-
-    def set_schedule(self, zone, _id, day, data):
+    def set_schedule(self, zone, timetable: Timetable, day, data):
         """
         Set the schedule for a zone, day is required
         """
-
-        # Type checking
-        if not isinstance(_id, Tado.Timetable):
-            raise TypeError('id must be an instance of Tado.Timetable')
-
         request = TadoRequest()
-        request.command = f"zones/{zone:d}/schedule/timetables/{_id:d}/blocks/{day}"
+        request.command = (
+            f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+        )
         request.action = Action.CHANGE
         request.payload = data
         request.mode = Mode.PLAIN
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getWeather(self):
-        """Gets outside weather data (Deprecated)"""
-        warnings.warn("The 'getWeather' method is deprecated, "
-                      "use 'get_weather' instead", DeprecationWarning, 2)
-        return self.get_weather()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_weather(self):
         """
@@ -411,16 +265,7 @@ class Tado:
         request = TadoRequest()
         request.command = "weather"
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getAirComfort(self):
-        """Gets air quality information (Deprecated)"""
-        warnings.warn("The 'getAirComfort' method is deprecated, "
-                      "use 'get_air_comfort' instead", DeprecationWarning, 2)
-        return self.get_air_comfort()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_air_comfort(self):
         """
@@ -430,21 +275,7 @@ class Tado:
         request = TadoRequest()
         request.command = "airComfort"
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getAppUsers(self):
-        """Gets getAppUsers data (deprecated)"""
-        warnings.warn("The 'getAppUsers' method is deprecated, "
-                      "use 'get_users' instead", DeprecationWarning, 2)
-
-        request = TadoRequest()
-        request.command = "getAppUsers"
-        request.endpoint = Endpoint.MOBILE
-
-        return self.http.request(request)
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_users(self):
         """
@@ -454,27 +285,7 @@ class Tado:
         request = TadoRequest()
         request.command = "users"
 
-        return self.http.request(request)
-
-    def getAppUsersRelativePositions(self):
-        """
-        Gets getAppUsersRelativePositions data
-        """
-
-        request = TadoRequest()
-        request.command = "getAppUsersRelativePositions"
-        request.endpoint = Endpoint.MOBILE
-
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getMobileDevices(self):
-        """Gets information about mobile devices (Deprecated)"""
-        warnings.warn("The 'getMobileDevices' method is deprecated, "
-                      "use 'get_mobile_devices' instead", DeprecationWarning, 2)
-        return self.get_mobile_devices()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_mobile_devices(self):
         """
@@ -484,16 +295,7 @@ class Tado:
         request = TadoRequest()
         request.command = "mobileDevices"
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def resetZoneOverlay(self, zone):
-        """Delete current overlay (Deprecated)"""
-        warnings.warn("The 'resetZoneOverlay' method is deprecated, "
-                      "use 'reset_zone_overlay' instead", DeprecationWarning, 2)
-        return self.reset_zone_overlay(zone)
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def reset_zone_overlay(self, zone):
         """
@@ -505,35 +307,23 @@ class Tado:
         request.action = Action.RESET
         request.mode = Mode.PLAIN
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setZoneOverlay(self, zone, overlayMode, setTemp=None, duration=None, deviceType='HEATING', power="ON",
-                       mode=None, fanSpeed=None, swing=None, fanLevel=None, verticalSwing=None,
-                         horizontalSwing=None):
-        """Set current overlay for a zone (Deprecated)"""
-        warnings.warn("The 'setZoneOverlay' method is deprecated, "
-                      "use 'set_zone_overlay' instead", DeprecationWarning, 2)
-        return self.set_zone_overlay(
-            zone,
-            overlay_mode=overlayMode,
-            set_temp=setTemp,
-            duration=duration,
-            device_type=deviceType,
-            power=power,
-            mode=mode,
-            fan_speed=fanSpeed,
-            swing=swing,
-            fan_level=fanLevel,
-            vertical_swing=verticalSwing,
-            horizontal_swing=horizontalSwing
-        )
-
-    # </editor-fold>
-
-    def set_zone_overlay(self, zone, overlay_mode, set_temp=None, duration=None, device_type='HEATING', power="ON",
-                         mode=None, fan_speed=None, swing=None, fan_level=None, vertical_swing=None,
-                         horizontal_swing=None):
+    def set_zone_overlay(
+        self,
+        zone,
+        overlay_mode,
+        set_temp=None,
+        duration=None,
+        device_type="HEATING",
+        power="ON",
+        mode=None,
+        fan_speed=None,
+        swing=None,
+        fan_level=None,
+        vertical_swing=None,
+        horizontal_swing=None,
+    ):
         """
         Set current overlay for a zone
         """
@@ -568,18 +358,9 @@ class Tado:
         request.action = Action.CHANGE
         request.payload = post_data
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def getZoneOverlayDefault(self, zone):
-        """Get current overlay default settings for zone. (Deprecated)"""
-        warnings.warn("The 'getZoneOverlayDefault' method is deprecated, "
-                      "use 'get_zone_overlay_default' instead", DeprecationWarning, 2)
-        return self.get_zone_overlay_default(zone)
-
-    # </editor-fold>
-
-    def get_zone_overlay_default(self, zone):
+    def get_zone_overlay_default(self, zone: int):
         """
         Get current overlay default settings for zone.
         """
@@ -587,50 +368,23 @@ class Tado:
         request = TadoRequest()
         request.command = f"zones/{zone:d}/defaultOverlay"
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setHome(self):
-        """Sets HomeState to HOME (Deprecated)"""
-        warnings.warn("The 'set_home' method is deprecated, "
-                      "use 'set_home' instead", DeprecationWarning, 2)
-        return self.set_home()
-
-    # </editor-fold>
-
-    def set_home(self):
+    def set_home(self) -> None:
         """
         Sets HomeState to HOME
         """
 
-        return self.change_presence("HOME")
+        return self.change_presence(Presence.HOME)
 
-    # <editor-fold desc="Deprecated">
-    def setAway(self):
-        """Sets HomeState to AWAY  (Deprecated)"""
-        warnings.warn("The 'setAway' method is deprecated, "
-                      "use 'set_away' instead", DeprecationWarning, 2)
-        return self.set_away()
-
-    # </editor-fold>
-
-    def set_away(self):
+    def set_away(self) -> None:
         """
         Sets HomeState to AWAY
         """
 
-        return self.change_presence("AWAY")
+        return self.change_presence(Presence.AWAY)
 
-    # <editor-fold desc="Deprecated">
-    def changePresence(self, presence):
-        """Sets HomeState to presence (Deprecated)"""
-        warnings.warn("The 'changePresence' method is deprecated, "
-                      "use 'change_presence' instead", DeprecationWarning, 2)
-        return self.change_presence(presence=presence)
-
-    # </editor-fold>
-
-    def change_presence(self, presence):
+    def change_presence(self, presence: Presence) -> None:
         """
         Sets HomeState to presence
         """
@@ -640,56 +394,31 @@ class Tado:
         request.action = Action.CHANGE
         request.payload = {"homePresence": presence}
 
-        return self.http.request(request)
+        self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setAuto(self):
-        """Sets HomeState to AUTO (Deprecated)"""
-        warnings.warn("The 'setAuto' method is deprecated, "
-                      "use 'set_auto' instead", DeprecationWarning, 2)
-        return self.set_auto()
-
-    # </editor-fold>
-
-    def set_auto(self):
+    def set_auto(self) -> None:
         """
         Sets HomeState to AUTO
         """
 
         # Only attempt to set Auto Geofencing if it is believed to be supported
-        if self.__auto_geofencing_supported:
+        if self._auto_geofencing_supported:
             request = TadoRequest()
             request.command = "presenceLock"
             request.action = Action.RESET
 
-            return self.http.request(request)
+            return self._http.request(request)
         else:
-            raise TadoNotSupportedException("Auto mode is not known to be supported.")
-
-    # <editor-fold desc="Deprecated">
-    def getWindowState(self, zone):
-        """Returns the state of the window for zone (Deprecated)"""
-        warnings.warn("The 'getWindowState' method is deprecated, "
-                      "use 'get_window_state' instead", DeprecationWarning, 2)
-        return self.get_window_state(zone=zone)
-
-    # </editor-fold>
+            raise TadoNotSupportedException(
+                "Auto mode is not known to be supported."
+            )
 
     def get_window_state(self, zone):
         """
         Returns the state of the window for zone
         """
 
-        return {'openWindow': self.get_state(zone)['openWindow']}
-
-    # <editor-fold desc="Deprecated">
-    def getOpenWindowDetected(self, zone):
-        """Returns whether an open window is detected. (Deprecated)"""
-        warnings.warn("The 'getOpenWindowDetected' method is deprecated, "
-                      "use 'get_open_window_detected' instead", DeprecationWarning, 2)
-        return self.get_open_window_detected(zone=zone)
-
-    # </editor-fold>
+        return {"openWindow": self.get_state(zone)["openWindow"]}
 
     def get_open_window_detected(self, zone):
         """
@@ -699,18 +428,9 @@ class Tado:
         data = self.get_state(zone)
 
         if "openWindowDetected" in data:
-            return {'openWindowDetected': data['openWindowDetected']}
+            return {"openWindowDetected": data["openWindowDetected"]}
         else:
-            return {'openWindowDetected': False}
-
-    # <editor-fold desc="Deprecated">
-    def setOpenWindow(self, zone):
-        """Sets the window in zone to open (Deprecated)"""
-        warnings.warn("The 'setOpenWindow' method is deprecated, "
-                      "use 'set_open_window' instead", DeprecationWarning, 2)
-        return self.set_open_window(zone=zone)
-
-    # </editor-fold>
+            return {"openWindowDetected": False}
 
     def set_open_window(self, zone):
         """
@@ -723,16 +443,7 @@ class Tado:
         request.action = Action.SET
         request.mode = Mode.PLAIN
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def resetOpenWindow(self, zone):
-        """Sets the window in zone to closed (Deprecated)"""
-        warnings.warn("The 'resetOpenWindow' method is deprecated, "
-                      "use 'reset_open_window' instead", DeprecationWarning, 2)
-        return self.reset_open_window(zone=zone)
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def reset_open_window(self, zone):
         """
@@ -744,22 +455,12 @@ class Tado:
         request.action = Action.RESET
         request.mode = Mode.PLAIN
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def getDeviceInfo(self, device_id, cmd=''):
-        """ Gets information about devices
-        with option to get specific info i.e. cmd='temperatureOffset' (Deprecated)"""
-        warnings.warn("The 'getDeviceInfo' method is deprecated, "
-                      "use 'get_device_info' instead", DeprecationWarning, 2)
-        return self.get_device_info(device_id=device_id, cmd=cmd)
-
-    # </editor-fold>
-
-    def get_device_info(self, device_id, cmd=''):
+    def get_device_info(self, device_id, cmd=""):
         """
         Gets information about devices
-        with option to get specific info i.e. cmd='temperatureOffset'    
+        with option to get specific info i.e. cmd='temperatureOffset'
         """
         request = TadoRequest()
         request.command = cmd
@@ -767,16 +468,7 @@ class Tado:
         request.domain = Domain.DEVICES
         request.device = device_id
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def setTempOffset(self, device_id, offset=0, measure="celsius"):
-        """Set the Temperature offset on the device. (Deprecated)"""
-        warnings.warn("The 'setTempOffset' method is deprecated, "
-                      "use 'set_temp_offset' instead", DeprecationWarning, 2)
-        return self.set_temp_offset(device_id=device_id, offset=offset, measure=measure)
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def set_temp_offset(self, device_id, offset=0, measure="celsius"):
         """
@@ -790,16 +482,7 @@ class Tado:
         request.device = device_id
         request.payload = {measure: offset}
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getEIQTariffs(self):
-        """Get Energy IQ tariff history (Deprecated)"""
-        warnings.warn("The 'getEIQTariffs' method is deprecated, "
-                      "use 'get_eiq_tariffs' instead", DeprecationWarning, 2)
-        return self.get_eiq_tariffs()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_eiq_tariffs(self):
         """
@@ -811,16 +494,7 @@ class Tado:
         request.action = Action.GET
         request.endpoint = Endpoint.EIQ
 
-        return self.http.request(request)
-
-    # <editor-fold desc="Deprecated">
-    def getEIQMeterReadings(self):
-        """Get Energy IQ meter readings (Deprecated)"""
-        warnings.warn("The 'getEIQMeterReadings' method is deprecated, "
-                      "use 'get_eiq_meter_readings' instead", DeprecationWarning, 2)
-        return self.get_eiq_meter_readings()
-
-    # </editor-fold>
+        return self._http.request(request)
 
     def get_eiq_meter_readings(self):
         """
@@ -832,18 +506,11 @@ class Tado:
         request.action = Action.GET
         request.endpoint = Endpoint.EIQ
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime('%Y-%m-%d'), reading=0):
-        """Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals (Deprecated)"""
-        warnings.warn("The 'setEIQMeterReadings' method is deprecated, "
-                      "use 'set_eiq_meter_readings' instead", DeprecationWarning, 2)
-        return self.set_eiq_meter_readings(date=date, reading=reading)
-
-    # </editor-fold>
-
-    def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime('%Y-%m-%d'), reading=0):
+    def set_eiq_meter_readings(
+        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
+    ):
         """
         Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals
         """
@@ -852,26 +519,18 @@ class Tado:
         request.command = "meterReadings"
         request.action = Action.SET
         request.endpoint = Endpoint.EIQ
-        request.payload = {
-            "date": date,
-            "reading": reading
-        }
+        request.payload = {"date": date, "reading": reading}
 
-        return self.http.request(request)
+        return self._http.request(request)
 
-    # <editor-fold desc="Deprecated">
-    def setEIQTariff(self, from_date=datetime.datetime.now().strftime('%Y-%m-%d'),
-                     to_date=datetime.datetime.now().strftime('%Y-%m-%d'), tariff=0, unit="m3", is_period=False):
-        """Send Tariffs to Tado, date format is YYYY-MM-DD,
-        tariff is with decimals, unit is either m3 or kWh, set is_period to true to set a period of price (Deprecated)"""
-        warnings.warn("The 'setEIQTariff' method is deprecated, "
-                      "use 'set_eiq_tariff' instead", DeprecationWarning, 2)
-        return self.set_eiq_tariff(from_date=from_date, to_date=to_date, tariff=tariff, unit=unit, is_period=is_period)
-
-    # </editor-fold>
-
-    def set_eiq_tariff(self, from_date=datetime.datetime.now().strftime('%Y-%m-%d'),
-                       to_date=datetime.datetime.now().strftime('%Y-%m-%d'), tariff=0, unit="m3", is_period=False):
+    def set_eiq_tariff(
+        self,
+        from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+        to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+        tariff=0,
+        unit="m3",
+        is_period=False,
+    ):
         """
         Send Tariffs to Tado, date format is YYYY-MM-DD,
         tariff is with decimals, unit is either m3 or kWh, set is_period to true to set a period of price
@@ -884,13 +543,13 @@ class Tado:
                 "tariffInCents": tariff_in_cents,
                 "unit": unit,
                 "startDate": from_date,
-                "endDate": to_date
+                "endDate": to_date,
             }
         else:
             payload = {
                 "tariffInCents": tariff_in_cents,
                 "unit": unit,
-                "startDate": from_date
+                "startDate": from_date,
             }
 
         request = TadoRequest()
@@ -899,7 +558,7 @@ class Tado:
         request.endpoint = Endpoint.EIQ
         request.payload = payload
 
-        return self.http.request(request)
+        return self._http.request(request)
 
     def get_heating_circuits(self):
         """
@@ -909,7 +568,7 @@ class Tado:
         request = TadoRequest()
         request.command = "heatingCircuits"
 
-        return self.http.request(request)
+        return self._http.request(request)
 
     def get_zone_control(self, zone):
         """
@@ -919,7 +578,7 @@ class Tado:
         request = TadoRequest()
         request.command = f"zones/{zone:d}/control"
 
-        return self.http.request(request)
+        return self._http.request(request)
 
     def set_zone_heating_circuit(self, zone, heating_circuit):
         """
@@ -931,4 +590,4 @@ class Tado:
         request.action = Action.CHANGE
         request.payload = {"circuitNumber": heating_circuit}
 
-        return self.http.request(request)
+        return self._http.request(request)
