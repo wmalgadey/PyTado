@@ -18,6 +18,10 @@ from .const import (
     TADO_HVAC_ACTION_TO_MODES,
     TADO_MODES_TO_HVAC_ACTION,
     TYPE_AIR_CONDITIONING,
+    CONST_VERTICAL_SWING_OFF,
+    CONST_HORIZONTAL_SWING_OFF,
+    CONST_FAN_SPEED_AUTO,
+    CONST_FAN_SPEED_OFF,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,8 +40,11 @@ class TadoZone:
     is_away: bool | None = None
     current_hvac_action: str = CONST_HVAC_OFF
     current_fan_speed: str | None = None
+    current_fan_level: str | None = None
     current_hvac_mode: str | None = None
     current_swing_mode: str | None = None
+    current_vertical_swing_mode: str | None = None
+    current_horizontal_swing_mode: str | None = None
     target_temp: float | None = None
     available: bool = False
     power: str | None = None
@@ -110,10 +117,13 @@ class TadoZone:
             setting = data["setting"]
 
             kwargs["current_fan_speed"] = None
+            kwargs["current_fan_level"] = None
             # If there is no overlay, the mode will always be
             # "SMART_SCHEDULE"
             kwargs["current_hvac_mode"] = CONST_MODE_OFF
             kwargs["current_swing_mode"] = CONST_MODE_OFF
+            kwargs["current_vertical_swing_mode"] = CONST_VERTICAL_SWING_OFF
+            kwargs["current_horizontal_swing_mode"] = CONST_HORIZONTAL_SWING_OFF
 
             if "mode" in setting:
                 # v3 devices use mode
@@ -137,6 +147,14 @@ class TadoZone:
                         setting["type"]
                     ]
 
+            if "verticalSwing" in setting:
+                kwargs["current_vertical_swing_mode"] = setting["verticalSwing"]
+
+            if "horizontalSwing" in setting:
+                kwargs["current_horizontal_swing_mode"] = setting[
+                    "horizontalSwing"
+                ]
+
             # Not all devices have fans
             if "fanSpeed" in setting:
                 kwargs["current_fan_speed"] = setting.get(
@@ -146,6 +164,16 @@ class TadoZone:
             elif "type" in setting and setting["type"] == TYPE_AIR_CONDITIONING:
                 kwargs["current_fan_speed"] = (
                     CONST_FAN_AUTO if power == "ON" else CONST_FAN_OFF
+                )
+
+            if "fanLevel" in setting:
+                kwargs["current_fan_level"] = setting.get(
+                    "fanLevel",
+                    (
+                        CONST_FAN_SPEED_AUTO
+                        if power == "ON"
+                        else CONST_FAN_SPEED_OFF
+                    ),
                 )
 
         kwargs["preparation"] = (
