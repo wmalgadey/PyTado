@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyTado"
-version = "0.17.5"
+version = "0.17.6"
 description = "PyTado from chrism0dwk, modfied by w.malgadey, diplix, michaelarnauts, LenhartStephan, splifter, syssi, andersonshatch, Yippy, p0thi, Coffee2CodeNL, chiefdragon"
 authors = [
     { name = "Chris Jewell", email = "chrism0dwk@gmail.com" },
