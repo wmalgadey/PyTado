@@ -2,7 +2,8 @@
 
 ## Supported Versions
 
-We take security vulnerabilities seriously. The following table outlines the versions of this project currently supported with security updates:
+We take security vulnerabilities seriously. The following table outlines the versions of this project currently
+supported with security updates:
 
 | Version | Supported          |
 |---------|--------------------|
@@ -11,7 +12,8 @@ We take security vulnerabilities seriously. The following table outlines the ver
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability, please contact us as soon as possible. We appreciate your efforts in responsibly disclosing vulnerabilities to help keep the project and its users safe.
+If you discover a security vulnerability, please contact us as soon as possible. We appreciate your efforts in
+responsibly disclosing vulnerabilities to help keep the project and its users safe.
 
 ### How to Report
 
@@ -27,7 +29,9 @@ We kindly ask that you do **not** disclose the vulnerability publicly until we h
 
 ## Response Time
 
-We will acknowledge receipt of your report within **72 hours**. After our initial assessment, we will provide updates on remediation progress as we work toward releasing a fix. We aim to issue a patch or provide a mitigation strategy within **14 days** of confirming a legitimate vulnerability.
+We will acknowledge receipt of your report within **72 hours**. After our initial assessment, we will provide updates
+on remediation progress as we work toward releasing a fix. We aim to issue a patch or provide a mitigation strategy
+within **14 days** of confirming a legitimate vulnerability.
 
 ## Disclosure Policy
 
@@ -39,4 +43,5 @@ Once the vulnerability has been resolved, and a patch or mitigation has been mad
 
 ## Thank You
 
-Your efforts to secure this project are greatly appreciated. Thank you for helping us maintain a safe and reliable environment for our users.
+Your efforts to secure this project are greatly appreciated. Thank you for helping us maintain a safe and reliable
+environment for our users.

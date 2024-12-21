@@ -4,9 +4,12 @@
 [![Building](https://github.com/wmalgadey/PyTado/actions/workflows/publish-to-pypi.yaml/badge.svg)](https://github.com/wmalgadey/PyTado/actions/workflows/publish-to-pypi.yaml)
 [![PyPI version](https://badge.fury.io/py/python-tado.svg)](https://badge.fury.io/py/python-tado)
 
-PyTado is a Python module implementing an interface to the Tado web API.  It allows a user to interact with their Tado heating system for the purposes of monitoring or controlling their heating system, beyond what Tado themselves currently offer.
+PyTado is a Python module implementing an interface to the Tado web API. It allows a user to interact with their
+Tado heating system for the purposes of monitoring or controlling their heating system, beyond what Tado themselves
+currently offer.
 
-It is hoped that this module might be used by those who wish to tweak their Tado systems, and further optimise their heating setups.
+It is hoped that this module might be used by those who wish to tweak their Tado systems, and further optimise their
+heating setups.
 
 ---
 
@@ -18,7 +21,11 @@ Copyright: Chris Jewell 2016-2018
 
 ## Disclaimer
 
-Besides owning a Tado system, I have no connection with the Tado company themselves. PyTado was created for my own use, and for others who may wish to experiment with personal Internet of Things systems.  I receive no help (financial or otherwise) from Tado, and have no business interest with them.  This software is provided without warranty, according to the GNU Public Licence version 3, and should therefore not be used where it may endanger life, financial stakes, or cause discomfort and inconvenience to others.
+Besides owning a Tado system, I have no connection with the Tado company themselves. PyTado was created for my own use,
+and for others who may wish to experiment with personal Internet of Things systems. I receive no help (financial or
+otherwise) from Tado, and have no business interest with them. This software is provided without warranty, according to
+the GNU Public Licence version 3, and should therefore not be used where it may endanger life, financial stakes, or
+cause discomfort and inconvenience to others.
 
 ## Example basic usage
 
@@ -30,22 +37,28 @@ Besides owning a Tado system, I have no connection with the Tado company themsel
 
 We are very open to the community's contributions - be it a quick fix of a typo, or a completely new feature!
 
-You don't need to be a Python expert to provide meaningful improvements. To learn how to get started, check out our [Contributor Guidelines](https://github.com/wmalgadey/econnect-python/blob/main/CONTRIBUTING.md) first, and ask for help in [GitHub Discussions](https://github.com/wmalgadey/PyTado/discussions) if you have questions.
+You don't need to be a Python expert to provide meaningful improvements. To learn how to get started, check out our
+[Contributor Guidelines](https://github.com/wmalgadey/econnect-python/blob/main/CONTRIBUTING.md) first, and ask for help
+in [GitHub Discussions](https://github.com/wmalgadey/PyTado/discussions) if you have questions.
 
 ## Development
 
-We welcome external contributions, even though the project was initially intended for personal use. If you think some parts could be exposed with a more generic interface, please open a [GitHub issue](https://github.com/wmalgadey/PyTado/issues) to discuss your suggestion.
+We welcome external contributions, even though the project was initially intended for personal use. If you think some
+parts could be exposed with a more generic interface, please open a [GitHub issue](https://github.com/wmalgadey/PyTado/issues)
+to discuss your suggestion.
 
 ### Dev Environment
 
-To contribute to this repository, you should first clone your fork and then setup your development environment. Clone your repository as follows (replace yourusername with your GitHub account name):
+To contribute to this repository, you should first clone your fork and then setup your development environment. Clone
+your repository as follows (replace yourusername with your GitHub account name):
 
 ```bash
 git clone https://github.com/yourusername/PyTado.git
 cd PyTado
 ```
 
-Then, to create your development environment and install the project with its dependencies, execute the following commands in your terminal:
+Then, to create your development environment and install the project with its dependencies, execute the following
+commands in your terminal:
 
 ```bash
 # Create and activate a new virtual environment
@@ -62,11 +75,11 @@ pre-commit install
 
 ### Coding Guidelines
 
-To maintain a consistent codebase, we utilize [black][1]. Consistency is crucial as it helps readability, reduces errors, and facilitates collaboration among developers.
+To maintain a consistent codebase, we utilize [black][1]. Consistency is crucial as it helps readability, reduces errors,
+and facilitates collaboration among developers.
 
-To ensure that every commit adheres to our coding standards, we've integrated [pre-commit hooks][2].
-These hooks automatically run `black` before each commit, ensuring that all code changes
-are automatically checked and formatted.
+To ensure that every commit adheres to our coding standards, we've integrated [pre-commit hooks][2]. These hooks
+automatically run `black` before each commit, ensuring that all code changes are automatically checked and formatted.
 
 For details on how to set up your development environment to make use of these hooks, please refer to the
 [Development][3] section of our documentation.
@@ -77,8 +90,8 @@ For details on how to set up your development environment to make use of these h
 
 ### Testing
 
-Ensuring the robustness and reliability of our code is paramount. Therefore, all contributions must include
-at least one test to verify the intended behavior.
+Ensuring the robustness and reliability of our code is paramount. Therefore, all contributions must include at least one
+test to verify the intended behavior.
 
 To run tests locally, execute the test suite using `pytest` with the following command:
 
@@ -90,7 +103,8 @@ pytest tests/ --cov --cov-branch -vv
 
 A message from the original author:
 
-> This software is at a purely experimental stage. If you're interested and can write Python, clone the Github repo, drop me a line, and get involved!
+> This software is at a purely experimental stage. If you're interested and can write Python, clone the Github repo,
+> drop me a line, and get involved!
 >
 > Best wishes and a warm winter to all!
 >
