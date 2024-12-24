@@ -3,6 +3,7 @@
 [![Linting and testing](https://github.com/wmalgadey/PyTado/actions/workflows/lint-and-test-matrix.yml/badge.svg)](https://github.com/wmalgadey/PyTado/actions/workflows/lint-and-test-matrix.yml)
 [![Build and deploy to pypi](https://github.com/wmalgadey/PyTado/actions/workflows/publish-to-pypi.yml/badge.svg?event=release)](https://github.com/wmalgadey/PyTado/actions/workflows/publish-to-pypi.yml)
 [![PyPI version](https://badge.fury.io/py/python-tado.svg)](https://badge.fury.io/py/python-tado)
+[![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
 PyTado is a Python module implementing an interface to the Tado web API. It allows a user to interact with their
 Tado heating system for the purposes of monitoring or controlling their heating system, beyond what Tado themselves
@@ -13,7 +14,7 @@ heating setups.
 
 ---
 
-Original author: Chris Jewell <chrism0dwk@gmail.com>  
+Original author: Chris Jewell <chrism0dwk@gmail.com>
 
 Licence: GPL v3
 
@@ -46,6 +47,28 @@ in [GitHub Discussions](https://github.com/wmalgadey/PyTado/discussions) if you 
 We welcome external contributions, even though the project was initially intended for personal use. If you think some
 parts could be exposed with a more generic interface, please open a [GitHub issue](https://github.com/wmalgadey/PyTado/issues)
 to discuss your suggestion.
+
+### Setting up a devcontainer
+
+The easiest way to start, is by opening a CodeSpace here on GitHub, or by using
+the [Dev Container][devcontainer] feature of Visual Studio Code.
+
+[![Open in Dev Containers][devcontainer-shield]][devcontainer]
+
+This Python project is fully managed using the [Poetry][poetry] dependency manager. But also relies on the use of NodeJS for certain checks during development.
+
+You need at least:
+
+- Python 3.12+
+- [Poetry][poetry-install]
+- NodeJS 18+ (including NPM)
+
+To install all packages, including all development requirements:
+
+```bash
+npm install
+poetry install
+```
 
 ### Dev Environment
 
@@ -109,3 +132,7 @@ A message from the original author:
 > Best wishes and a warm winter to all!
 >
 > Chris Jewell
+
+
+[devcontainer-shield]: https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode
+[devcontainer]: https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/wmalgadey/PyTado
