@@ -4,15 +4,20 @@ repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
   hooks:
+    - id: no-commit-to-branch
+      name: "Don't commit to master branch"
+      args: [--branch, master]
     - id: check-ast
     - id: check-json
     - id: check-merge-conflict
     - id: check-toml
     - id: check-yaml
+    - id: check-json
     - id: end-of-file-fixer
       exclude: custom_components/econnect_metronet/manifest.json
     - id: mixed-line-ending
     - id: trailing-whitespace
+
 
 - repo: https://github.com/PyCQA/isort
   rev: 5.13.2
@@ -52,7 +57,7 @@ repos:
   hooks:
     - id: ruff
       exclude: tests/
-      args: [--line-length=120]
+      args: [--line-length=120, --fix]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.13.0
@@ -60,3 +65,16 @@ repos:
     - id: mypy
       exclude: tests/
       additional_dependencies: [types-requests]
+
+- repo: local
+  hooks:
+    - id: pytest
+      name: pytest
+      entry: pytest --cov=. --cov-report term-missing
+      language: system
+      types: [python]
+    - id: prettier
+      name: prettier
+      entry: prettier
+      language: system
+      types: [python, json, yaml, markdown]
