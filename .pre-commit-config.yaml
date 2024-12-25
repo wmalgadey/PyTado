@@ -4,15 +4,20 @@ repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v5.0.0
   hooks:
+    - id: no-commit-to-branch
+      name: "Don't commit to master branch"
+      args: [--branch, master]
     - id: check-ast
     - id: check-json
     - id: check-merge-conflict
     - id: check-toml
     - id: check-yaml
+    - id: check-json
     - id: end-of-file-fixer
       exclude: custom_components/econnect_metronet/manifest.json
     - id: mixed-line-ending
     - id: trailing-whitespace
+
 
 - repo: https://github.com/PyCQA/isort
   rev: 5.13.2
@@ -31,20 +36,21 @@ repos:
   hooks:
     - id: black
       exclude: tests/
-      args: [--line-length=80]
+      args: [--line-length=100]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 7.1.1
   hooks:
     - id: flake8
       exclude: tests/
-      args: [--max-line-length=80]
+      args: [--max-line-length=100 ]
 
 - repo: https://github.com/PyCQA/bandit
   rev: '1.8.0'
   hooks:
     - id: bandit
       exclude: tests/
+      args: ["--skip", "B105"]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
@@ -52,7 +58,7 @@ repos:
   hooks:
     - id: ruff
       exclude: tests/
-      args: [--line-length=80]
+      args: [--line-length=100, --fix]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.13.0
@@ -60,3 +66,20 @@ repos:
     - id: mypy
       exclude: tests/
       additional_dependencies: [types-requests]
+
+- repo: local
+  hooks:
+    - id: prettier
+      name: prettier
+      entry: prettier
+      language: system
+      types: [python, json, yaml, markdown]
+
+    - id: pytest
+      name: pytest
+      entry: pytest
+      language: python
+      types: [python]
+      pass_filenames: false
+      always_run: true
+      additional_dependencies: [responses, pytest-mock]

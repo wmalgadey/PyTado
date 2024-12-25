@@ -2,22 +2,14 @@
 PyTado interface implementation for app.tado.com.
 """
 
-import enum
 import datetime
+import enum
 import logging
-
 from typing import Any
 
+from ...exceptions import TadoException, TadoNotSupportedException
+from ...http import Action, Domain, Endpoint, Http, Mode, TadoRequest
 from ...logger import Logger
-from ...exceptions import TadoNotSupportedException
-from ...http import (
-    Action,
-    Domain,
-    Endpoint,
-    Http,
-    Mode,
-    TadoRequest,
-)
 from ...zone import TadoZone
 
 
@@ -155,9 +147,7 @@ class Tado:
         # showSwitchToAutoGeofencingButton or currently enabled via the
         # presence of presenceLocked = False
         if "showSwitchToAutoGeofencingButton" in data:
-            self._auto_geofencing_supported = data[
-                "showSwitchToAutoGeofencingButton"
-            ]
+            self._auto_geofencing_supported = data["showSwitchToAutoGeofencingButton"]
         elif "presenceLocked" in data:
             if not data["presenceLocked"]:
                 self._auto_geofencing_supported = True
@@ -210,9 +200,7 @@ class Tado:
         data = self._http.request(request)
 
         if "id" not in data:
-            raise TadoException(
-                f'Returned data did not contain "id" : {str(data)}'
-            )
+            raise TadoException(f'Returned data did not contain "id" : {str(data)}')
 
         return Timetable(data["id"])
 
@@ -224,14 +212,10 @@ class Tado:
         try:
             day = datetime.datetime.strptime(date, "%Y-%m-%d")
         except ValueError as err:
-            raise ValueError(
-                "Incorrect date format, should be YYYY-MM-DD"
-            ) from err
+            raise ValueError("Incorrect date format, should be YYYY-MM-DD") from err
 
         request = TadoRequest()
-        request.command = (
-            f"zones/{zone:d}/dayReport?date={day.strftime('%Y-%m-%d')}"
-        )
+        request.command = f"zones/{zone:d}/dayReport?date={day.strftime('%Y-%m-%d')}"
         return self._http.request(request)
 
     def set_timetable(self, zone: int, timetable: Timetable) -> None:
@@ -250,22 +234,16 @@ class Tado:
 
         self._http.request(request)
 
-    def get_schedule(
-        self, zone: int, timetable: Timetable, day=None
-    ) -> dict[str, Any]:
+    def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
         """
         request = TadoRequest()
         if day:
-            request.command = (
-                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
-            )
+            request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
         else:
-            request.command = (
-                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks"
-            )
+            request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks"
         request.mode = Mode.PLAIN
 
         return self._http.request(request)
@@ -276,9 +254,7 @@ class Tado:
         """
 
         request = TadoRequest()
-        request.command = (
-            f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
-        )
+        request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
         request.action = Action.CHANGE
         request.payload = data
         request.mode = Mode.PLAIN
@@ -437,9 +413,7 @@ class Tado:
 
             return self._http.request(request)
         else:
-            raise TadoNotSupportedException(
-                "Auto mode is not known to be supported."
-            )
+            raise TadoNotSupportedException("Auto mode is not known to be supported.")
 
     def get_window_state(self, zone):
         """
@@ -537,9 +511,7 @@ class Tado:
 
         return self._http.request(request)
 
-    def set_eiq_meter_readings(
-        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
-    ):
+    def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
         """
         Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals
         """
@@ -622,9 +594,7 @@ class Tado:
 
         return self._http.request(request)
 
-    def get_running_times(
-        self, date=datetime.datetime.now().strftime("%Y-%m-%d")
-    ) -> dict:
+    def get_running_times(self, date=datetime.datetime.now().strftime("%Y-%m-%d")) -> dict:
         """
         Get the running times from the Minder API
         """

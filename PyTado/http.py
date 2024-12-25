@@ -62,7 +62,7 @@ class TadoRequest:
         self,
         endpoint: Endpoint = Endpoint.MY_API,
         command: str | None = None,
-        action: Action = Action.GET,
+        action: Action | str = Action.GET,
         payload: dict[str, Any] | None = None,
         domain: Domain = Domain.HOME,
         device: int | None = None,
@@ -86,7 +86,7 @@ class TadoXRequest(TadoRequest):
         self,
         endpoint: Endpoint = Endpoint.HOPS_API,
         command: str | None = None,
-        action: Action = Action.GET,
+        action: Action | str = Action.GET,
         payload: dict[str, Any] | None = None,
         domain: Domain = Domain.HOME,
         device: int | None = None,
@@ -106,14 +106,14 @@ class TadoXRequest(TadoRequest):
         self._action = action
 
     @property
-    def action(self) -> str:
+    def action(self) -> Action | str:
         """Get request action for Tado X"""
         if self._action == Action.CHANGE:
             return "PATCH"
         return self._action
 
     @action.setter
-    def action(self, value: Action):
+    def action(self, value: Action | str):
         """Set request action"""
         self._action = value
 
@@ -151,6 +151,7 @@ class Http:
         self._username = username
         self._password = password
         self._id, self._token_refresh = self._login()
+
         self._x_api = self._check_x_line_generation()
 
     def _log_response(self, response: requests.Response, *args, **kwargs):
@@ -176,9 +177,7 @@ class Http:
 
         url = self._configure_url(request)
 
-        http_request = requests.Request(
-            request.action, url, headers=headers, data=data
-        )
+        http_request = requests.Request(request.action, url, headers=headers, data=data)
         prepped = http_request.prepare()
 
         retries = _DEFAULT_RETRIES
@@ -221,14 +220,17 @@ class Http:
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
         elif request.endpoint == Endpoint.MINDER:
-            url = f"{request.endpoint}{request.domain}/{self.id:d}/{request.command}?{urlencode(request.params)}"
+            params = request.params if request.params is not None else {}
+
+            url = (
+                f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
+                f"?{urlencode(params)}"
+            )
         else:
             url = f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
         return url
 
-    def _configure_payload(
-        self, headers: dict[str, str], request: TadoRequest
-    ) -> bytes:
+    def _configure_payload(self, headers: dict[str, str], request: TadoRequest) -> bytes:
         if request.payload is None:
             return b""
 
@@ -292,7 +294,7 @@ class Http:
             f"Unknown error while refreshing token with status code {response.status_code}"
         )
 
-    def _login(self) -> tuple[int, str] | None:
+    def _login(self) -> tuple[int, str]:
 
         headers = self._headers
         headers["Content-Type"] = "application/json"
@@ -320,25 +322,26 @@ class Http:
         )
 
         if response.status_code == 400:
-            raise TadoWrongCredentialsException(
-                "Your username or password is invalid"
+            raise TadoWrongCredentialsException("Your username or password is invalid")
+
+        if response.status_code != 200:
+            raise TadoException(
+                f"Login failed for unknown reason with status code {response.status_code}"
             )
 
-        if response.status_code == 200:
-            refresh_token = self._set_oauth_header(response.json())
-            id_ = self._get_id()
+        refresh_token = self._set_oauth_header(response.json())
+        id_ = self._get_id()
 
-            return id_, refresh_token
-
-        raise TadoException(
-            f"Login failed for unknown reason with status code {response.status_code}"
-        )
+        return id_, refresh_token
 
     def _get_id(self) -> int:
         request = TadoRequest()
         request.action = Action.GET
         request.domain = Domain.ME
-        return self.request(request)["homes"][0]["id"]
+
+        homes_ = self.request(request)["homes"]
+
+        return homes_[0]["id"]
 
     def _check_x_line_generation(self):
         # get home info
@@ -347,5 +350,7 @@ class Http:
         request.domain = Domain.HOME
         request.command = ""
 
-        home = self.request(request)
-        return "generation" in home and home["generation"] == "LINE_X"
+        _LOGGER.debug(f"id is {self._id}")
+
+        home_ = self.request(request)
+        return "generation" in home_ and home_["generation"] == "LINE_X"

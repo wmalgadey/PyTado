@@ -45,7 +45,7 @@ platforms = ["any"]
 zip-safe = false
 
 [tool.black]
-line-length = 80
+line-length = 100
 target-version = ['py311']
 
 [tool.pytype]
@@ -211,7 +211,7 @@ generated-members = ''
 
 [tool.pylint.FORMAT]
 
-max-line-length = 80
+max-line-length = 100
 
 ignore-long-lines = '''(?x)(
   ^\s*(\#\ )?<?https?://\S+>?$|
@@ -307,3 +307,8 @@ class_
 # List of valid names for the first argument in a metaclass class method.valid-metaclass-classmethod-first-arg=mcs
 # List of method names used to declare (i.e. assign) instance attributes.
 # warning.
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]

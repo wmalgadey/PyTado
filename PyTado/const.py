@@ -2,9 +2,7 @@
 
 # Api credentials
 CLIENT_ID = "tado-web-app"
-CLIENT_SECRET = (
-    "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
-)
+CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
 
 # Types
 TYPE_AIR_CONDITIONING = "AIR_CONDITIONING"
@@ -49,12 +47,8 @@ CONST_HORIZONTAL_SWING_MID_RIGHT = "MID_RIGHT"
 CONST_HORIZONTAL_SWING_RIGHT = "RIGHT"
 
 # When we change the temperature setting, we need an overlay mode
-CONST_OVERLAY_TADO_MODE = (
-    "NEXT_TIME_BLOCK"  # wait until tado changes the mode automatic
-)
-CONST_OVERLAY_MANUAL = (
-    "MANUAL"  # the user has changed the temperature or mode manually
-)
+CONST_OVERLAY_TADO_MODE = "NEXT_TIME_BLOCK"  # wait until tado changes the mode automatic
+CONST_OVERLAY_MANUAL = "MANUAL"  # the user has changed the temperature or mode manually
 CONST_OVERLAY_TIMER = "TIMER"  # the temperature will be reset after a timespan
 
 # Heat always comes first since we get the

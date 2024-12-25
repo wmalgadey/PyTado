@@ -3,11 +3,11 @@ PyTado interface abstraction to use app.tado.com or hops.tado.com
 """
 
 import datetime
-import warnings
 import functools
+import warnings
 
-from PyTado.http import Http
 import PyTado.interface.api as API
+from PyTado.http import Http
 
 
 def deprecated(new_func_name):
@@ -51,7 +51,7 @@ class Tado:
         )
 
         if self._http.is_x_line:
-            self._api = API.TadoX(http=self._http, debug=debug)
+            self._api: API.Tado | API.TadoX = API.TadoX(http=self._http, debug=debug)
         else:
             self._api = API.Tado(http=self._http, debug=debug)
 
@@ -253,9 +253,7 @@ class Tado:
     @deprecated("set_temp_offset")
     def setTempOffset(self, device_id, offset=0, measure="celsius"):
         """Set the Temperature offset on the device. (Deprecated)"""
-        return self.set_temp_offset(
-            device_id=device_id, offset=offset, measure=measure
-        )
+        return self.set_temp_offset(device_id=device_id, offset=offset, measure=measure)
 
     @deprecated("get_eiq_tariffs")
     def getEIQTariffs(self):
@@ -268,10 +266,11 @@ class Tado:
         return self.get_eiq_meter_readings()
 
     @deprecated("set_eiq_meter_readings")
-    def setEIQMeterReadings(
-        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
-    ):
-        """Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals (Deprecated)"""
+    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
+        """Send Meter Readings to Tado (Deprecated)
+
+        date format is YYYY-MM-DD, reading is without decimals
+        """
         return self.set_eiq_meter_readings(date=date, reading=reading)
 
     @deprecated("set_eiq_tariff")
@@ -283,8 +282,10 @@ class Tado:
         unit="m3",
         is_period=False,
     ):
-        """Send Tariffs to Tado, date format is YYYY-MM-DD,
-        tariff is with decimals, unit is either m3 or kWh, set is_period to true to set a period of price (Deprecated)
+        """Send Tariffs to Tado (Deprecated)
+
+        date format is YYYY-MM-DD, tariff is with decimals, unit is either
+        m3 or kWh, set is_period to true to set a period of price
         """
         return self.set_eiq_tariff(
             from_date=from_date,
