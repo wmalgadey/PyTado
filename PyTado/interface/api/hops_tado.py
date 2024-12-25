@@ -2,6 +2,7 @@
 PyTado interface implementation for hops.tado.com (Tado X).
 """
 
+import functools
 import logging
 from typing import Any
 
@@ -10,6 +11,18 @@ from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
 from ...zone import TadoXZone, TadoZone
 from .my_tado import Tado, Timetable
+
+
+def not_supported(reason):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            raise TadoNotSupportedException(f"{func.__name__} is not supported: {reason}")
+
+        return wrapper
+
+    return decorator
+
 
 _LOGGER = Logger(__name__)
 
@@ -107,12 +120,12 @@ class TadoX(Tado):
 
         return data
 
+    @not_supported("This method is not currently supported by the Tado X API")
     def get_capabilities(self, zone):
         """
         Gets current capabilities of zone.
         """
-
-        raise TadoNotSupportedException("This method is not currently supported by the Tado X API")
+        pass
 
     def get_climate(self, zone):
         """
@@ -125,6 +138,7 @@ class TadoX(Tado):
             "humidity": data["humidity"]["percentage"],
         }
 
+    @not_supported("Tado X API only support seven days timetable")
     def set_timetable(self, zone: int, timetable: Timetable) -> None:
         """
         Set the Timetable type currently active
@@ -132,8 +146,7 @@ class TadoX(Tado):
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
-
-        raise TadoNotSupportedException("Tado X API only support seven days timetable")
+        pass
 
     def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
         """
@@ -248,14 +261,12 @@ class TadoX(Tado):
 
         return self._http.request(request)
 
+    @not_supported("Concept of zones is not available by Tado X API, they use rooms")
     def get_zone_overlay_default(self, zone: int):
         """
         Get current overlay default settings for zone.
         """
-
-        raise TadoNotSupportedException(
-            "Concept of zones is not available by Tado X API, they use rooms"
-        )
+        pass
 
     def get_open_window_detected(self, zone):
         """
@@ -269,20 +280,20 @@ class TadoX(Tado):
         else:
             return {"openWindowDetected": False}
 
+    @not_supported("This method is not currently supported by the Tado X API")
     def set_open_window(self, zone):
         """
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
         """
+        pass
 
-        raise TadoNotSupportedException("This method is not currently supported by the Tado X API")
-
+    @not_supported("This method is not currently supported by the Tado X API")
     def reset_open_window(self, zone):
         """
         Sets the window in zone to closed
         """
-
-        raise TadoNotSupportedException("This method is not currently supported by the Tado X API")
+        pass
 
     def get_device_info(self, device_id, cmd=""):
         """
