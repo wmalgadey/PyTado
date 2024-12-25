@@ -1,7 +1,4 @@
 {
-    "containerEnv": {
-        "POETRY_VIRTUALENVS_IN_PROJECT": "true"
-    },
     "customizations": {
         "codespaces": {
             "openFiles": [

@@ -55,21 +55,6 @@ the [Dev Container][devcontainer] feature of Visual Studio Code.
 
 [![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
-This Python project is fully managed using the [Poetry][poetry] dependency manager. But also relies on the use of NodeJS for certain checks during development.
-
-You need at least:
-
-- Python 3.12+
-- [Poetry][poetry-install]
-- NodeJS 18+ (including NPM)
-
-To install all packages, including all development requirements:
-
-```bash
-npm install
-poetry install
-```
-
 ### Dev Environment
 
 To contribute to this repository, you should first clone your fork and then setup your development environment. Clone
