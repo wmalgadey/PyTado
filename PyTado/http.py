@@ -350,7 +350,6 @@ class Http:
         request.domain = Domain.HOME
         request.command = ""
 
-        _LOGGER.debug(f"id is {self._id}")
-
         home_ = self.request(request)
+
         return "generation" in home_ and home_["generation"] == "LINE_X"
