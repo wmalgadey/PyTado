@@ -179,7 +179,7 @@ class Http:
         data = self._configure_payload(headers, request)
         url = self._configure_url(request)
 
-        http_request = requests.Request(request.action, url, headers=headers, data=data)
+        http_request = requests.Request(method=request.action, url=url, headers=headers, data=data)
         prepped = http_request.prepare()
 
         retries = _DEFAULT_RETRIES
