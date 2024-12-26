@@ -26,11 +26,6 @@ repos:
       exclude: tests/
       args: ["--profile", "black"]
 
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.19.1
-  hooks:
-    - id: pyupgrade
-
 - repo: https://github.com/psf/black
   rev: 24.10.0
   hooks:
@@ -38,19 +33,29 @@ repos:
       exclude: tests/
       args: [--line-length=100]
 
+- repo: https://github.com/pre-commit/mirrors-autopep8
+  rev: v1.5.7
+  hooks:
+    - id: autopep8
+      exclude: tests/
+      args: [--max-line-length=100, --aggressive, --aggressive]
+
 - repo: https://github.com/PyCQA/flake8
   rev: 7.1.1
   hooks:
     - id: flake8
       exclude: tests/
-      args: [--max-line-length=100 ]
+      args: [--max-line-length=100]
+
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.19.1
+  hooks:
+    - id: pyupgrade
 
 - repo: https://github.com/PyCQA/bandit
   rev: '1.8.0'
   hooks:
     - id: bandit
-      exclude: tests/
-      args: ["--skip", "B105"]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
