@@ -75,7 +75,7 @@ class TadoX(Tado):
             serial_number = device.get("serialNo", device.get("serialNumber"))
             if not serial_number:
                 continue
-            
+
             request = TadoXRequest()
             request.domain = Domain.DEVICES
             request.device = serial_number
