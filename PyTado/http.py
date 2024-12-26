@@ -203,7 +203,7 @@ class Http:
                         _DEFAULT_RETRIES,
                         e,
                     )
-                    raise e
+                    raise TadoException(e)
 
         if response.text is None or response.text == "":
             return {}
@@ -287,7 +287,7 @@ class Http:
             )
         except requests.exceptions.ConnectionError as e:
             _LOGGER.error("Connection error: %s", e)
-            raise e
+            raise TadoException(e)
 
         if response.status_code != 200:
             raise TadoWrongCredentialsException(
@@ -324,7 +324,7 @@ class Http:
             )
         except requests.exceptions.ConnectionError as e:
             _LOGGER.error("Connection error: %s", e)
-            raise e
+            raise TadoException(e)
 
         if response.status_code == 400:
             raise TadoWrongCredentialsException("Your username or password is invalid")
