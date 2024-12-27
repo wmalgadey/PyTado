@@ -58,5 +58,7 @@
         }
     },
     "image": "mcr.microsoft.com/vscode/devcontainers/python:3.12",
-    "name": "PyTado"
+    "name": "PyTado",
+    "postCreateCommand": "python3 -m venv venv && . venv/bin/activate && pip install --upgrade pip && pip install -e '.[all]' && pre-commit install",
+    "updateContentCommand": "python3 -m venv venv && . venv/bin/activate && pip install --upgrade pip && pip install -e '.[all]' && pre-commit install"
 }
