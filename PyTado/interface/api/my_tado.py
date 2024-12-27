@@ -400,7 +400,7 @@ class Tado:
 
         self._http.request(request)
 
-    def set_child_lock(self, device_id: int, child_lock: bool) -> None:
+    def set_child_lock(self, device_id, child_lock) -> None:
         """
         Sets the child lock on a device
         """
