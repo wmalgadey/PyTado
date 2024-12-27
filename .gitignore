@@ -71,6 +71,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Ruff cache
+.ruff_cache
+
 # PyBuilder
 .pybuilder/
 target/
