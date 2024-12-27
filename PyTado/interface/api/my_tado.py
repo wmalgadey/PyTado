@@ -400,6 +400,20 @@ class Tado:
 
         self._http.request(request)
 
+    def set_child_lock(self, device_id: int, child_lock: bool) -> None:
+        """
+        Sets the child lock on a device
+        """
+
+        request = TadoRequest()
+        request.command = "childLock"
+        request.action = Action.CHANGE
+        request.device = device_id
+        request.domain = Domain.DEVICES
+        request.payload = {"childLockEnabled": child_lock}
+
+        self._http.request(request)
+
     def set_auto(self) -> None:
         """
         Sets HomeState to AUTO
