@@ -2,5 +2,6 @@
 
 from .hops_tado import TadoX
 from .my_tado import Tado
+from .base_tado import TadoBase
 
-__all__ = ["Tado", "TadoX"]
+__all__ = ["Tado", "TadoX", "TadoBase"]

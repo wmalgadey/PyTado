@@ -51,7 +51,7 @@ class Tado:
         )
 
         if self._http.is_x_line:
-            self._api: API.Tado | API.TadoX = API.TadoX(http=self._http, debug=debug)
+            self._api: API.TadoBase = API.TadoX(http=self._http, debug=debug)
         else:
             self._api = API.Tado(http=self._http, debug=debug)
 

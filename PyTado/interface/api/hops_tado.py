@@ -3,16 +3,15 @@ PyTado interface implementation for hops.tado.com (Tado X).
 """
 
 import functools
-import logging
 from typing import Any
 
 from PyTado.const import TYPE_HEATING
+from PyTado.interface.api.base_tado import TadoBase, Timetable
 
 from ...exceptions import TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
 from ...zone import TadoXZone, TadoZone
-from .my_tado import Tado, Timetable
 
 
 def not_supported(reason):
@@ -29,7 +28,7 @@ def not_supported(reason):
 _LOGGER = Logger(__name__)
 
 
-class TadoX(Tado):
+class TadoX(TadoBase):
     """Interacts with a Tado thermostat via hops.tado.com (Tado X) API.
 
     Example usage: http = Http('me@somewhere.com', 'mypasswd')
@@ -43,22 +42,10 @@ class TadoX(Tado):
         debug: bool = False,
     ):
         """Class Constructor"""
-
-        super().__init__(http=http, debug=debug)
-
         if not http.is_x_line:
             raise TadoNotSupportedException("TadoX is only usable with LINE_X Generation")
 
-        if debug:
-            _LOGGER.setLevel(logging.DEBUG)
-        else:
-            _LOGGER.setLevel(logging.WARNING)
-
-        self._http = http
-
-        # Track whether the user's Tado instance supports auto-geofencing,
-        # set to None until explicitly set
-        self._auto_geofencing_supported = None
+        super().__init__(http=http, debug=debug)
 
     def get_devices(self):
         """
@@ -165,6 +152,10 @@ class TadoX(Tado):
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
+        pass
+
+    @not_supported("Tado X API does not support historic data")
+    def get_timetable(self, zone: int):
         pass
 
     def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
