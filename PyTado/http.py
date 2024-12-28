@@ -164,12 +164,18 @@ class Http:
         og_request_url = response.request.url
         og_request_headers = response.request.headers
         response_status = response.status_code
+
+        if response.text is None or response.text == "":
+            response_data = {}
+        else:
+            response_data = response.json()
+
         _LOGGER.debug(
             f"\nRequest:\n\tMethod:{og_request_method}"
             f"\n\tURL: {og_request_url}"
             f"\n\tHeaders: {pprint.pformat(og_request_headers)}"
             f"\nResponse:\n\tStatusCode: {response_status}"
-            f"\n\tData: {response.json()}"
+            f"\n\tData: {response_data}"
         )
 
     def request(self, request: TadoRequest) -> dict[str, Any]:
