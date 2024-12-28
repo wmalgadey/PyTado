@@ -26,13 +26,6 @@ repos:
       exclude: tests/
       args: ["--profile", "black"]
 
-- repo: https://github.com/psf/black
-  rev: 24.10.0
-  hooks:
-    - id: black
-      exclude: tests/
-      args: [--line-length=100]
-
 - repo: https://github.com/pre-commit/mirrors-autopep8
   rev: v1.5.7
   hooks:
@@ -66,7 +59,7 @@ repos:
       args: [--line-length=100, --fix]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.13.0
+  rev: v1.14.0
   hooks:
     - id: mypy
       exclude: tests/
