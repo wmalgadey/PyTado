@@ -6,6 +6,8 @@ import functools
 import logging
 from typing import Any
 
+from PyTado.const import TYPE_HEATING
+
 from ...exceptions import TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
@@ -81,6 +83,13 @@ class TadoX(Tado):
             request.device = serial_number
             device.update(self._http.request(request))
 
+            # compatibility with my.tado.com API
+            device["shortSerialNo"] = device["serialNo"]
+            device["characteristics"]["capabilities"] = self.get_capabilities(device["serialNo"])
+            device["name"] = device["roomName"]
+            device["id"] = device["roomId"]
+            device["generation"] = "LINE_X"
+
         if "otherDevices" in rooms_and_devices:
             devices.append(rooms_and_devices["otherDevices"])
 
@@ -111,7 +120,12 @@ class TadoX(Tado):
         request = TadoXRequest()
         request.command = "rooms"
 
-        return self._http.request(request)
+        rooms_ = self._http.request(request)
+
+        # make response my.tado.com compatible
+        zone_states = {"zoneStates": {"id": room["id"], "name": room["name"]} for room in rooms_}
+
+        return {**zone_states, **rooms_}
 
     def get_state(self, zone):
         """
@@ -124,12 +138,17 @@ class TadoX(Tado):
 
         return data
 
-    @not_supported("This method is not currently supported by the Tado X API")
     def get_capabilities(self, zone):
         """
         Gets current capabilities of zone.
         """
-        pass
+
+        _LOGGER.warning(
+            "get_capabilities is not supported by Tado X API. "
+            "We currently always return type heating."
+        )
+
+        return {"type": TYPE_HEATING}
 
     def get_climate(self, zone):
         """
