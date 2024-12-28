@@ -331,10 +331,8 @@ class TadoX(Tado):
         """
 
         request = TadoXRequest()
-        request.command = "childLock"
+        request.command = f"roomsAndDevices/devices/{device_id}"
         request.action = Action.CHANGE
-        request.device = device_id
-        request.domain = Domain.DEVICES
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
