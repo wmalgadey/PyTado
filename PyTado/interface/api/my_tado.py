@@ -636,7 +636,7 @@ class Tado:
         return self._http.request(request)
 
     def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: int
+        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
     ):
         """
         Set the boiler max output temperature with home by bridge endpoint
