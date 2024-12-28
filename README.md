@@ -51,7 +51,7 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
-Note: for developers, you can create an `example_dev.py` file in the root of the project to test your changes. This will is ignored by the `.gitignore` file.
+Note: for developers, you can create an `example_dev.py` file in the root of the project to test your changes. This file will be ignored by the `.gitignore` file.
 
 ## Contributing
 
