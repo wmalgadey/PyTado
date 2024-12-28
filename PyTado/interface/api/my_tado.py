@@ -606,3 +606,33 @@ class Tado:
         request.params = {"from": date}
 
         return self._http.request(request)
+
+    def get_boiler_output_temperature(self, bridge_id: str):
+        """
+        Get the bridge details
+        """
+
+        request = TadoRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME_BY_BRIDGE
+        request.device = bridge_id
+
+        request.command = "boilerWiringInstallationState"
+        install_state = self._http.request(request)
+
+        return {
+            "boiler": install_state["boiler"],
+        }
+
+    def get_boiler_max_output_temperature(self, bridge_id: str):
+        """
+        Get the bridge details
+        """
+
+        request = TadoRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME_BY_BRIDGE
+        request.device = bridge_id
+        request.command = "boilerMaxOutputTemperature"
+
+        return self._http.request(request)

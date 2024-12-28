@@ -37,6 +37,7 @@ class Domain(enum.StrEnum):
     HOME = "homes"
     DEVICES = "devices"
     ME = "me"
+    HOME_BY_BRIDGE = "homeByBridge"
 
 
 class Action(enum.StrEnum):
@@ -65,7 +66,7 @@ class TadoRequest:
         action: Action | str = Action.GET,
         payload: dict[str, Any] | None = None,
         domain: Domain = Domain.HOME,
-        device: int | None = None,
+        device: int | str | None = None,
         mode: Mode = Mode.OBJECT,
         params: dict[str, Any] | None = None,
     ) -> None:
@@ -89,7 +90,7 @@ class TadoXRequest(TadoRequest):
         action: Action | str = Action.GET,
         payload: dict[str, Any] | None = None,
         domain: Domain = Domain.HOME,
-        device: int | None = None,
+        device: int | str | None = None,
         mode: Mode = Mode.OBJECT,
         params: dict[str, Any] | None = None,
     ) -> None:
@@ -213,7 +214,7 @@ class Http:
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{request.endpoint}{request.command}"
-        elif request.domain == Domain.DEVICES:
+        elif request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE:
             url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
