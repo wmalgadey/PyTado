@@ -84,7 +84,7 @@ class TadoX(Tado):
             device.update(self._http.request(request))
 
             # compatibility with my.tado.com API
-            device["shortSerialNo"] = device["serialNo"]
+            device["shortSerialNo"] = serial_number
             device["characteristics"]["capabilities"] = self.get_capabilities(device["serialNo"])
             device["name"] = device["roomName"]
             device["id"] = device["roomId"]
