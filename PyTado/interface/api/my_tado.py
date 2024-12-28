@@ -634,3 +634,20 @@ class Tado:
         request.params = {"authKey": auth_key}
 
         return self._http.request(request)
+
+    def set_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str, temperature_in_celcius: int
+    ):
+        """
+        Set the boiler max output temperature with home by bridge endpoint
+        """
+
+        request = TadoRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME_BY_BRIDGE
+        request.device = bridge_id
+        request.command = "boilerMaxOutputTemperature"
+        request.params = {"authKey": auth_key}
+        request.payload = {"boilerMaxOutputTemperatureInCelsius": temperature_in_celcius}
+
+        return self._http.request(request)
