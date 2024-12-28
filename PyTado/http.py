@@ -182,6 +182,7 @@ class Http:
 
         http_request = requests.Request(method=request.action, url=url, headers=headers, data=data)
         prepped = http_request.prepare()
+        prepped.hooks["response"].append(self._log_response)
 
         retries = _DEFAULT_RETRIES
 
@@ -197,6 +198,7 @@ class Http:
                     _LOGGER.warning("Connection error: %s", e)
                     self._session.close()
                     self._session = requests.Session()
+                    self._session.hooks["response"].append(self._log_response)
                     retries -= 1
                 else:
                     _LOGGER.error(
@@ -204,7 +206,7 @@ class Http:
                         _DEFAULT_RETRIES,
                         e,
                     )
-                    raise TadoException(e)
+                    raise TadoException(e) from e
 
         if response.text is None or response.text == "":
             return {}
@@ -218,15 +220,13 @@ class Http:
             url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
-        elif request.endpoint == Endpoint.MINDER:
-            params = request.params if request.params is not None else {}
-
-            url = (
-                f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
-                f"?{urlencode(params)}"
-            )
         else:
             url = f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
+
+        if request.params is not None:
+            params = request.params
+            url += f"?{urlencode(params)}"
+
         return url
 
     def _configure_payload(self, headers: dict[str, str], request: TadoRequest) -> bytes:

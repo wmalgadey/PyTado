@@ -607,26 +607,23 @@ class Tado:
 
         return self._http.request(request)
 
-    def get_boiler_output_temperature(self, bridge_id: str):
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
         """
-        Get the bridge details
+        Get the boiler wiring installation state from home by bridge endpoint
         """
 
         request = TadoRequest()
         request.action = Action.GET
         request.domain = Domain.HOME_BY_BRIDGE
         request.device = bridge_id
-
         request.command = "boilerWiringInstallationState"
-        install_state = self._http.request(request)
+        request.params = {"authKey": auth_key}
 
-        return {
-            "boiler": install_state["boiler"],
-        }
+        return self._http.request(request)
 
-    def get_boiler_max_output_temperature(self, bridge_id: str):
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
         """
-        Get the bridge details
+        Get the boiler max output temperature from home by bridge endpoint
         """
 
         request = TadoRequest()
@@ -634,5 +631,6 @@ class Tado:
         request.domain = Domain.HOME_BY_BRIDGE
         request.device = bridge_id
         request.command = "boilerMaxOutputTemperature"
+        request.params = {"authKey": auth_key}
 
         return self._http.request(request)

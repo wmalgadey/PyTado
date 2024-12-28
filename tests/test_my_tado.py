@@ -87,14 +87,16 @@ class TadoTestCase(unittest.TestCase):
             assert running_times["lastUpdated"] == "2023-08-05T19:50:21Z"
             assert running_times["runningTimes"][0]["zones"][0]["id"] == 1
 
-    def test_get_boiler_output_temperature(self):
+    def test_get_boiler_install_state(self):
         with mock.patch(
             "PyTado.http.Http.request",
             return_value=json.loads(
                 common.load_fixture("home_by_bridge.boiler_wiring_installation_state.json")
             ),
         ):
-            boiler_temperature = self.tado_client.get_boiler_output_temperature("IB123456789")
+            boiler_temperature = self.tado_client.get_boiler_install_state(
+                "IB123456789", "authcode"
+            )
 
             assert self.tado_client._http.request.called
             assert boiler_temperature["boiler"]["outputTemperature"]["celsius"] == 38.01
@@ -106,7 +108,9 @@ class TadoTestCase(unittest.TestCase):
                 common.load_fixture("home_by_bridge.boiler_max_output_temperature.json")
             ),
         ):
-            boiler_temperature = self.tado_client.get_boiler_max_output_temperature("IB123456789")
+            boiler_temperature = self.tado_client.get_boiler_max_output_temperature(
+                "IB123456789", "authcode"
+            )
 
             assert self.tado_client._http.request.called
             assert boiler_temperature["boilerMaxOutputTemperatureInCelsius"] == 50.0
