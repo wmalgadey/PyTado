@@ -6,9 +6,7 @@ import functools
 from typing import Any
 
 from PyTado.const import TYPE_HEATING
-
 from PyTado.interface.api.base_tado import TadoBase, Timetable
-
 
 from ...exceptions import TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest

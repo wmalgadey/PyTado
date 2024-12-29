@@ -1,14 +1,12 @@
+import datetime
+import enum
+import logging
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
-from PyTado.http import Http
-from PyTado.logger import Logger
-from PyTado.http import Action, Domain, TadoRequest, Endpoint
 from PyTado.exceptions import TadoNotSupportedException
-import logging
-import datetime
-import enum
-
+from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
+from PyTado.logger import Logger
 from PyTado.zone.hops_zone import TadoXZone
 from PyTado.zone.my_zone import TadoZone
 
@@ -127,7 +125,8 @@ class TadoBase(metaclass=ABCMeta):
         if self._auto_geofencing_supported is None:
             self.get_home_state()
 
-        return self._auto_geofencing_supported  # type: ignore get_home_state() narrows the type to bool
+        # get_home_state() narrows the type to bool
+        return self._auto_geofencing_supported  # type: ignore
 
     @abstractmethod
     def get_capabilities(self, zone: int):  # TODO: typing
