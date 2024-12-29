@@ -6,9 +6,11 @@ from typing import Any
 from PyTado.interface.api.base_tado import TadoBase, Timetable
 
 from ...exceptions import TadoException
-from ...http import Action, Domain, Mode, TadoRequest
+from ...http import Action, Domain, Mode, TadoRequest, Endpoint
 from ...logger import Logger
 from ...zone import TadoZone
+
+import datetime
 
 _LOGGER = Logger(__name__)
 
