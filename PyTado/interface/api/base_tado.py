@@ -151,7 +151,7 @@ class TadoBase(metaclass=ABCMeta):
             raise ValueError("Incorrect date format, should be YYYY-MM-DD") from err
 
         request = TadoRequest()
-        request.command = f"zones/{zone:d}/dayReport?date={day.strftime("%Y-%m-%d")}"
+        request.command = f"zones/{zone:d}/dayReport?date={day.strftime('%Y-%m-%d')}"
         return self._http.request(request)
 
     @abstractmethod
