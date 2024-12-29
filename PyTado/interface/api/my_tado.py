@@ -1,10 +1,11 @@
 """
 PyTado interface implementation for app.tado.com.
 """
+
 import datetime
 from typing import Any
 
-from PyTado.interface.api.base_tado import TadoBase, Timetable
+from PyTado.interface.api.base_tado import Presence, TadoBase, Timetable
 
 from ...exceptions import TadoException
 from ...http import Action, Domain, Endpoint, Mode, TadoRequest
@@ -223,6 +224,46 @@ class Tado(TadoBase):
         request.command = f"zones/{zone:d}/defaultOverlay"
 
         return self._http.request(request)
+
+    def set_home(self) -> None:
+        """
+        Sets HomeState to HOME
+        """
+
+        return self.change_presence(Presence.HOME)
+
+    def set_away(self) -> None:
+        """
+        Sets HomeState to AWAY
+        """
+
+        return self.change_presence(Presence.AWAY)
+
+    def change_presence(self, presence: Presence) -> None:
+        """
+        Sets HomeState to presence
+        """
+
+        request = TadoRequest()
+        request.command = "presenceLock"
+        request.action = Action.CHANGE
+        request.payload = {"homePresence": presence}
+
+        self._http.request(request)
+
+    def set_child_lock(self, device_id, child_lock) -> None:
+        """
+        Sets the child lock on a device
+        """
+
+        request = TadoRequest()
+        request.command = "childLock"
+        request.action = Action.CHANGE
+        request.device = device_id
+        request.domain = Domain.DEVICES
+        request.payload = {"childLockEnabled": child_lock}
+
+        self._http.request(request)
 
     def get_open_window_detected(self, zone):
         """

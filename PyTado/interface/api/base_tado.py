@@ -192,6 +192,10 @@ class TadoBase(metaclass=ABCMeta):
     def get_zone_overlay_default(self, zone: int):
         pass
 
+    @abstractmethod
+    def set_child_lock(self, device_id, child_lock) -> None:
+        pass
+
     def set_home(self) -> None:
         """
         Sets HomeState to HOME
