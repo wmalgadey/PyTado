@@ -310,6 +310,20 @@ class TadoBase(metaclass=ABCMeta):
     ) -> dict[str, Any]:
         pass
 
+    @abstractmethod
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+        pass
+
+    @abstractmethod
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+        pass
+
+    @abstractmethod
+    def set_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
+    ):
+        pass
+
     def get_eiq_tariffs(self):
         """
         Get Energy IQ tariff history
@@ -395,50 +409,5 @@ class TadoBase(metaclass=ABCMeta):
         request.action = Action.GET
         request.endpoint = Endpoint.MINDER
         request.params = {"from": date}
-
-        return self._http.request(request)
-
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
-        """
-        Get the boiler wiring installation state from home by bridge endpoint
-        """
-
-        request = TadoRequest()
-        request.action = Action.GET
-        request.domain = Domain.HOME_BY_BRIDGE
-        request.device = bridge_id
-        request.command = "boilerWiringInstallationState"
-        request.params = {"authKey": auth_key}
-
-        return self._http.request(request)
-
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
-        """
-        Get the boiler max output temperature from home by bridge endpoint
-        """
-
-        request = TadoRequest()
-        request.action = Action.GET
-        request.domain = Domain.HOME_BY_BRIDGE
-        request.device = bridge_id
-        request.command = "boilerMaxOutputTemperature"
-        request.params = {"authKey": auth_key}
-
-        return self._http.request(request)
-
-    def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
-        """
-        Set the boiler max output temperature with home by bridge endpoint
-        """
-
-        request = TadoRequest()
-        request.action = Action.CHANGE
-        request.domain = Domain.HOME_BY_BRIDGE
-        request.device = bridge_id
-        request.command = "boilerMaxOutputTemperature"
-        request.params = {"authKey": auth_key}
-        request.payload = {"boilerMaxOutputTemperatureInCelsius": temperature_in_celcius}
 
         return self._http.request(request)

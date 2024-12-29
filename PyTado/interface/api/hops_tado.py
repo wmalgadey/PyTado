@@ -360,3 +360,17 @@ class TadoX(TadoBase):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+        pass
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+        pass
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def set_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
+    ):
+        pass
