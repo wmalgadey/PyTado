@@ -160,3 +160,10 @@ cython_debug/
 #.idea/
 
 .DS_Store
+
+# 11ty
+_site/
+
+# node/npm
+node_modules/
+package-lock.json
