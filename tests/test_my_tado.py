@@ -6,7 +6,7 @@ from unittest import mock
 
 from . import common
 
-from PyTado.http import Http
+from PyTado.http import Http, TadoRequest
 from PyTado.interface.api import Tado
 
 
@@ -15,9 +15,7 @@ class TadoTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        login_patch = mock.patch(
-            "PyTado.http.Http._login", return_value=(1, "foo")
-        )
+        login_patch = mock.patch("PyTado.http.Http._login", return_value=(1, "foo"))
         get_me_patch = mock.patch("PyTado.interface.api.Tado.get_me")
         login_patch.start()
         get_me_patch.start()
@@ -35,9 +33,7 @@ class TadoTestCase(unittest.TestCase):
         with mock.patch(
             "PyTado.http.Http.request",
             return_value=json.loads(
-                common.load_fixture(
-                    "tadov2.home_state.auto_supported.manual_mode.json"
-                )
+                common.load_fixture("tadov2.home_state.auto_supported.manual_mode.json")
             ),
         ):
             self.tado_client.get_home_state()
@@ -53,9 +49,7 @@ class TadoTestCase(unittest.TestCase):
         with mock.patch(
             "PyTado.http.Http.request",
             return_value=json.loads(
-                common.load_fixture(
-                    "tadov2.home_state.auto_supported.auto_mode.json"
-                )
+                common.load_fixture("tadov2.home_state.auto_supported.auto_mode.json")
             ),
         ):
             self.tado_client.get_home_state()
@@ -86,9 +80,60 @@ class TadoTestCase(unittest.TestCase):
         with mock.patch(
             "PyTado.http.Http.request",
             return_value=json.loads(common.load_fixture("running_times.json")),
-        ):
+        ) as mock_request:
             running_times = self.tado_client.get_running_times("2023-08-01")
 
-            assert self.tado_client._http.request.called
+            mock_request.assert_called_once()
+
             assert running_times["lastUpdated"] == "2023-08-05T19:50:21Z"
             assert running_times["runningTimes"][0]["zones"][0]["id"] == 1
+
+    def test_get_boiler_install_state(self):
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value=json.loads(
+                common.load_fixture("home_by_bridge.boiler_wiring_installation_state.json")
+            ),
+        ) as mock_request:
+            boiler_temperature = self.tado_client.get_boiler_install_state(
+                "IB123456789", "authcode"
+            )
+
+            mock_request.assert_called_once()
+
+            assert boiler_temperature["boiler"]["outputTemperature"]["celsius"] == 38.01
+
+    def test_get_boiler_max_output_temperature(self):
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value=json.loads(
+                common.load_fixture("home_by_bridge.boiler_max_output_temperature.json")
+            ),
+        ) as mock_request:
+            boiler_temperature = self.tado_client.get_boiler_max_output_temperature(
+                "IB123456789", "authcode"
+            )
+
+            mock_request.assert_called_once()
+
+            assert boiler_temperature["boilerMaxOutputTemperatureInCelsius"] == 50.0
+
+    def test_set_boiler_max_output_temperature(self):
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value={"success": True},
+        ) as mock_request:
+            response = self.tado_client.set_boiler_max_output_temperature(
+                "IB123456789", "authcode", 75
+            )
+
+            mock_request.assert_called_once()
+            args, _ = mock_request.call_args
+            request: TadoRequest = args[0]
+
+            self.assertEqual(request.command, "boilerMaxOutputTemperature")
+            self.assertEqual(request.action, "PUT")
+            self.assertEqual(request.payload, {"boilerMaxOutputTemperatureInCelsius": 75})
+
+            # Verify the response
+            self.assertTrue(response["success"])

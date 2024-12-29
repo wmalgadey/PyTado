@@ -37,6 +37,7 @@ class Domain(enum.StrEnum):
     HOME = "homes"
     DEVICES = "devices"
     ME = "me"
+    HOME_BY_BRIDGE = "homeByBridge"
 
 
 class Action(enum.StrEnum):
@@ -65,10 +66,10 @@ class TadoRequest:
         action: Action | str = Action.GET,
         payload: dict[str, Any] | None = None,
         domain: Domain = Domain.HOME,
-        device: int | None = None,
+        device: int | str | None = None,
         mode: Mode = Mode.OBJECT,
         params: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         self.endpoint = endpoint
         self.command = command
         self.action = action
@@ -89,10 +90,10 @@ class TadoXRequest(TadoRequest):
         action: Action | str = Action.GET,
         payload: dict[str, Any] | None = None,
         domain: Domain = Domain.HOME,
-        device: int | None = None,
+        device: int | str | None = None,
         mode: Mode = Mode.OBJECT,
         params: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         super().__init__(
             endpoint=endpoint,
             command=command,
@@ -113,7 +114,7 @@ class TadoXRequest(TadoRequest):
         return self._action
 
     @action.setter
-    def action(self, value: Action | str):
+    def action(self, value: Action | str) -> None:
         """Set request action"""
         self._action = value
 
@@ -138,7 +139,7 @@ class Http:
         password: str,
         http_session: requests.Session | None = None,
         debug: bool = False,
-    ):
+    ) -> None:
         if debug:
             _LOGGER.setLevel(logging.DEBUG)
         else:
@@ -154,17 +155,27 @@ class Http:
 
         self._x_api = self._check_x_line_generation()
 
-    def _log_response(self, response: requests.Response, *args, **kwargs):
+    @property
+    def is_x_line(self) -> bool:
+        return self._x_api
+
+    def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
         og_request_method = response.request.method
         og_request_url = response.request.url
         og_request_headers = response.request.headers
         response_status = response.status_code
+
+        if response.text is None or response.text == "":
+            response_data = {}
+        else:
+            response_data = response.json()
+
         _LOGGER.debug(
             f"\nRequest:\n\tMethod:{og_request_method}"
             f"\n\tURL: {og_request_url}"
             f"\n\tHeaders: {pprint.pformat(og_request_headers)}"
             f"\nResponse:\n\tStatusCode: {response_status}"
-            f"\n\tData: {response.json()}"
+            f"\n\tData: {response_data}"
         )
 
     def request(self, request: TadoRequest) -> dict[str, Any]:
@@ -172,13 +183,12 @@ class Http:
         self._refresh_token()
 
         headers = self._headers
-
         data = self._configure_payload(headers, request)
-
         url = self._configure_url(request)
 
-        http_request = requests.Request(request.action, url, headers=headers, data=data)
+        http_request = requests.Request(method=request.action, url=url, headers=headers, data=data)
         prepped = http_request.prepare()
+        prepped.hooks["response"].append(self._log_response)
 
         retries = _DEFAULT_RETRIES
 
@@ -194,6 +204,7 @@ class Http:
                     _LOGGER.warning("Connection error: %s", e)
                     self._session.close()
                     self._session = requests.Session()
+                    self._session.hooks["response"].append(self._log_response)
                     retries -= 1
                 else:
                     _LOGGER.error(
@@ -201,33 +212,27 @@ class Http:
                         _DEFAULT_RETRIES,
                         e,
                     )
-                    raise e
+                    raise TadoException(e) from e
 
         if response.text is None or response.text == "":
             return {}
 
         return response.json()
 
-    @property
-    def is_x_line(self):
-        return self._x_api
-
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{request.endpoint}{request.command}"
-        elif request.domain == Domain.DEVICES:
+        elif request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE:
             url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
-        elif request.endpoint == Endpoint.MINDER:
-            params = request.params if request.params is not None else {}
-
-            url = (
-                f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
-                f"?{urlencode(params)}"
-            )
         else:
             url = f"{request.endpoint}{request.domain}/{self._id:d}/{request.command}"
+
+        if request.params is not None:
+            params = request.params
+            url += f"?{urlencode(params)}"
+
         return url
 
     def _configure_payload(self, headers: dict[str, str], request: TadoRequest) -> bytes:
@@ -242,6 +247,7 @@ class Http:
         return json.dumps(request.payload).encode("utf8")
 
     def _set_oauth_header(self, data: dict[str, Any]) -> str:
+        """Set the OAuth header and return the refresh token"""
 
         access_token = data["access_token"]
         expires_in = float(data["expires_in"])
@@ -250,15 +256,15 @@ class Http:
         self._token_refresh = refresh_token
         self._refresh_at = datetime.now()
         self._refresh_at = self._refresh_at + timedelta(seconds=expires_in)
-        # we subtract 30 seconds from the correct refresh time
-        # then we have a 30 seconds timespan to get a new refresh_token
+        # We subtract 30 seconds from the correct refresh time.
+        # Then we have a 30 seconds timespan to get a new refresh_token
         self._refresh_at = self._refresh_at - timedelta(seconds=30)
 
-        self._headers["Authorization"] = "Bearer " + access_token
+        self._headers["Authorization"] = f"Bearer {access_token}"
         return refresh_token
 
     def _refresh_token(self) -> None:
-
+        """Refresh the token if it is about to expire"""
         if self._refresh_at >= datetime.now():
             return
 
@@ -274,52 +280,58 @@ class Http:
         self._session = requests.Session()
         self._session.hooks["response"].append(self._log_response)
 
-        response = self._session.request(
-            "post",
-            url,
-            params=data,
-            timeout=_DEFAULT_TIMEOUT,
-            data=json.dumps({}).encode("utf8"),
-            headers={
-                "Content-Type": "application/json",
-                "Referer": "https://app.tado.com/",
-            },
-        )
+        try:
+            response = self._session.request(
+                "post",
+                url,
+                params=data,
+                timeout=_DEFAULT_TIMEOUT,
+                data=json.dumps({}).encode("utf8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Referer": "https://app.tado.com/",
+                },
+            )
+        except requests.exceptions.ConnectionError as e:
+            _LOGGER.error("Connection error: %s", e)
+            raise TadoException(e)
 
-        if response.status_code == 200:
-            self._set_oauth_header(response.json())
-            return
+        if response.status_code != 200:
+            raise TadoWrongCredentialsException(
+                "Failed to refresh token, probably wrong credentials. "
+                f"Status code: {response.status_code}"
+            )
 
-        raise TadoException(
-            f"Unknown error while refreshing token with status code {response.status_code}"
-        )
+        self._set_oauth_header(response.json())
 
     def _login(self) -> tuple[int, str]:
-
-        headers = self._headers
-        headers["Content-Type"] = "application/json"
+        """Login to the API and get the refresh token"""
 
         url = "https://auth.tado.com/oauth/token"
         data = {
-            "client_id": "tado-web-app",
-            "client_secret": "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
             "grant_type": "password",
             "password": self._password,
             "scope": "home.user",
             "username": self._username,
         }
 
-        response = self._session.request(
-            "post",
-            url,
-            params=data,
-            timeout=_DEFAULT_TIMEOUT,
-            data=json.dumps({}).encode("utf8"),
-            headers={
-                "Content-Type": "application/json",
-                "Referer": "https://app.tado.com/",
-            },
-        )
+        try:
+            response = self._session.request(
+                "post",
+                url,
+                params=data,
+                timeout=_DEFAULT_TIMEOUT,
+                data=json.dumps({}).encode("utf8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Referer": "https://app.tado.com/",
+                },
+            )
+        except requests.exceptions.ConnectionError as e:
+            _LOGGER.error("Connection error: %s", e)
+            raise TadoException(e)
 
         if response.status_code == 400:
             raise TadoWrongCredentialsException("Your username or password is invalid")
