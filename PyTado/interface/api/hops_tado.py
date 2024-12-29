@@ -61,6 +61,8 @@ class TadoX(TadoBase):
         devices = [device for room in rooms for device in room["devices"]]
 
         for device in devices:
+            device["generation"] = "LINE_X"
+
             serial_number = device.get("serialNo", device.get("serialNumber"))
             if not serial_number:
                 continue
@@ -72,13 +74,21 @@ class TadoX(TadoBase):
 
             # compatibility with my.tado.com API
             device["shortSerialNo"] = serial_number
-            device["characteristics"]["capabilities"] = self.get_capabilities(device["serialNo"])
             device["name"] = device["roomName"]
             device["id"] = device["roomId"]
-            device["generation"] = "LINE_X"
+
+            if "characteristics" not in device:
+                device["characteristics"] = {"capabilities": {}}
+
+            device["characteristics"]["capabilities"] = self.get_capabilities(serial_number)
 
         if "otherDevices" in rooms_and_devices:
-            devices.append(rooms_and_devices["otherDevices"])
+            for device in rooms_and_devices["otherDevices"]:
+                device["generation"] = "LINE_X"
+
+                serial_number = device.get("serialNo", device.get("serialNumber"))
+
+                devices.append(device)
 
         return devices
 
@@ -94,14 +104,14 @@ class TadoX(TadoBase):
 
     def get_zone_state(self, zone: int) -> TadoZone:
         """
-        Gets current state of Zone as a TadoXZone object.
+        Gets current state of zone/room as a TadoXZone object.
         """
 
         return TadoXZone.from_data(zone, self.get_state(zone))
 
     def get_zone_states(self):
         """
-        Gets current states of all zones.
+        Gets current states of all zones/rooms.
         """
 
         request = TadoXRequest()
@@ -116,7 +126,7 @@ class TadoX(TadoBase):
 
     def get_state(self, zone):
         """
-        Gets current state of Zone.
+        Gets current state of zone/room.
         """
 
         request = TadoXRequest()
@@ -127,7 +137,7 @@ class TadoX(TadoBase):
 
     def get_capabilities(self, zone):
         """
-        Gets current capabilities of zone.
+        Gets current capabilities of zone/room.
         """
 
         _LOGGER.warning(
@@ -139,7 +149,7 @@ class TadoX(TadoBase):
 
     def get_climate(self, zone):
         """
-        Gets temp (centigrade) and humidity (% RH) for zone.
+        Gets temp (centigrade) and humidity (% RH) for zone/room.
         """
 
         data = self.get_state(zone)["sensorDataPoints"]

@@ -5,14 +5,11 @@ PyTado interface implementation for app.tado.com.
 import datetime
 from typing import Any
 
-from PyTado.interface.api.base_tado import Presence, TadoBase, Timetable
+from PyTado.interface.api.base_tado import TadoBase, Timetable
 
 from ...exceptions import TadoException
 from ...http import Action, Domain, Endpoint, Mode, TadoRequest
-from ...logger import Logger
 from ...zone import TadoZone
-
-_LOGGER = Logger(__name__)
 
 
 class Tado(TadoBase):
@@ -225,32 +222,6 @@ class Tado(TadoBase):
 
         return self._http.request(request)
 
-    def set_home(self) -> None:
-        """
-        Sets HomeState to HOME
-        """
-
-        return self.change_presence(Presence.HOME)
-
-    def set_away(self) -> None:
-        """
-        Sets HomeState to AWAY
-        """
-
-        return self.change_presence(Presence.AWAY)
-
-    def change_presence(self, presence: Presence) -> None:
-        """
-        Sets HomeState to presence
-        """
-
-        request = TadoRequest()
-        request.command = "presenceLock"
-        request.action = Action.CHANGE
-        request.payload = {"homePresence": presence}
-
-        self._http.request(request)
-
     def set_child_lock(self, device_id, child_lock) -> None:
         """
         Sets the child lock on a device
@@ -372,50 +343,5 @@ class Tado(TadoBase):
         request.action = Action.GET
         request.endpoint = Endpoint.MINDER
         request.params = {"from": date}
-
-        return self._http.request(request)
-
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
-        """
-        Get the boiler wiring installation state from home by bridge endpoint
-        """
-
-        request = TadoRequest()
-        request.action = Action.GET
-        request.domain = Domain.HOME_BY_BRIDGE
-        request.device = bridge_id
-        request.command = "boilerWiringInstallationState"
-        request.params = {"authKey": auth_key}
-
-        return self._http.request(request)
-
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
-        """
-        Get the boiler max output temperature from home by bridge endpoint
-        """
-
-        request = TadoRequest()
-        request.action = Action.GET
-        request.domain = Domain.HOME_BY_BRIDGE
-        request.device = bridge_id
-        request.command = "boilerMaxOutputTemperature"
-        request.params = {"authKey": auth_key}
-
-        return self._http.request(request)
-
-    def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
-        """
-        Set the boiler max output temperature with home by bridge endpoint
-        """
-
-        request = TadoRequest()
-        request.action = Action.CHANGE
-        request.domain = Domain.HOME_BY_BRIDGE
-        request.device = bridge_id
-        request.command = "boilerMaxOutputTemperature"
-        request.params = {"authKey": auth_key}
-        request.payload = {"boilerMaxOutputTemperatureInCelsius": temperature_in_celcius}
 
         return self._http.request(request)
