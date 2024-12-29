@@ -1,8 +1,8 @@
 """Constant values for the Tado component."""
 
 # Api credentials
-CLIENT_ID = "tado-web-app"
-CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
+CLIENT_ID = "tado-web-app"  # nosec B105
+CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"  # nosec B105
 
 # Types
 TYPE_AIR_CONDITIONING = "AIR_CONDITIONING"

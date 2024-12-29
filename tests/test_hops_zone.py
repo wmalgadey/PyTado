@@ -44,6 +44,17 @@ class TadoZoneTestCase(unittest.TestCase):
         get_state_patch.start()
         self.addCleanup(get_state_patch.stop)
 
+    def set_get_devices_fixture(self, filename: str) -> None:
+        def get_devices():
+            return json.loads(common.load_fixture(filename))
+
+        get_devices_patch = mock.patch(
+            "PyTado.interface.api.TadoX.get_devices",
+            side_effect=get_devices,
+        )
+        get_devices_patch.start()
+        self.addCleanup(get_devices_patch.stop)
+
     def test_tadox_heating_auto_mode(self):
         """Test general homes response."""
 
@@ -145,3 +156,14 @@ class TadoZoneTestCase(unittest.TestCase):
         assert mode.tado_mode is None
         assert mode.target_temp is None
         assert mode.zone_id == 1
+
+    def test_get_devices(self):
+        """ Test get_devices method """
+        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
+
+        devices_and_rooms = self.tado_client.get_devices()
+        rooms = devices_and_rooms['rooms']
+        assert len(rooms) == 2
+        room_1 = rooms[0]
+        assert room_1['roomName'] == 'Room 1'
+        assert room_1['devices'][0]['serialNumber'] == 'VA1234567890'

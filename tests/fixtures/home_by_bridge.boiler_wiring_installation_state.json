@@ -1,0 +1,18 @@
+{
+    "state": "INSTALLATION_COMPLETED",
+    "deviceWiredToBoiler": {
+        "type": "RU02B",
+        "serialNo": "RUXXXXXXXXXX",
+        "thermInterfaceType": "OPENTHERM",
+        "connected": true,
+        "lastRequestTimestamp": "2024-12-28T10:36:47.533Z"
+    },
+    "bridgeConnected": true,
+    "hotWaterZonePresent": false,
+    "boiler": {
+        "outputTemperature": {
+            "celsius": 38.01,
+            "timestamp": "2024-12-28T10:36:54.000Z"
+        }
+    }
+}

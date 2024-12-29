@@ -6,7 +6,9 @@ import functools
 from typing import Any
 
 from PyTado.const import TYPE_HEATING
+
 from PyTado.interface.api.base_tado import TadoBase, Timetable
+
 
 from ...exceptions import TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
@@ -61,13 +63,17 @@ class TadoX(TadoBase):
         devices = [device for room in rooms for device in room["devices"]]
 
         for device in devices:
+            serial_number = device.get("serialNo", device.get("serialNumber"))
+            if not serial_number:
+                continue
+
             request = TadoXRequest()
             request.domain = Domain.DEVICES
-            request.device = device["serialNo"]
+            request.device = serial_number
             device.update(self._http.request(request))
 
             # compatibility with my.tado.com API
-            device["shortSerialNo"] = device["serialNo"]
+            device["shortSerialNo"] = serial_number
             device["characteristics"]["capabilities"] = self.get_capabilities(device["serialNo"])
             device["name"] = device["roomName"]
             device["id"] = device["roomId"]
