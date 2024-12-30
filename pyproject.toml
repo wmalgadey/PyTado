@@ -38,7 +38,7 @@ all = [
 ]
 
 [project.scripts]
-pytado = "pytado.__main__:main"
+pytado = "PyTado.__main__:main"
 
 [tool.setuptools]
 platforms = ["any"]
