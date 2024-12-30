@@ -61,10 +61,8 @@
     "name": "PyTado",
     "postCreateCommand": "python3 -m venv venv && . venv/bin/activate && pip install --upgrade pip && pip install -e '.[all]' && pre-commit install",
     "updateContentCommand": "python3 -m venv venv && . venv/bin/activate && pip install --upgrade pip && pip install -e '.[all]' && pre-commit install",
-    "runArgs": [
-        "--userns=keep-id"
-    ],
     "containerUser": "vscode",
+    "remoteUser": "vscode",
     "updateRemoteUserUID": true,
     "containerEnv": {
         "HOME": "/home/vscode"
