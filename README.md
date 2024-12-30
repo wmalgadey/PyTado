@@ -51,7 +51,18 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
-Note: for developers, you can create an `example_dev.py` file in the root of the project to test your changes. This file will be ignored by the `.gitignore` file.
+
+Note: For developers, there is an `example.py` script in `examples/` which is configured to fetch data from your account.
+
+You can easily inject your credentials leveraging a tool such as [direnv](https://direnv.net/) and creating a `.envrc.private` file in the root of the repo with the contents set to your Tado credentials.
+
+```aiignore
+export TADO_USERNAME="username"
+export TADO_PASSWORD="password"
+```
+
+You can then invoke `python examples/example.py`.
+
 
 ## Contributing
 
