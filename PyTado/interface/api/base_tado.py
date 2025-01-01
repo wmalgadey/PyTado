@@ -8,6 +8,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
+from PyTado.const import Unit
 from PyTado.exceptions import TadoNotSupportedException
 from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
 from PyTado.logger import Logger
@@ -365,9 +366,9 @@ class TadoBase(metaclass=ABCMeta):
         self,
         from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
         to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        tariff=0,
-        unit="m3",
-        is_period=False,
+        tariff: int = 0,
+        unit: Unit = Unit.M3,
+        is_period: bool = False,
     ):
         """
         Send Tariffs to Tado, date format is YYYY-MM-DD,

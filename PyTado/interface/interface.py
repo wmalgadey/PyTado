@@ -7,6 +7,7 @@ import functools
 import warnings
 
 import PyTado.interface.api as API
+from PyTado.const import Unit
 from PyTado.http import Http
 
 
@@ -283,9 +284,9 @@ class Tado:
         self,
         from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
         to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        tariff=0,
-        unit="m3",
-        is_period=False,
+        tariff: int = 0,
+        unit: Unit = Unit.M3,
+        is_period: bool = False,
     ):
         """Send Tariffs to Tado (Deprecated)
 
