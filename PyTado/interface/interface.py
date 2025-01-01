@@ -77,6 +77,11 @@ class Tado:
         """Gets zones information. (deprecated)"""
         return self.get_zones()
 
+    @deprecated("set_child_lock")
+    def setChildLock(self, device_id, enabled):
+        """Set the child lock for a device"""
+        return self.set_child_lock(device_id, enabled)
+
     @deprecated("get_zone_state")
     def getZoneState(self, zone):
         """Gets current state of Zone as a TadoZone object. (deprecated)"""

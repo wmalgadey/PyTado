@@ -71,6 +71,12 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Ruff cache
+.ruff_cache
+
+# Example dev
+/examples/example_dev.py
+
 # PyBuilder
 .pybuilder/
 target/
@@ -127,6 +133,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.envrc.private
+!/.envrc
 
 # Spyder project settings
 .spyderproject
@@ -167,3 +175,4 @@ _site/
 # node/npm
 node_modules/
 package-lock.json
+junit.xml

@@ -328,3 +328,15 @@ class TadoX(Tado):
         request.payload = {"temperatureOffset": offset}
 
         return self._http.request(request)
+
+    def set_child_lock(self, device_id, child_lock):
+        """ "
+        Set and toggle the child lock on the device.
+        """
+
+        request = TadoXRequest()
+        request.command = f"roomsAndDevices/devices/{device_id}"
+        request.action = Action.CHANGE
+        request.payload = {"childLockEnabled": child_lock}
+
+        self._http.request(request)

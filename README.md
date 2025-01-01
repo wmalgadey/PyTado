@@ -3,6 +3,7 @@
 [![Linting and testing](https://github.com/wmalgadey/PyTado/actions/workflows/lint-and-test-matrix.yml/badge.svg)](https://github.com/wmalgadey/PyTado/actions/workflows/lint-and-test-matrix.yml)
 [![Build and deploy to pypi](https://github.com/wmalgadey/PyTado/actions/workflows/publish-to-pypi.yml/badge.svg?event=release)](https://github.com/wmalgadey/PyTado/actions/workflows/publish-to-pypi.yml)
 [![PyPI version](https://badge.fury.io/py/python-tado.svg)](https://badge.fury.io/py/python-tado)
+[![codecov](https://codecov.io/github/wmalgadey/PyTado/graph/badge.svg?token=14TT00IWJI)](https://codecov.io/github/wmalgadey/PyTado)
 [![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
 PyTado is a Python module implementing an interface to the Tado web API. It allows a user to interact with their
@@ -33,6 +34,36 @@ cause discomfort and inconvenience to others.
     >>> from PyTado.interface import Tado
     >>> t = Tado('my@username.com', 'mypassword')
     >>> climate = t.get_climate(zone=1)
+
+## Usage
+```python
+"""Example client for PyTado"""
+
+from PyTado.interface.interface import Tado
+
+
+def main() -> None:
+    """Retrieve all zones, once successfully logged in"""
+    tado = Tado(username="mail@email.com", password="password")  # nosec
+    zones = tado.get_zones()
+    print(zones)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Note: For developers, there is an `example.py` script in `examples/` which is configured to fetch data from your account.
+
+You can easily inject your credentials leveraging a tool such as [direnv](https://direnv.net/) and creating a `.envrc.private` file in the root of the repo with the contents set to your Tado credentials.
+
+```aiignore
+export TADO_USERNAME="username"
+export TADO_PASSWORD="password"
+```
+
+You can then invoke `python examples/example.py`.
+
 
 ## Contributing
 
