@@ -51,7 +51,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e '.[all]'
 
-    - name: Run Tests
+    - name: Run Tests with coverage
       run: |
         pytest --cov --junitxml=junit.xml -o junit_family=legacy --cov-branch --cov-report=xml
 
