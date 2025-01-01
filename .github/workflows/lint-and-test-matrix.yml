@@ -51,15 +51,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e '.[all]'
 
-    - name: Run Tests with Coverage
+    - name: Run Tests
       run: |
-        pip install coverage pytest pytest-cov
-        coverage run -m pytest --maxfail=1 --disable-warnings -q
-        coverage report -m
-        coverage html
+        pip install pytest pytest-cov
+        pytest --cov --junitxml=junit.xml -o junit_family=legacy
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
       with:
-        name: coverage-html-report-${{ matrix.python-version }}
-        path: coverage_html_report
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Run Coverage
+      run: |
+        pytest --cov-branch --cov-report=xml
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
