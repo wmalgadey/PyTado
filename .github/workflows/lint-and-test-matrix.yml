@@ -53,7 +53,6 @@ jobs:
 
     - name: Run Tests
       run: |
-        pip install pytest pytest-cov
         pytest --cov --junitxml=junit.xml -o junit_family=legacy
 
     - name: Upload test results to Codecov
