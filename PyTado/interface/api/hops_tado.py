@@ -115,12 +115,12 @@ class TadoX(TadoBase):
         request = TadoXRequest()
         request.command = "rooms"
 
-        rooms_ = self._http.request(request)
+        rooms = self._http.request(request)
 
         # make response my.tado.com compatible
-        zone_states = {"zoneStates": {"id": room["id"], "name": room["name"]} for room in rooms_}
+        zone_states = {"zoneStates": [{"id": room["id"], "name": room["name"]} for room in rooms]}
 
-        return {**zone_states, **rooms_}
+        return {**zone_states, "rooms": rooms}
 
     def get_state(self, zone):
         """
