@@ -77,9 +77,7 @@ class TadoX(TadoBase):
             device["name"] = device["roomName"]
             device["id"] = device["roomId"]
 
-            if "characteristics" not in device:
-                device["characteristics"] = {"capabilities": {}}
-
+            device.setdefault("characteristics", {"capabilities": {}})
             device["characteristics"]["capabilities"] = self.get_capabilities(serial_number)
 
         if "otherDevices" in rooms_and_devices:
