@@ -140,7 +140,7 @@ class TadoBase(metaclass=ABCMeta):
     def get_climate(self, zone: int):  # TODO: typing
         pass
 
-    def get_historic(self, zone, date):
+    def get_historic(self, zone: int, date: str) -> dict[str, Any]:
         """
         Gets historic information on given date for zone
         """
