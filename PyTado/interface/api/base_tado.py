@@ -8,7 +8,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
-from PyTado.const import Unit
+from PyTado.const import DEFAULT_DATE_FORMAT, Unit
 from PyTado.exceptions import TadoNotSupportedException
 from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
 from PyTado.logger import Logger
@@ -147,12 +147,12 @@ class TadoBase(metaclass=ABCMeta):
         """
 
         try:
-            day = datetime.datetime.strptime(date, "%Y-%m-%d")
+            day = datetime.datetime.strptime(date, f"{DEFAULT_DATE_FORMAT}")
         except ValueError as err:
             raise ValueError("Incorrect date format, should be YYYY-MM-DD") from err
 
         request = TadoRequest()
-        request.command = f"zones/{zone:d}/dayReport?date={day.strftime('%Y-%m-%d')}"
+        request.command = f"zones/{zone:d}/dayReport?date={day.strftime(f'{DEFAULT_DATE_FORMAT}')}"
         return self._http.request(request)
 
     @abstractmethod
@@ -349,7 +349,8 @@ class TadoBase(metaclass=ABCMeta):
 
         return self._http.request(request)
 
-    def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
+    def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime(
+            "{DEFAULT_DATE_FORMAT}"), reading=0):
         """
         Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals
         """
@@ -364,8 +365,8 @@ class TadoBase(metaclass=ABCMeta):
 
     def set_eiq_tariff(
         self,
-        from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
+        from_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        to_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
         tariff: int = 0,
         unit: Unit = Unit.M3,
         is_period: bool = False,
@@ -400,7 +401,8 @@ class TadoBase(metaclass=ABCMeta):
 
         return self._http.request(request)
 
-    def get_running_times(self, date=datetime.datetime.now().strftime("%Y-%m-%d")) -> dict:
+    def get_running_times(self, date=datetime.datetime.now().strftime(
+            f"{DEFAULT_DATE_FORMAT}")) -> dict:
         """
         Get the running times from the Minder API
         """

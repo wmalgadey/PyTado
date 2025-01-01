@@ -5,11 +5,11 @@ PyTado interface implementation for app.tado.com.
 import datetime
 from typing import Any
 
+from PyTado.const import DEFAULT_DATE_FORMAT
+from PyTado.exceptions import TadoException
+from PyTado.http import Action, Domain, Endpoint, Mode, TadoRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
-
-from ...exceptions import TadoException
-from ...http import Action, Domain, Endpoint, Mode, TadoRequest
-from ...zone import TadoZone
+from PyTado.zone import TadoZone
 
 
 class Tado(TadoBase):
@@ -333,7 +333,8 @@ class Tado(TadoBase):
 
         return self._http.request(request)
 
-    def get_running_times(self, date=datetime.datetime.now().strftime("%Y-%m-%d")) -> dict:
+    def get_running_times(self, date=datetime.datetime.now().strftime(
+            f"{DEFAULT_DATE_FORMAT}")) -> dict:
         """
         Get the running times from the Minder API
         """
