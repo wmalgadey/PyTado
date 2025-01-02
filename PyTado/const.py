@@ -1,6 +1,8 @@
 """Constant values for the Tado component."""
 
 # Api credentials
+import enum
+
 CLIENT_ID = "tado-web-app"  # nosec B105
 CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"  # nosec B105
 
@@ -95,6 +97,14 @@ TADO_MODES_WITH_NO_TEMP_SETTING = [
 
 DEFAULT_TADO_PRECISION = 0.1
 DEFAULT_TADOX_PRECISION = 0.01
+DEFAULT_DATE_FORMAT = "%Y-%m-%d"
 
 HOME_DOMAIN = "homes"
 DEVICE_DOMAIN = "devices"
+
+
+class Unit(enum.Enum):
+    """unit Enum"""
+
+    M3 = "m3"
+    KWH = "kWh"
