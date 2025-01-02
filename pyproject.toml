@@ -28,13 +28,20 @@ classifiers = [
 ]
 
 [project.urls]
-GitHub = "https://github.com/wmalgadey/PyTado"
+Documentation = "https://wmalgadey.github.io/PyTado/"
+Issues = "https://github.com/wmalgadey/PyTado/issues"
+Source = "https://github.com/wmalgadey/PyTado"
 
 [project.optional-dependencies]
-dev = ["black>=24.3", "pre-commit", "pytype", "pylint", "types-requests", "requests", "responses", "pytest", "pytest-cov"]
+dev = ["pre-commit", "pytype", "types-requests"]
+
+lint = ["black>=24.3", "pylint"]
+test = ["responses", "pytest", "pytest-mock", "pytest-cov"]
 
 all = [
   "python-tado[dev]",
+  "python-tado[lint]",
+  "python-tado[test]",
 ]
 
 [project.scripts]
