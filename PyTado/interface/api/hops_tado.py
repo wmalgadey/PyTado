@@ -85,6 +85,7 @@ class TadoX(TadoBase):
                 device["generation"] = "LINE_X"
 
                 serial_number = device.get("serialNo", device.get("serialNumber"))
+                device["shortSerialNo"] = serial_number
 
                 devices.append(device)
 
