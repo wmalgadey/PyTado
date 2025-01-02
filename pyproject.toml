@@ -28,7 +28,9 @@ classifiers = [
 ]
 
 [project.urls]
-GitHub = "https://github.com/wmalgadey/PyTado"
+Documentation = "https://wmalgadey.github.io/PyTado/"
+Issues = "https://github.com/wmalgadey/PyTado/issues"
+Source = "https://github.com/wmalgadey/PyTado"
 
 [project.optional-dependencies]
 dev = ["pre-commit", "pytype", "types-requests"]
