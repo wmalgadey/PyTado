@@ -284,7 +284,6 @@ class TadoX(Tado):
         else:
             return {"openWindowDetected": False}
 
-    @not_supported("This method is not currently supported by the Tado X API")
     def set_open_window(self, zone):
         """
         Sets the window in zone to open
