@@ -289,7 +289,7 @@ class TadoX(Tado):
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
         """
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone}/openWindow"
         request.action = Action.SET
 
@@ -299,7 +299,7 @@ class TadoX(Tado):
         """
         Sets the window in zone to closed
         """
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone}/openWindow"
         request.action = Action.RESET
 
