@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """Module for querying and controlling Tado smart thermostats."""
 
@@ -54,14 +53,10 @@ def main():
         required=True,
         help=("Tado username in the form of an email address."),
     )
-    required_flags.add_argument(
-        "--password", required=True, help="Tado password."
-    )
+    required_flags.add_argument("--password", required=True, help="Tado password.")
 
     # Flags with default values go here.
-    log_levels = dict(
-        (logging.getLevelName(level), level) for level in [10, 20, 30, 40, 50]
-    )
+    log_levels = {logging.getLevelName(level): level for level in [10, 20, 30, 40, 50]}
     parser.add_argument(
         "--loglevel",
         default="INFO",
@@ -71,30 +66,20 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    show_config_parser = subparsers.add_parser(
-        "get_me", help="Get home information."
-    )
+    show_config_parser = subparsers.add_parser("get_me", help="Get home information.")
     show_config_parser.set_defaults(func=get_me)
 
-    start_activity_parser = subparsers.add_parser(
-        "get_state", help="Get state of zone."
-    )
-    start_activity_parser.add_argument(
-        "--zone", help="Zone to get the state of."
-    )
+    start_activity_parser = subparsers.add_parser("get_state", help="Get state of zone.")
+    start_activity_parser.add_argument("--zone", help="Zone to get the state of.")
     start_activity_parser.set_defaults(func=get_state)
 
-    start_activity_parser = subparsers.add_parser(
-        "get_states", help="Get states of all zones."
-    )
+    start_activity_parser = subparsers.add_parser("get_states", help="Get states of all zones.")
     start_activity_parser.set_defaults(func=get_states)
 
     start_activity_parser = subparsers.add_parser(
         "get_capabilities", help="Get capabilities of zone."
     )
-    start_activity_parser.add_argument(
-        "--zone", help="Zone to get the capabilities of."
-    )
+    start_activity_parser.add_argument("--zone", help="Zone to get the capabilities of.")
     start_activity_parser.set_defaults(func=get_capabilities)
 
     args = parser.parse_args()

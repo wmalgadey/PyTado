@@ -1,0 +1,6 @@
+{
+    "roomCount": 2,
+    "isHeatSourceInstalled": false,
+    "isHeatPumpInstalled": false,
+    "supportsFlowTemperatureOptimization": false
+}

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-tado"
-version = "0.18.3"
+version = "0.18.5"
 description = "PyTado from chrism0dwk, modfied by w.malgadey, diplix, michaelarnauts, LenhartStephan, splifter, syssi, andersonshatch, Yippy, p0thi, Coffee2CodeNL, chiefdragon, FilBr, nikilase, albertomontesg, Moritz-Schmidt, palazzem"
 authors = [
     { name = "Chris Jewell", email = "chrism0dwk@gmail.com" },
@@ -31,17 +31,21 @@ classifiers = [
 GitHub = "https://github.com/wmalgadey/PyTado"
 
 [project.optional-dependencies]
-dev = ["black>=24.3", "pytype", "pylint", "types-requests", "coverage", "pytest", "pytest-cov"]
+dev = ["black>=24.3", "pre-commit", "pytype", "pylint", "types-requests", "requests", "responses", "pytest", "pytest-cov"]
+
+all = [
+  "python-tado[dev]",
+]
 
 [project.scripts]
-pytado = "pytado.__main__:main"
+pytado = "PyTado.__main__:main"
 
 [tool.setuptools]
 platforms = ["any"]
 zip-safe = false
 
 [tool.black]
-line-length = 80
+line-length = 100
 target-version = ['py311']
 
 [tool.pytype]
@@ -207,7 +211,7 @@ generated-members = ''
 
 [tool.pylint.FORMAT]
 
-max-line-length = 80
+max-line-length = 100
 
 ignore-long-lines = '''(?x)(
   ^\s*(\#\ )?<?https?://\S+>?$|
@@ -303,3 +307,13 @@ class_
 # List of valid names for the first argument in a metaclass class method.valid-metaclass-classmethod-first-arg=mcs
 # List of method names used to declare (i.e. assign) instance attributes.
 # warning.
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+tests = []
+skips = []

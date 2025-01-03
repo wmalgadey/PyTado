@@ -2,3 +2,5 @@
 
 from .hops_zone import TadoXZone
 from .my_zone import TadoZone
+
+__all__ = ["TadoZone", "TadoXZone"]

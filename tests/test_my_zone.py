@@ -67,6 +67,38 @@ class TadoZoneTestCase(unittest.TestCase):
         assert mode.precision == 0.1
         assert mode.current_swing_mode == "OFF"
 
+    def test_my_api_issue_88(self):
+        """Test smart ac cool mode."""
+        self.set_fixture("my_api_issue_88.termination_condition.json")
+        mode = self.tado_client.get_zone_state(1)
+
+        assert mode.ac_power is None
+        assert mode.ac_power_timestamp is None
+        assert mode.available is True
+        assert mode.connection is None
+        assert mode.current_fan_speed is None
+        assert mode.current_humidity == 64.40
+        assert mode.current_humidity_timestamp == "2024-12-19T14:14:52.404Z"
+        assert mode.current_hvac_action == "HEATING"
+        assert mode.current_hvac_mode == "HEAT"
+        assert mode.current_swing_mode == "OFF"
+        assert mode.current_temp == 16.2
+        assert mode.current_temp_timestamp == "2024-12-19T14:14:52.404Z"
+        assert mode.heating_power is None
+        assert mode.heating_power_percentage == 100.0
+        assert mode.heating_power_timestamp == "2024-12-19T14:14:15.558Z"
+        assert mode.is_away is False
+        assert mode.link == "ONLINE"
+        assert mode.open_window is False
+        assert not mode.open_window_attr
+        assert mode.overlay_active
+        assert mode.overlay_termination_type == "TIMER"
+        assert mode.power == "ON"
+        assert mode.precision == 0.1
+        assert mode.preparation is False
+        assert mode.tado_mode == "HOME"
+        assert mode.target_temp == 22.0
+
     def test_smartac3_smart_mode(self):
         """Test smart ac smart mode."""
         self.set_fixture("smartac3.smart_mode.json")

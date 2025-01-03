@@ -2,22 +2,26 @@
 PyTado interface implementation for hops.tado.com (Tado X).
 """
 
+import functools
 import logging
-
 from typing import Any
 
+from ...exceptions import TadoNotSupportedException
+from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
+from ...logger import Logger
+from ...zone import TadoXZone, TadoZone
 from .my_tado import Tado, Timetable
 
-from ...logger import Logger
-from ...exceptions import TadoNotSupportedException
-from ...http import (
-    Action,
-    Http,
-    Mode,
-    TadoRequest,
-    TadoXRequest,
-)
-from ...zone import TadoZone, TadoXZone
+
+def not_supported(reason):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            raise TadoNotSupportedException(f"{func.__name__} is not supported: {reason}")
+
+        return wrapper
+
+    return decorator
 
 
 _LOGGER = Logger(__name__)
@@ -28,7 +32,7 @@ class TadoX(Tado):
 
     Example usage: http = Http('me@somewhere.com', 'mypasswd')
                    t = TadoX(http)
-                   t.get_climate(1) # Get climate, zone 1.
+                   t.get_climate(1) # Get climate, room 1.
     """
 
     def __init__(
@@ -41,9 +45,7 @@ class TadoX(Tado):
         super().__init__(http=http, debug=debug)
 
         if not http.is_x_line:
-            raise TadoNotSupportedException(
-                "TadoX is only usable with LINE_X Generation"
-            )
+            raise TadoNotSupportedException("TadoX is only usable with LINE_X Generation")
 
         if debug:
             _LOGGER.setLevel(logging.DEBUG)
@@ -56,28 +58,40 @@ class TadoX(Tado):
         # set to None until explicitly set
         self._auto_geofencing_supported = None
 
-    def _create_x_request(self) -> TadoRequest:
-        return TadoXRequest()
-
     def get_devices(self):
         """
         Gets device information.
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = "roomsAndDevices"
 
-        rooms: list[dict[str, Any]] = self._http.request(request)["rooms"]
+        rooms_and_devices: list[dict[str, Any]] = self._http.request(request)
+        rooms = rooms_and_devices["rooms"]
+
         devices = [device for room in rooms for device in room["devices"]]
+
+        for device in devices:
+            serial_number = device.get("serialNo", device.get("serialNumber"))
+            if not serial_number:
+                continue
+
+            request = TadoXRequest()
+            request.domain = Domain.DEVICES
+            request.device = serial_number
+            device.update(self._http.request(request))
+
+        if "otherDevices" in rooms_and_devices:
+            devices.append(rooms_and_devices["otherDevices"])
 
         return devices
 
     def get_zones(self):
         """
-        Gets zones information.
+        Gets zones (or rooms in Tado X API) information.
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = "roomsAndDevices"
 
         return self._http.request(request)["rooms"]
@@ -94,7 +108,7 @@ class TadoX(Tado):
         Gets current states of all zones.
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = "rooms"
 
         return self._http.request(request)
@@ -104,20 +118,18 @@ class TadoX(Tado):
         Gets current state of Zone.
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone:d}"
         data = self._http.request(request)
 
         return data
 
+    @not_supported("This method is not currently supported by the Tado X API")
     def get_capabilities(self, zone):
         """
         Gets current capabilities of zone.
         """
-
-        raise TadoNotSupportedException(
-            "This method is not currently supported by the Tado X API"
-        )
+        pass
 
     def get_climate(self, zone):
         """
@@ -130,6 +142,7 @@ class TadoX(Tado):
             "humidity": data["humidity"]["percentage"],
         }
 
+    @not_supported("Tado X API only support seven days timetable")
     def set_timetable(self, zone: int, timetable: Timetable) -> None:
         """
         Set the Timetable type currently active
@@ -137,30 +150,62 @@ class TadoX(Tado):
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
+        pass
 
-        raise TadoNotSupportedException(
-            "This method is not currently supported by the Tado X API"
-        )
-
-    def get_schedule(
-        self, zone: int, timetable: Timetable, day=None
-    ) -> dict[str, Any]:
+    def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone:d}/schedule"
 
         return self._http.request(request)
 
     def set_schedule(self, zone, timetable: Timetable, day, data):
         """
-        Set the schedule for a zone, day is required
+        Set the schedule for a zone, day is not required for Tado X API.
+
+        example data
+        [
+        {
+            "start": "00:00",
+            "end": "07:05",
+            "dayType": "MONDAY",
+            "setting": {
+            "power": "ON",
+            "temperature": {
+                "value": 18
+            }
+            }
+        },
+        {
+            "start": "07:05",
+            "end": "22:05",
+            "dayType": "MONDAY",
+            "setting": {
+            "power": "ON",
+            "temperature": {
+                "value": 22
+            }
+            }
+        },
+        {
+            "start": "22:05",
+            "end": "24:00",
+            "dayType": "MONDAY",
+            "setting": {
+            "power": "ON",
+            "temperature": {
+                "value": 18
+            }
+            }
+        }
+        ]
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone:d}/schedule"
         request.action = Action.SET
         request.payload = data
@@ -173,7 +218,7 @@ class TadoX(Tado):
         Delete current overlay
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone:d}/resumeSchedule"
         request.action = Action.SET
 
@@ -195,7 +240,7 @@ class TadoX(Tado):
         horizontal_swing=None,
     ):
         """
-        Set current overlay for a zone
+        Set current overlay for a zone, a room in Tado X API.
         """
 
         post_data = {
@@ -213,21 +258,19 @@ class TadoX(Tado):
         if duration is not None:
             post_data["termination"]["durationInSeconds"] = duration
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"rooms/{zone:d}/manualControl"
         request.action = Action.SET
         request.payload = post_data
 
         return self._http.request(request)
 
+    @not_supported("Concept of zones is not available by Tado X API, they use rooms")
     def get_zone_overlay_default(self, zone: int):
         """
         Get current overlay default settings for zone.
         """
-
-        raise TadoNotSupportedException(
-            "This method is not currently supported by the Tado X API"
-        )
+        pass
 
     def get_open_window_detected(self, zone):
         """
@@ -241,6 +284,7 @@ class TadoX(Tado):
         else:
             return {"openWindowDetected": False}
 
+    @not_supported("This method is not currently supported by the Tado X API")
     def set_open_window(self, zone):
         """
         Sets the window in zone to open
@@ -251,12 +295,11 @@ class TadoX(Tado):
         request.action = Action.SET
 
         return self._http.request(request)
-
+      
     def reset_open_window(self, zone):
         """
         Sets the window in zone to closed
         """
-
         request = self._create_x_request()
         request.command = f"rooms/{zone}/openWindow"
         request.action = Action.RESET
@@ -269,18 +312,38 @@ class TadoX(Tado):
         with option to get specific info i.e. cmd='temperatureOffset'
         """
 
-        raise TadoNotSupportedException(
-            "This method is not currently supported by the Tado X API"
-        )
+        if cmd:
+            request = TadoRequest()
+            request.command = cmd
+        else:
+            request = TadoXRequest()
+
+        request.action = Action.GET
+        request.domain = Domain.DEVICES
+        request.device = device_id
+
+        return self._http.request(request)
 
     def set_temp_offset(self, device_id, offset=0, measure="celsius"):
         """
         Set the Temperature offset on the device.
         """
 
-        request = self._create_x_request()
+        request = TadoXRequest()
         request.command = f"roomsAndDevices/devices/{device_id}"
         request.action = Action.CHANGE
         request.payload = {"temperatureOffset": offset}
 
         return self._http.request(request)
+
+    def set_child_lock(self, device_id, child_lock):
+        """ "
+        Set and toggle the child lock on the device.
+        """
+
+        request = TadoXRequest()
+        request.command = f"roomsAndDevices/devices/{device_id}"
+        request.action = Action.CHANGE
+        request.payload = {"childLockEnabled": child_lock}
+
+        self._http.request(request)

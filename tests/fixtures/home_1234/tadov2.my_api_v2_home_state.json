@@ -1,0 +1,45 @@
+{
+    "id": 1234,
+    "name": "My Home - Tado v1-v3+",
+    "dateTimeZone": "Europe/Berlin",
+    "dateCreated": "2024-12-04T21:53:35.862Z",
+    "temperatureUnit": "CELSIUS",
+    "partner": null,
+    "simpleSmartScheduleEnabled": true,
+    "awayRadiusInMeters": 400.00,
+    "installationCompleted": true,
+    "incidentDetection": {"supported": false, "enabled": true},
+    "zonesCount": 0,
+    "language": "de-DE",
+    "preventFromSubscribing": true,
+    "skills": [],
+    "christmasModeEnabled": true,
+    "showAutoAssistReminders": true,
+    "contactDetails": {
+        "name": "Alice Wonderland",
+        "email": "alice-in@wonder.land",
+        "phone": "+00000000"
+    },
+    "address": {
+        "addressLine1": "Wonderland 1",
+        "addressLine2": null,
+        "zipCode": "112",
+        "city": "Wonderland",
+        "state": null,
+        "country": "DEU"
+    },
+    "geolocation": {"latitude": 25.1532934, "longitude": 2.3324432},
+    "consentGrantSkippable": true,
+    "enabledFeatures": [
+        "AA_REVERSE_TRIAL_7D",
+        "EIQ_SETTINGS_AS_WEBVIEW",
+        "HIDE_BOILER_REPAIR_SERVICE",
+        "OWD_SETTINGS_AS_WEBVIEW",
+        "SETTINGS_OVERVIEW_AS_WEBVIEW"
+    ],
+    "isAirComfortEligible": false,
+    "isBalanceAcEligible": false,
+    "isEnergyIqEligible": true,
+    "isHeatSourceInstalled": false,
+    "isHeatPumpInstalled": false
+}

@@ -1,0 +1,76 @@
+{
+    "name": "Alice Wonderland",
+    "email": "alice-in@wonder.land",
+    "username": "alice-in@wonder.land",
+    "id": "123a1234567b89012cde1f23",
+    "homes": [
+        {
+            "id": 1234,
+            "name": "Test Home"
+        }
+    ],
+    "locale": "de_DE",
+    "mobileDevices": [
+        {
+            "name": "iPad",
+            "id": 1234567,
+            "settings": {
+                "geoTrackingEnabled": false,
+                "specialOffersEnabled": true,
+                "onDemandLogRetrievalEnabled": false,
+                "pushNotifications": {
+                    "lowBatteryReminder": true,
+                    "awayModeReminder": true,
+                    "homeModeReminder": true,
+                    "openWindowReminder": true,
+                    "energySavingsReportReminder": true,
+                    "incidentDetection": true,
+                    "energyIqReminder": true,
+                    "tariffHighPriceAlert": true,
+                    "tariffLowPriceAlert": true
+                }
+            },
+            "deviceMetadata": {
+                "platform": "iOS",
+                "osVersion": "18.0",
+                "model": "iPad8,10",
+                "locale": "de"
+            }
+        },
+        {
+            "name": "iPhone",
+            "id": 12345678,
+            "settings": {
+                "geoTrackingEnabled": true,
+                "specialOffersEnabled": true,
+                "onDemandLogRetrievalEnabled": false,
+                "pushNotifications": {
+                    "lowBatteryReminder": true,
+                    "awayModeReminder": true,
+                    "homeModeReminder": true,
+                    "openWindowReminder": true,
+                    "energySavingsReportReminder": true,
+                    "incidentDetection": true,
+                    "energyIqReminder": true,
+                    "tariffHighPriceAlert": true,
+                    "tariffLowPriceAlert": true
+                }
+            },
+            "location": {
+                "stale": false,
+                "atHome": true,
+                "bearingFromHome": {
+                    "degrees": 90.0,
+                    "radians": 1.5707963267948966
+                },
+                "relativeDistanceFromHomeFence": 0.0
+            },
+            "deviceMetadata": {
+                "platform": "iOS",
+                "osVersion": "18.2",
+                "model": "iPhone14,5",
+                "locale": "de"
+            }
+        }
+    ]
+}

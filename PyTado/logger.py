@@ -35,16 +35,12 @@ class Logger(logging.Logger):
             """
             Do the actual filtering
             """
-            original = logging.Formatter.format(
-                self, record
-            )  # call parent method
+            original = logging.Formatter.format(self, record)  # call parent method
             return self._filter(original)
 
     def __init__(self, name: str, level=logging.NOTSET):
         super().__init__(name)
         log_sh = logging.StreamHandler()
-        log_fmt = self.SensitiveFormatter(
-            fmt="%(name)s :: %(levelname)-8s :: %(message)s"
-        )
+        log_fmt = self.SensitiveFormatter(fmt="%(name)s :: %(levelname)-8s :: %(message)s")
         log_sh.setFormatter(log_fmt)
         self.addHandler(log_sh)
