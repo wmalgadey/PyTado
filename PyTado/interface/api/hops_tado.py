@@ -295,7 +295,7 @@ class TadoX(Tado):
         request.action = Action.SET
 
         return self._http.request(request)
-      
+
     def reset_open_window(self, zone):
         """
         Sets the window in zone to closed
