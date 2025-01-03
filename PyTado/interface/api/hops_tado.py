@@ -284,20 +284,26 @@ class TadoX(Tado):
         else:
             return {"openWindowDetected": False}
 
-    @not_supported("This method is not currently supported by the Tado X API")
     def set_open_window(self, zone):
         """
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
         """
-        pass
+        request = TadoXRequest()
+        request.command = f"rooms/{zone}/openWindow"
+        request.action = Action.SET
 
-    @not_supported("This method is not currently supported by the Tado X API")
+        return self._http.request(request)
+
     def reset_open_window(self, zone):
         """
         Sets the window in zone to closed
         """
-        pass
+        request = TadoXRequest()
+        request.command = f"rooms/{zone}/openWindow"
+        request.action = Action.RESET
+
+        return self._http.request(request)
 
     def get_device_info(self, device_id, cmd=""):
         """

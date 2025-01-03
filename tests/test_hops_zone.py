@@ -167,3 +167,21 @@ class TadoZoneTestCase(unittest.TestCase):
         room_1 = rooms[0]
         assert room_1['roomName'] == 'Room 1'
         assert room_1['devices'][0]['serialNumber'] == 'VA1234567890'
+
+    def test_set_window_open(self):
+        """ Test get_devices method """
+        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
+
+        devices_and_rooms = self.tado_client.get_devices()
+        for room in devices_and_rooms['rooms']:
+            result = self.tado_client.set_open_window(zone=room)
+            assert isinstance(result, dict)
+
+    def test_reset_window_open(self):
+        """ Test get_devices method """
+        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
+
+        devices_and_rooms = self.tado_client.get_devices()
+        for room in devices_and_rooms['rooms']:
+            result = self.tado_client.reset_open_window(zone=room)
+            assert isinstance(result, dict)
