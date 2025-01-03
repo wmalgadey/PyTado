@@ -246,19 +246,22 @@ class TadoX(Tado):
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
         """
+        request = self._create_x_request()
+        request.command = f"rooms/{zone}/openWindow"
+        request.action = Action.SET
 
-        raise TadoNotSupportedException(
-            "This method is not currently supported by the Tado X API"
-        )
+        return self._http.request(request)
 
     def reset_open_window(self, zone):
         """
         Sets the window in zone to closed
         """
 
-        raise TadoNotSupportedException(
-            "This method is not currently supported by the Tado X API"
-        )
+        request = self._create_x_request()
+        request.command = f"rooms/{zone}/openWindow"
+        request.action = Action.RESET
+
+        return self._http.request(request)
 
     def get_device_info(self, device_id, cmd=""):
         """
