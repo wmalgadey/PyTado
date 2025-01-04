@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 
 import requests
 
-from PyTado.const import CLIENT_ID, CLIENT_SECRET
+from PyTado.const import CLIENT_ID, CLIENT_SECRET, HTTP_CODES_OK
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
 
@@ -64,7 +64,7 @@ class TadoRequest:
         endpoint: Endpoint = Endpoint.MY_API,
         command: str | None = None,
         action: Action | str = Action.GET,
-        payload: dict[str, Any] | None = None,
+        payload: dict[str, Any] | list[Any] | None = None,
         domain: Domain = Domain.HOME,
         device: int | str | None = None,
         mode: Mode = Mode.OBJECT,
@@ -88,7 +88,7 @@ class TadoXRequest(TadoRequest):
         endpoint: Endpoint = Endpoint.HOPS_API,
         command: str | None = None,
         action: Action | str = Action.GET,
-        payload: dict[str, Any] | None = None,
+        payload: dict[str, Any] | list[Any] | None = None,
         domain: Domain = Domain.HOME,
         device: int | str | None = None,
         mode: Mode = Mode.OBJECT,
@@ -216,6 +216,17 @@ class Http:
 
         if response.text is None or response.text == "":
             return {}
+        
+        if response.status_code not in HTTP_CODES_OK:
+            _LOGGER.error(
+                "Request %s failed with status code %d: %s",
+                url,
+                response.status_code,
+                response.json(),
+            )
+            raise TadoException(
+                f"Request failed with status code {response.status_code}"
+            )
 
         return response.json()
 
