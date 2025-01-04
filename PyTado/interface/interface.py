@@ -4,23 +4,28 @@ PyTado interface abstraction to use app.tado.com or hops.tado.com
 
 import datetime
 import functools
+from typing import Any, Callable
 import warnings
 
 import PyTado.interface.api as API
 from PyTado.http import Http
+from PyTado.models.util import Base
 
 
-def deprecated(new_func_name):
-    def decorator(func):
+def deprecated(new_func_name: str) -> Callable:
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             warnings.warn(
                 f"The '{func.__name__}' method is deprecated, use '{new_func_name}' instead. "
                 "Deprecated methods will be removed with 1.0.0.",
                 DeprecationWarning,
                 stacklevel=2,
             )
-            return getattr(args[0], new_func_name)(*args, **kwargs)
+            result = getattr(args[0], new_func_name)(*args[1:], **kwargs)
+            if isinstance(result, Base):
+                return result.to_dict()
+            return result
 
         return wrapper
 
