@@ -11,7 +11,7 @@ authors = [
     { name = "w.malgadey", email = "w.malgadey@gmail.com" },
     { name = "FilBr", email = "filippo.barba@protonmail.com" },
 ]
-dependencies = ["requests"]
+dependencies = ["requests", "pydantic"]
 requires-python = ">=3.11"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -31,7 +31,18 @@ classifiers = [
 GitHub = "https://github.com/wmalgadey/PyTado"
 
 [project.optional-dependencies]
-dev = ["black>=24.3", "pre-commit", "pytype", "pylint", "types-requests", "requests", "responses", "coverage", "pytest", "pytest-cov"]
+dev = [
+    "black>=24.3",
+    "pre-commit",
+    "pytype",
+    "pylint",
+    "types-requests",
+    "requests",
+    "responses",
+    "coverage",
+    "pytest",
+    "pytest-cov"
+  ]
 
 all = [
   "python-tado[dev]",
