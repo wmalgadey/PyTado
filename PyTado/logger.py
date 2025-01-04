@@ -17,12 +17,12 @@ class Logger(logging.Logger):
         """
 
         @staticmethod
-        def _filter(s):
+        def _filter(s: str) -> str:
             patterns = [
                 r"'Bearer [\w-]*\.[\w-]*\.[\w-]*'",
                 r"'access_token': '[\w-]*\.[\w-]*\.[\w-]*'",
                 r"'refresh_token': '[\w-]*\.[\w-]*\.[\w-]*'",
-                r"\?.*",
+                r"\?.+?\s",
             ]
             try:
                 for pattern in patterns:
