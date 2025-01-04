@@ -13,7 +13,17 @@ from PyTado.models.line_x import Schedule as ScheduleX
 from PyTado.models.pre_line_x.zone import Zone, ZoneState
 from PyTado.models.pre_line_x.schedule import Schedule, Schedules
 from PyTado.models.return_models import Capabilities, Climate
-from PyTado.types import DayType, FanMode, FanSpeed, HorizontalSwing, HvacMode, OverlayMode, Power, VerticalSwing, ZoneType
+from PyTado.types import (
+    DayType,
+    FanMode,
+    FanSpeed,
+    HorizontalSwing,
+    HvacMode,
+    OverlayMode,
+    Power,
+    VerticalSwing,
+    ZoneType,
+)
 
 from ...exceptions import TadoException
 from ...http import Action, Domain, Endpoint, Mode, TadoRequest
@@ -52,7 +62,7 @@ class Tado(TadoBase):
         Gets current state of Zone as a TadoZone object.
         """
 
-        return self.get_state(zone) # type: ignore # TODO: proper zone model
+        return self.get_state(zone)  # type: ignore # TODO: proper zone model
 
     def get_zone_states(self) -> dict[str, ZoneState]:
         """
@@ -62,7 +72,10 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = "zoneStates"
 
-        return {key: ZoneState.model_validate(value) for key, value in  self._http.request(request).items()}
+        return {
+            key: ZoneState.model_validate(value)
+            for key, value in self._http.request(request).items()
+        }
 
     def get_state(self, zone: int) -> ZoneState:
         """
@@ -71,7 +84,7 @@ class Tado(TadoBase):
 
         request = TadoRequest()
         request.command = f"zones/{zone}/state"
-    
+
         data = {
             **self._http.request(request),
             **self.get_zone_overlay_default(zone),
@@ -132,7 +145,9 @@ class Tado(TadoBase):
         return Timetable(self._http.request(request).get("id"))
 
     @overload
-    def get_schedule(self, zone: int, timetable: Timetable, day: DayType) -> list[Schedule]: ...
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
 
     @overload
     def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
@@ -140,14 +155,18 @@ class Tado(TadoBase):
     @overload
     def get_schedule(self, zone: int) -> ScheduleX: ...
 
-    def get_schedule(self, zone: int, timetable: Timetable | None = None, day: DayType | None = None) -> list[Schedule] | ScheduleX:
+    def get_schedule(
+        self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
+    ) -> list[Schedule] | ScheduleX:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
         """
         request = TadoRequest()
         if day:
-            request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+            request.command = (
+                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+            )
         else:
             request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks"
         request.mode = Mode.PLAIN
@@ -160,9 +179,7 @@ class Tado(TadoBase):
     ) -> list[Schedule]: ...
 
     @overload
-    def set_schedule(
-        self, zone: int, data: SetSchedule
-    ) -> None: ...
+    def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
 
     def set_schedule(
         self,
@@ -177,13 +194,14 @@ class Tado(TadoBase):
 
         if isinstance(data, list):
             request = TadoRequest()
-            request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+            request.command = (
+                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+            )
             request.action = Action.CHANGE
             request.payload = [schedule.model_dump(by_alias=True) for schedule in data]
             # request.mode = Mode.PLAIN
             return [Schedule.model_validate(s) for s in self._http.request(request)]
         raise TadoException("Invalid data type for set_schedule for pre line x")
-
 
     def reset_zone_overlay(self, zone: int) -> None:
         """
@@ -271,7 +289,7 @@ class Tado(TadoBase):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
-    
+
     def get_air_comfort(self) -> AirComfort:
         request = TadoRequest()
         request.command = "airComfort"
@@ -375,7 +393,6 @@ class Tado(TadoBase):
 
         return self._http.request(request)
 
-
     def get_boiler_install_state(self, bridge_id: str, auth_key: str):
         """
         Get the boiler wiring installation state from home by bridge endpoint
@@ -417,6 +434,8 @@ class Tado(TadoBase):
         request.device = bridge_id
         request.command = "boilerMaxOutputTemperature"
         request.params = {"authKey": auth_key}
-        request.payload = {"boilerMaxOutputTemperatureInCelsius": temperature_in_celcius}
+        request.payload = {
+            "boilerMaxOutputTemperatureInCelsius": temperature_in_celcius
+        }
 
         return self._http.request(request)

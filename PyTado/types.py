@@ -5,6 +5,7 @@ from PyTado.logger import Logger
 
 logger = Logger(__name__)
 
+
 class StrEnumMissing(StrEnum):
     def __str__(self) -> str:
         return self.name
@@ -20,6 +21,7 @@ class StrEnumMissing(StrEnum):
         unknown_enum_val._value_ = value
         return unknown_enum_val
 
+
 class Presence(StrEnumMissing):
     """Presence Enum"""
 
@@ -28,11 +30,13 @@ class Presence(StrEnumMissing):
     TADO_MODE = "TADO_MODE"
     AUTO = "AUTO"
 
+
 class Power(StrEnumMissing):
     """Power Enum"""
 
     ON = "ON"
     OFF = "OFF"
+
 
 class Timetable(IntEnum):
     """Timetable Enum"""
@@ -41,12 +45,14 @@ class Timetable(IntEnum):
     THREE_DAY = 1
     SEVEN_DAY = 2
 
+
 class ZoneType(StrEnumMissing):
     """Zone Type Enum"""
 
     HEATING = "HEATING"
     HOT_WATER = "HOT_WATER"
     AIR_CONDITIONING = "AIR_CONDITIONING"
+
 
 class HvacMode(StrEnumMissing):
     OFF = "OFF"
@@ -57,12 +63,14 @@ class HvacMode(StrEnumMissing):
     DRY = "DRY"
     FAN = "FAN"
 
+
 class FanMode(StrEnumMissing):
     OFF = "OFF"
     AUTO = "AUTO"
     LOW = "LOW"
     MIDDLE = "MIDDLE"
     HIGH = "HIGH"
+
 
 class FanSpeed(StrEnumMissing):
     OFF = "OFF"
@@ -73,9 +81,11 @@ class FanSpeed(StrEnumMissing):
     LEVEL3 = "LEVEL3"
     LEVEL4 = "LEVEL4"
 
+
 class VerticalSwing(StrEnumMissing):
     OFF = "OFF"
     ON = "ON"
+
 
 class HorizontalSwing(StrEnumMissing):
     OFF = "OFF"
@@ -86,10 +96,12 @@ class HorizontalSwing(StrEnumMissing):
     MID_RIGHT = "MID_RIGHT"
     RIGHT = "RIGHT"
 
+
 class OverlayMode(StrEnumMissing):
     NEXT_TIME_BLOCK = "NEXT_TIME_BLOCK"  # resume schedule on next time block
     MANUAL = "MANUAL"  # never resume schedule automatically
     TIMER = "TIMER"  # resume schedule after a certain time
+
 
 class HvacAction(StrEnumMissing):
     HEAT = "HEATING"
@@ -99,6 +111,7 @@ class HvacAction(StrEnumMissing):
     IDLE = "IDLE"
     OFF = "OFF"
     HOT_WATER = "HOT_WATER"
+
 
 TADO_MODES_TO_HVAC_ACTION: dict[HvacMode, HvacAction] = {
     HvacMode.HEAT: HvacAction.HEAT,
@@ -115,6 +128,7 @@ TADO_HVAC_ACTION_TO_MODES: dict[HvacAction, HvacMode | HvacAction] = {
     HvacAction.COOL: HvacMode.COOL,
 }
 
+
 class DayType(StrEnumMissing):
     MONDAY = "MONDAY"
     TUESDAY = "TUESDAY"
@@ -126,11 +140,13 @@ class DayType(StrEnumMissing):
     MONDAY_TO_FRIDAY = "MONDAY_TO_FRIDAY"
     MONDAY_TO_SUNDAY = "MONDAY_TO_SUNDAY"
 
+
 class LinkState(StrEnumMissing):
     """Link State Enum"""
 
     ONLINE = "ONLINE"
     OFFLINE = "OFFLINE"
+
 
 class ConnectionState(StrEnumMissing):
     """Connection State Enum"""

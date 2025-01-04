@@ -3,6 +3,7 @@ from PyTado.models.util import Base
 from pydantic import model_validator
 from typing import Any, Dict
 
+
 class User(Base):
     """User model represents a user's profile information."""
 
@@ -23,6 +24,7 @@ class Home(Base):
     temperature_unit: str | None = None
     generation: str | None = None
 
+
 class TempPrecision(Base):
     celsius: float
     fahrenheit: float
@@ -37,12 +39,12 @@ class Temperature(Base):
     timestamp: str | None = None
     precision: TempPrecision | None = None
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def __pre_deserialize__(cls, d: Dict[Any, Any]) -> Dict[Any, Any]:
         if d.get("value", None) is not None:
             d["celsius"] = d["value"]
-            d["fahrenheit"] = float(d["value"])*9/5+32
+            d["fahrenheit"] = float(d["value"]) * 9 / 5 + 32
             # TODO: get temperature unit from tado home info and convert accordingly
         return d
 
@@ -123,23 +125,28 @@ class MobileDevice(Base):
     settings: MobileSettings
     location: MobileLocation | None = None
 
+
 class Freshness(Base):
     value: str  # TODO: use Enum or similar
     last_open_window: datetime
+
 
 class RoomComfortCoordinate(Base):
     radial: float
     angular: int
 
+
 class RoomComfort(Base):
     room_id: int
-    temperature_level: str | None = None # TODO: use Enum or similar
-    humidity_level: str | None = None # TODO: use Enum or similar
+    temperature_level: str | None = None  # TODO: use Enum or similar
+    humidity_level: str | None = None  # TODO: use Enum or similar
     coordinate: RoomComfortCoordinate | None = None
+
 
 class AirComfort(Base):
     freshness: Freshness
     comfort: list[RoomComfort]
+
 
 class EIQTariff(Base):
     unit: str
@@ -150,15 +157,18 @@ class EIQTariff(Base):
     tariff_in_cents: int
     id: str
 
+
 class EIQMeterReading(Base):
     id: str
     home_id: int
     reading: int
     date: date
 
+
 class RunningTimeZone(Base):
     id: int
     running_time_in_seconds: int
+
 
 class RunningTime(Base):
     start_time: datetime
@@ -166,14 +176,15 @@ class RunningTime(Base):
     running_time_in_seconds: int
     zones: list[RunningTimeZone]
 
+
 class RunningTimeSummary(Base):
     start_time: datetime
     end_time: datetime
     total_running_time_in_seconds: int
     mean_in_seconds_per_day: int
 
+
 class RunningTimes(Base):
     running_times: list[RunningTime]
     summary: RunningTimeSummary
     last_updated: datetime
-

@@ -4,6 +4,7 @@ from datetime import datetime
 
 from PyTado.types import ConnectionState, OverlayMode
 
+
 class OpenWindow(Base):
     """OpenWindow model represents the open window state of a romm."""
 
@@ -18,19 +19,24 @@ class ManualControlTermination(Base):
     remaining_time_in_seconds: int | None
     projected_expiry: datetime | None
 
+
 class NextTimeBlock(Base):
     """NextTimeBlock model represents the next time block."""
 
     start: datetime
 
+
 class BalanceControl(Base):
     """BalanceControl model"""
+
     pass  # TODO: I don't know what this is yet
+
 
 class InsideTemperature(Base):
     """InsideTemperature model represents the temperature in Celsius and Fahrenheit."""
 
     value: float
+
 
 class Setting(Base):
     """Setting model represents the setting of a room."""
@@ -38,10 +44,12 @@ class Setting(Base):
     power: str
     temperature: InsideTemperature | None = None
 
+
 class Humidity(Base):
     """Humidity model represents the humidity in percent."""
 
     percentage: float
+
 
 class SensorDataPoints(Base):
     """SensorDataPoints model represents the sensor data points of a room."""
@@ -49,21 +57,25 @@ class SensorDataPoints(Base):
     inside_temperature: InsideTemperature
     humidity: Humidity
 
+
 class HeatingPower(Base):
     """HeatingPower model represents the heating power of a room."""
 
     percentage: int
+
 
 class Connection(Base):
     """Connection model represents the connection state of a room."""
 
     state: ConnectionState
 
+
 class NextScheduleChange(Base):
     """NextScheduleChange model represents the next schedule change."""
 
     start: datetime
     setting: Setting
+
 
 class RoomState(Base):
     """Room model (replaces Zones in TadoX) represents the state of a room."""

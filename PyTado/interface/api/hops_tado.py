@@ -10,10 +10,24 @@ from PyTado.models.common.schedule import ScheduleElement
 from PyTado.models.home import AirComfort
 from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
 from PyTado.models.line_x.room import RoomState
-from PyTado.models.line_x.schedule import Schedule as ScheduleX, SetSchedule, TempValue as TempValueX
+from PyTado.models.line_x.schedule import (
+    Schedule as ScheduleX,
+    SetSchedule,
+    TempValue as TempValueX,
+)
 from PyTado.models.pre_line_x import Schedule
 from PyTado.models.return_models import Capabilities, Climate
-from PyTado.types import DayType, FanMode, FanSpeed, HorizontalSwing, HvacMode, OverlayMode, Power, VerticalSwing, ZoneType
+from PyTado.types import (
+    DayType,
+    FanMode,
+    FanSpeed,
+    HorizontalSwing,
+    HvacMode,
+    OverlayMode,
+    Power,
+    VerticalSwing,
+    ZoneType,
+)
 
 from ...exceptions import TadoException, TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
@@ -75,7 +89,7 @@ class TadoX(TadoBase):
 
         return devices
 
-    def get_zones(self) -> list[DevicesRooms]: 
+    def get_zones(self) -> list[DevicesRooms]:
         """
         Gets zones (or rooms in Tado X API) information.
         """
@@ -90,7 +104,7 @@ class TadoX(TadoBase):
         Gets current state of zone/room as a TadoXZone object.
         """
 
-        return self.get_state(zone) # type: ignore # TODO: proper Zone model
+        return self.get_state(zone)  # type: ignore # TODO: proper Zone model
 
     def get_zone_states(self) -> dict[str, RoomState]:
         """
@@ -182,9 +196,7 @@ class TadoX(TadoBase):
     ) -> list[Schedule]: ...
 
     @overload
-    def set_schedule(
-        self, zone: int, data: SetSchedule
-    ) -> None: ...
+    def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
 
     def set_schedule(
         self,

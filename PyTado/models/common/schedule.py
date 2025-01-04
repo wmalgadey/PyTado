@@ -7,17 +7,18 @@ from PyTado.types import Power, ZoneType, DayType
 T = TypeVar("T")
 
 
-
 class Setting(Base, Generic[T]):
     type: ZoneType | None = None
     power: Power
     temperature: T
 
+
 class ScheduleElement(Base, Generic[T]):
     """ScheduleElement model represents one Block of a schedule.
     Tado v3 API days go from 00:00 to 00:00
-    Tado X API days go from 00:00 to 24:00 
+    Tado X API days go from 00:00 to 24:00
     """
+
     day_type: DayType
     start: str
     end: str
@@ -33,4 +34,3 @@ class ScheduleElement(Base, Generic[T]):
         except Exception as e:
             raise ValueError(f"Invalid time format {value}") from e
         return value
-

@@ -186,7 +186,9 @@ class Http:
         data = self._configure_payload(headers, request)
         url = self._configure_url(request)
 
-        http_request = requests.Request(method=request.action, url=url, headers=headers, data=data)
+        http_request = requests.Request(
+            method=request.action, url=url, headers=headers, data=data
+        )
         prepped = http_request.prepare()
         prepped.hooks["response"].append(self._log_response)
 
@@ -216,7 +218,7 @@ class Http:
 
         if response.text is None or response.text == "":
             return {}
-        
+
         if response.status_code not in HTTP_CODES_OK:
             _LOGGER.error(
                 "Request %s failed with status code %d: %s",
@@ -233,8 +235,12 @@ class Http:
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{request.endpoint}{request.command}"
-        elif request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE:
-            url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
+        elif (
+            request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE
+        ):
+            url = (
+                f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
+            )
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
         else:
@@ -246,7 +252,9 @@ class Http:
 
         return url
 
-    def _configure_payload(self, headers: dict[str, str], request: TadoRequest) -> bytes:
+    def _configure_payload(
+        self, headers: dict[str, str], request: TadoRequest
+    ) -> bytes:
         if request.payload is None:
             return b""
 

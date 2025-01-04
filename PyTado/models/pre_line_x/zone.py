@@ -2,7 +2,16 @@ from datetime import datetime
 from PyTado.models.util import Base
 from PyTado.models.pre_line_x.device import Device
 from PyTado.models.home import TempPrecision, Temperature
-from PyTado.types import FanMode, FanSpeed, HorizontalSwing, LinkState, Mode, Power, Presence, VerticalSwing
+from PyTado.types import (
+    FanMode,
+    FanSpeed,
+    HorizontalSwing,
+    LinkState,
+    HvacMode,
+    Power,
+    Presence,
+    VerticalSwing,
+)
 
 
 class DazzleMode(Base):
@@ -36,11 +45,13 @@ class Zone(Base):  # pylint: disable=too-many-instance-attributes
     dazzle_mode: DazzleMode
     open_window_detection: OpenWindowDetection
 
+
 class TerminationCondition(Base):
     """TerminationCondition model represents the termination condition."""
 
     type: str | None = None
     duration_in_seconds: int | None = None
+
 
 class HeatingPower(Base):
     """HeatingPower model represents the heating power."""
@@ -59,11 +70,13 @@ class AcPower(Base):
     timestamp: str
     value: str
 
+
 class ActivityDataPoints(Base):
     """ActivityDataPoints model represents the activity data points."""
 
     ac_power: AcPower | None = None
     heating_power: HeatingPower | None = None
+
 
 class InsideTemperature(Base):
     """InsideTemperature model represents the temperature in Celsius and Fahrenheit."""
@@ -73,6 +86,7 @@ class InsideTemperature(Base):
     precision: TempPrecision
     type: str | None = None
     timestamp: str | None = None
+
 
 class OpenWindow(Base):
     """OpenWindow model represents the open window settings of a zone (Pre Tado X only)."""
@@ -88,7 +102,7 @@ class Setting(Base):
 
     power: str
     type: str | None = None
-    mode: Mode | None = None
+    mode: HvacMode | None = None
     temperature: Temperature | None = None
     fan_speed: FanSpeed | None = None
     fan_level: FanMode | None = None
@@ -96,8 +110,6 @@ class Setting(Base):
     horizontal_swing: HorizontalSwing | None = None
     light: Power | None = None
     is_boost: bool | None = None
-
-
 
 
 class Termination(Base):
@@ -122,11 +134,13 @@ class NextScheduleChange(Base):
     start: datetime
     setting: Setting
 
+
 class LinkReason(Base):
     """LinkReason model represents the reason of a link state."""
 
     code: str
     title: str
+
 
 class Link(Base):
     """Link model represents the link of a zone."""
@@ -149,10 +163,12 @@ class SensorDataPoints(Base):
     inside_temperature: InsideTemperature
     humidity: Humidity
 
+
 class NextTimeBlock(Base):
     """NextTimeBlock model represents the next time block."""
 
     start: datetime
+
 
 class ZoneState(Base):  # pylint: disable=too-many-instance-attributes
     """ZoneState model represents the state of a zone."""
@@ -167,7 +183,7 @@ class ZoneState(Base):  # pylint: disable=too-many-instance-attributes
     open_window: OpenWindow | None = None
     next_schedule_change: NextScheduleChange | None = None
     next_time_block: NextTimeBlock
-    link: Link 
+    link: Link
     running_offline_schedule: bool | None = None
     activity_data_points: ActivityDataPoints
     sensor_data_points: SensorDataPoints

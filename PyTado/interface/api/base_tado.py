@@ -36,7 +36,19 @@ from PyTado.models.pre_line_x import Zone, ZoneState
 from PyTado.models import Capabilities, Climate
 from PyTado.zone.hops_zone import TadoXZone
 from PyTado.zone.my_zone import TadoZone
-from PyTado.types import DayType, FanMode, FanSpeed, HorizontalSwing, HvacMode, OverlayMode, Power, Presence, Timetable, VerticalSwing, ZoneType
+from PyTado.types import (
+    DayType,
+    FanMode,
+    FanSpeed,
+    HorizontalSwing,
+    HvacMode,
+    OverlayMode,
+    Power,
+    Presence,
+    Timetable,
+    VerticalSwing,
+    ZoneType,
+)
 
 _LOGGER = Logger(__name__)
 
@@ -155,7 +167,9 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @overload
-    def get_schedule(self, zone: int, timetable: Timetable, day: DayType) -> list[Schedule]: ...
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
 
     @overload
     def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
@@ -170,13 +184,21 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @overload
-    def set_schedule(self, zone: int, data: list[Schedule], timetable: Timetable, day: DayType) -> list[Schedule]: ...
+    def set_schedule(
+        self, zone: int, data: list[Schedule], timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
 
     @overload
     def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
 
     @abstractmethod
-    def set_schedule(self, zone: int, data: list[Schedule] | SetSchedule, timetable: Timetable | None = None, day: DayType | None = None) -> None | list[Schedule]:
+    def set_schedule(
+        self,
+        zone: int,
+        data: list[Schedule] | SetSchedule,
+        timetable: Timetable | None = None,
+        day: DayType | None = None,
+    ) -> None | list[Schedule]:
         pass
 
     @abstractmethod

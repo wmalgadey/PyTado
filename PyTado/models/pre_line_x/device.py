@@ -1,6 +1,7 @@
 from datetime import datetime
 from PyTado.models.util import Base
 
+
 class ConnectionState(Base):
     """ConnectionState model represents the connection state of a device."""
 
@@ -19,6 +20,7 @@ class MountingState(Base):
 
     value: str
     timestamp: datetime
+
 
 class Device(Base):
     """Device model represents a device in a zone or room."""

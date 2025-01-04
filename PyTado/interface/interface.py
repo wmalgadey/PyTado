@@ -276,7 +276,9 @@ class Tado:
         return self.get_eiq_meter_readings()
 
     @deprecated("set_eiq_meter_readings")
-    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
+    def setEIQMeterReadings(
+        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
+    ):
         """Send Meter Readings to Tado (Deprecated)
 
         date format is YYYY-MM-DD, reading is without decimals
