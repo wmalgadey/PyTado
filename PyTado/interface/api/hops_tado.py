@@ -3,22 +3,31 @@ PyTado interface implementation for hops.tado.com (Tado X).
 """
 
 import functools
-from typing import Any
+from typing import Any, Callable, overload
 
-from PyTado.const import TYPE_HEATING
 from PyTado.interface.api.base_tado import TadoBase, Timetable
+from PyTado.models.common.schedule import ScheduleElement
+from PyTado.models.home import AirComfort
+from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
+from PyTado.models.line_x.room import RoomState
+from PyTado.models.line_x.schedule import Schedule as ScheduleX, SetSchedule, TempValue as TempValueX
+from PyTado.models.pre_line_x import Schedule
+from PyTado.models.return_models import Capabilities, Climate
+from PyTado.types import DayType, FanMode, FanSpeed, HorizontalSwing, HvacMode, OverlayMode, Power, VerticalSwing, ZoneType
 
-from ...exceptions import TadoNotSupportedException
+from ...exceptions import TadoException, TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
 from ...zone import TadoXZone, TadoZone
 
 
-def not_supported(reason):
-    def decorator(func):
+def not_supported(reason: str) -> Callable:
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            raise TadoNotSupportedException(f"{func.__name__} is not supported: {reason}")
+        def wrapper(*args: Any, **kwargs: Any) -> None:
+            raise TadoNotSupportedException(
+                f"{func.__name__} is not supported: {reason}"
+            )
 
         return wrapper
 
@@ -43,11 +52,13 @@ class TadoX(TadoBase):
     ):
         """Class Constructor"""
         if not http.is_x_line:
-            raise TadoNotSupportedException("TadoX is only usable with LINE_X Generation")
+            raise TadoNotSupportedException(
+                "TadoX is only usable with LINE_X Generation"
+            )
 
         super().__init__(http=http, debug=debug)
 
-    def get_devices(self):
+    def get_devices(self) -> list[Device]:
         """
         Gets device information.
         """
@@ -55,44 +66,16 @@ class TadoX(TadoBase):
         request = TadoXRequest()
         request.command = "roomsAndDevices"
 
-        rooms_and_devices: list[dict[str, Any]] = self._http.request(request)
-        rooms = rooms_and_devices["rooms"]
+        rooms_and_devices = DevicesResponse.model_validate(self._http.request(request))
 
-        devices = [device for room in rooms for device in room["devices"]]
-
-        for device in devices:
-            device["generation"] = "LINE_X"
-
-            serial_number = device.get("serialNo", device.get("serialNumber"))
-            if not serial_number:
-                continue
-
-            request = TadoXRequest()
-            request.domain = Domain.DEVICES
-            request.device = serial_number
-            device.update(self._http.request(request))
-
-            # compatibility with my.tado.com API
-            device["shortSerialNo"] = serial_number
-            device["name"] = device["roomName"]
-            device["id"] = device["roomId"]
-
-            if "characteristics" not in device:
-                device["characteristics"] = {"capabilities": {}}
-
-            device["characteristics"]["capabilities"] = self.get_capabilities(serial_number)
-
-        if "otherDevices" in rooms_and_devices:
-            for device in rooms_and_devices["otherDevices"]:
-                device["generation"] = "LINE_X"
-
-                serial_number = device.get("serialNo", device.get("serialNumber"))
-
-                devices.append(device)
+        devices = [
+            device for room in rooms_and_devices.rooms for device in room.devices
+        ]
+        devices.extend(rooms_and_devices.other_devices)
 
         return devices
 
-    def get_zones(self):
+    def get_zones(self) -> list[DevicesRooms]: 
         """
         Gets zones (or rooms in Tado X API) information.
         """
@@ -100,16 +83,16 @@ class TadoX(TadoBase):
         request = TadoXRequest()
         request.command = "roomsAndDevices"
 
-        return self._http.request(request)["rooms"]
+        return DevicesResponse.model_validate(self._http.request(request)).rooms
 
     def get_zone_state(self, zone: int) -> TadoZone:
         """
         Gets current state of zone/room as a TadoXZone object.
         """
 
-        return TadoXZone.from_data(zone, self.get_state(zone))
+        return self.get_state(zone) # type: ignore # TODO: proper Zone model
 
-    def get_zone_states(self):
+    def get_zone_states(self) -> dict[str, RoomState]:
         """
         Gets current states of all zones/rooms.
         """
@@ -117,14 +100,11 @@ class TadoX(TadoBase):
         request = TadoXRequest()
         request.command = "rooms"
 
-        rooms_ = self._http.request(request)
+        rooms = [RoomState.model_validate(room) for room in self._http.request(request)]
 
-        # make response my.tado.com compatible
-        zone_states = {"zoneStates": {"id": room["id"], "name": room["name"]} for room in rooms_}
+        return {room.name: room for room in rooms}
 
-        return {**zone_states, **rooms_}
-
-    def get_state(self, zone):
+    def get_state(self, zone: int) -> RoomState:
         """
         Gets current state of zone/room.
         """
@@ -133,9 +113,9 @@ class TadoX(TadoBase):
         request.command = f"rooms/{zone:d}"
         data = self._http.request(request)
 
-        return data
+        return RoomState.model_validate(data)
 
-    def get_capabilities(self, zone):
+    def get_capabilities(self, zone: int) -> Capabilities:
         """
         Gets current capabilities of zone/room.
         """
@@ -145,18 +125,18 @@ class TadoX(TadoBase):
             "We currently always return type heating."
         )
 
-        return {"type": TYPE_HEATING}
+        return Capabilities(type=ZoneType.HEATING)
 
-    def get_climate(self, zone):
+    def get_climate(self, zone: int) -> Climate:
         """
         Gets temp (centigrade) and humidity (% RH) for zone/room.
         """
 
-        data = self.get_state(zone)["sensorDataPoints"]
-        return {
-            "temperature": data["insideTemperature"]["value"],
-            "humidity": data["humidity"]["percentage"],
-        }
+        data = self.get_state(zone)
+        return Climate(
+            temperature=data.sensor_data_points.inside_temperature.value,
+            humidity=data.sensor_data_points.humidity.percentage,
+        )
 
     @not_supported("Tado X API only support seven days timetable")
     def set_timetable(self, zone: int, timetable: Timetable) -> None:
@@ -169,10 +149,23 @@ class TadoX(TadoBase):
         pass
 
     @not_supported("Tado X API does not support historic data")
-    def get_timetable(self, zone: int):
+    def get_timetable(self, zone: int) -> None:
         pass
 
-    def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
+    @overload
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
+
+    @overload
+    def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
+
+    @overload
+    def get_schedule(self, zone: int) -> ScheduleX: ...
+
+    def get_schedule(
+        self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
+    ) -> ScheduleX | list[Schedule]:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
@@ -181,59 +174,39 @@ class TadoX(TadoBase):
         request = TadoXRequest()
         request.command = f"rooms/{zone:d}/schedule"
 
-        return self._http.request(request)
+        return ScheduleX.model_validate(self._http.request(request))
 
-    def set_schedule(self, zone, timetable: Timetable, day, data):
+    @overload
+    def set_schedule(
+        self, zone: int, data: list[Schedule], timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
+
+    @overload
+    def set_schedule(
+        self, zone: int, data: SetSchedule
+    ) -> None: ...
+
+    def set_schedule(
+        self,
+        zone: int,
+        data: list[Schedule] | SetSchedule,
+        timetable: Timetable | None = None,
+        day: DayType | None = None,
+    ) -> None | list[Schedule]:
         """
         Set the schedule for a zone, day is not required for Tado X API.
-
-        example data
-        [
-        {
-            "start": "00:00",
-            "end": "07:05",
-            "dayType": "MONDAY",
-            "setting": {
-            "power": "ON",
-            "temperature": {
-                "value": 18
-            }
-            }
-        },
-        {
-            "start": "07:05",
-            "end": "22:05",
-            "dayType": "MONDAY",
-            "setting": {
-            "power": "ON",
-            "temperature": {
-                "value": 22
-            }
-            }
-        },
-        {
-            "start": "22:05",
-            "end": "24:00",
-            "dayType": "MONDAY",
-            "setting": {
-            "power": "ON",
-            "temperature": {
-                "value": 18
-            }
-            }
-        }
-        ]
         """
+        if isinstance(data, SetSchedule):
+            request = TadoXRequest()
+            request.command = f"rooms/{zone:d}/schedule"
+            request.action = Action.SET
+            request.payload = data.model_dump(by_alias=True)
+            request.mode = Mode.OBJECT
+            self._http.request(request)
+            return None
+        raise TadoException("Invalid data type for set_schedule for Tado X API")
 
-        request = TadoXRequest()
-        request.command = f"rooms/{zone:d}/schedule"
-        request.action = Action.SET
-        request.payload = data
-        request.mode = Mode.OBJECT
-
-        return self._http.request(request)
-
-    def reset_zone_overlay(self, zone):
+    def reset_zone_overlay(self, zone: int) -> None:
         """
         Delete current overlay
         """
@@ -242,28 +215,28 @@ class TadoX(TadoBase):
         request.command = f"rooms/{zone:d}/resumeSchedule"
         request.action = Action.SET
 
-        return self._http.request(request)
+        self._http.request(request)
 
     def set_zone_overlay(
         self,
-        zone,
-        overlay_mode,
-        set_temp=None,
-        duration=None,
-        device_type="HEATING",
-        power="ON",
-        mode=None,
-        fan_speed=None,
-        swing=None,
-        fan_level=None,
-        vertical_swing=None,
-        horizontal_swing=None,
-    ):
+        zone: int,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: int | None = None,
+        device_type: ZoneType = ZoneType.HEATING,
+        power: Power = Power.ON,
+        mode: HvacMode | None = None,
+        fan_speed: FanSpeed | None = None,
+        swing: Any = None,
+        fan_level: FanMode | None = None,
+        vertical_swing: VerticalSwing | None = None,
+        horizontal_swing: HorizontalSwing | None = None,
+    ) -> None:
         """
         Set current overlay for a zone, a room in Tado X API.
         """
 
-        post_data = {
+        post_data: dict[str, Any] = {
             "setting": {"type": device_type, "power": power},
             "termination": {"type": overlay_mode},
         }
@@ -283,7 +256,7 @@ class TadoX(TadoBase):
         request.action = Action.SET
         request.payload = post_data
 
-        return self._http.request(request)
+        self._http.request(request)
 
     @not_supported("Concept of zones is not available by Tado X API, they use rooms")
     def get_zone_overlay_default(self, zone: int):
@@ -361,15 +334,27 @@ class TadoX(TadoBase):
 
         self._http.request(request)
 
-    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_air_comfort(self) -> AirComfort:
+        request = TadoXRequest()
+        request.command = "airComfort"
+
+        return AirComfort.model_validate(self._http.request(request))
+
+    @not_supported(
+        "This method is not currently supported by Tado X Bridges (missing authKey)"
+    )
     def get_boiler_install_state(self, bridge_id: str, auth_key: str):
         pass
 
-    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    @not_supported(
+        "This method is not currently supported by Tado X Bridges (missing authKey)"
+    )
     def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
         pass
 
-    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    @not_supported(
+        "This method is not currently supported by Tado X Bridges (missing authKey)"
+    )
     def set_boiler_max_output_temperature(
         self, bridge_id: str, auth_key: str, temperature_in_celcius: float
     ):
