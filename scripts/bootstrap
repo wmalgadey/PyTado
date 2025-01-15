@@ -4,6 +4,5 @@ set -e
 
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
-pip install -e '.[all]'
-pre-commit install
+poetry install
+poetry run pre-commit install
