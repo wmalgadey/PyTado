@@ -1021,6 +1021,20 @@ urllib3 = ">=1.25.10,<3.0"
 tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "tomli", "tomli-w", "types-PyYAML", "types-requests"]
 
 [[package]]
+name = "syrupy"
+version = "4.8.1"
+description = "Pytest Snapshot Test Utility"
+optional = false
+python-versions = ">=3.8.1"
+files = [
+    {file = "syrupy-4.8.1-py3-none-any.whl", hash = "sha256:274f97cbaf44175f5e478a2f3a53559d31f41c66c6bf28131695f94ac893ea00"},
+    {file = "syrupy-4.8.1.tar.gz", hash = "sha256:8da8c0311e6d92de0b15767768c6ab98982b7b4a4c67083c08fbac3fbad4d44c"},
+]
+
+[package.dependencies]
+pytest = ">=7.0.0,<9.0.0"
+
+[[package]]
 name = "tabulate"
 version = "0.9.0"
 description = "Pretty-print tabular data"
@@ -1127,4 +1141,4 @@ test = ["pytest", "pytest-cov", "pytest-mock", "responses"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11"
-content-hash = "16d9eeab3f567a7a4ed2f9d7b3192d815ee20562f602f60ceec0d96f86b9a78d"
+content-hash = "3d3fbc465026e85074253b922a02eadaf3fc91dbf752cd80e61517a1eed62bcc"

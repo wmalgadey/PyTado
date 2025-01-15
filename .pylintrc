@@ -1,0 +1,8 @@
+[MASTER]
+ignore-patterns=
+max-line-length=100
+per-file-ignores=
+    tests/*:C0301,W0212
+
+[MESSAGES CONTROL]
+disable=protected-access

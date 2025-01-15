@@ -38,9 +38,10 @@ pre-commit = "*"
 pytype = "*"
 types-requests = "*"
 responses = "*"
-pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+pytest = "^8.3.4"
+syrupy = "^4.8.1"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
