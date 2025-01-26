@@ -7,6 +7,7 @@ import functools
 import warnings
 
 import PyTado.interface.api as API
+from PyTado.const import DEFAULT_DATE_FORMAT, Unit
 from PyTado.http import Http
 
 
@@ -51,7 +52,7 @@ class Tado:
         )
 
         if self._http.is_x_line:
-            self._api: API.Tado | API.TadoX = API.TadoX(http=self._http, debug=debug)
+            self._api: API.TadoBase = API.TadoX(http=self._http, debug=debug)
         else:
             self._api = API.Tado(http=self._http, debug=debug)
 
@@ -271,7 +272,8 @@ class Tado:
         return self.get_eiq_meter_readings()
 
     @deprecated("set_eiq_meter_readings")
-    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
+    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime(
+            f"{DEFAULT_DATE_FORMAT}"), reading=0):
         """Send Meter Readings to Tado (Deprecated)
 
         date format is YYYY-MM-DD, reading is without decimals
@@ -281,11 +283,11 @@ class Tado:
     @deprecated("set_eiq_tariff")
     def setEIQTariff(
         self,
-        from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        tariff=0,
-        unit="m3",
-        is_period=False,
+        from_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        to_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        tariff: int = 0,
+        unit: Unit = Unit.M3,
+        is_period: bool = False,
     ):
         """Send Tariffs to Tado (Deprecated)
 
