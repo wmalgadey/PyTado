@@ -3,14 +3,15 @@ PyTado interface implementation for hops.tado.com (Tado X).
 """
 
 import functools
-import logging
 from typing import Any
+
+from PyTado.const import TYPE_HEATING
+from PyTado.interface.api.base_tado import TadoBase, Timetable
 
 from ...exceptions import TadoNotSupportedException
 from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
 from ...zone import TadoXZone, TadoZone
-from .my_tado import Tado, Timetable
 
 
 def not_supported(reason):
@@ -27,7 +28,7 @@ def not_supported(reason):
 _LOGGER = Logger(__name__)
 
 
-class TadoX(Tado):
+class TadoX(TadoBase):
     """Interacts with a Tado thermostat via hops.tado.com (Tado X) API.
 
     Example usage: http = Http('me@somewhere.com', 'mypasswd')
@@ -41,22 +42,10 @@ class TadoX(Tado):
         debug: bool = False,
     ):
         """Class Constructor"""
-
-        super().__init__(http=http, debug=debug)
-
         if not http.is_x_line:
             raise TadoNotSupportedException("TadoX is only usable with LINE_X Generation")
 
-        if debug:
-            _LOGGER.setLevel(logging.DEBUG)
-        else:
-            _LOGGER.setLevel(logging.WARNING)
-
-        self._http = http
-
-        # Track whether the user's Tado instance supports auto-geofencing,
-        # set to None until explicitly set
-        self._auto_geofencing_supported = None
+        super().__init__(http=http, debug=debug)
 
     def get_devices(self):
         """
@@ -72,6 +61,8 @@ class TadoX(Tado):
         devices = [device for room in rooms for device in room["devices"]]
 
         for device in devices:
+            device["generation"] = "LINE_X"
+
             serial_number = device.get("serialNo", device.get("serialNumber"))
             if not serial_number:
                 continue
@@ -81,8 +72,22 @@ class TadoX(Tado):
             request.device = serial_number
             device.update(self._http.request(request))
 
+            # compatibility with my.tado.com API
+            device["shortSerialNo"] = serial_number
+            device["name"] = device["roomName"]
+            device["id"] = device["roomId"]
+
+            device.setdefault("characteristics", {"capabilities": {}})
+            device["characteristics"]["capabilities"] = self.get_capabilities(serial_number)
+
         if "otherDevices" in rooms_and_devices:
-            devices.append(rooms_and_devices["otherDevices"])
+            for device in rooms_and_devices["otherDevices"]:
+                device["generation"] = "LINE_X"
+
+                serial_number = device.get("serialNo", device.get("serialNumber"))
+                device["shortSerialNo"] = serial_number
+
+                devices.append(device)
 
         return devices
 
@@ -98,24 +103,29 @@ class TadoX(Tado):
 
     def get_zone_state(self, zone: int) -> TadoZone:
         """
-        Gets current state of Zone as a TadoXZone object.
+        Gets current state of zone/room as a TadoXZone object.
         """
 
         return TadoXZone.from_data(zone, self.get_state(zone))
 
     def get_zone_states(self):
         """
-        Gets current states of all zones.
+        Gets current states of all zones/rooms.
         """
 
         request = TadoXRequest()
         request.command = "rooms"
 
-        return self._http.request(request)
+        rooms = self._http.request(request)
+
+        # make response my.tado.com compatible
+        zone_states = {"zoneStates": [{"id": room["id"], "name": room["name"]} for room in rooms]}
+
+        return {**zone_states, "rooms": rooms}
 
     def get_state(self, zone):
         """
-        Gets current state of Zone.
+        Gets current state of zone/room.
         """
 
         request = TadoXRequest()
@@ -124,16 +134,21 @@ class TadoX(Tado):
 
         return data
 
-    @not_supported("This method is not currently supported by the Tado X API")
     def get_capabilities(self, zone):
         """
-        Gets current capabilities of zone.
+        Gets current capabilities of zone/room.
         """
-        pass
+
+        _LOGGER.warning(
+            "get_capabilities is not supported by Tado X API. "
+            "We currently always return type heating."
+        )
+
+        return {"type": TYPE_HEATING}
 
     def get_climate(self, zone):
         """
-        Gets temp (centigrade) and humidity (% RH) for zone.
+        Gets temp (centigrade) and humidity (% RH) for zone/room.
         """
 
         data = self.get_state(zone)["sensorDataPoints"]
@@ -150,6 +165,10 @@ class TadoX(Tado):
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
+        pass
+
+    @not_supported("Tado X API does not support historic data")
+    def get_timetable(self, zone: int):
         pass
 
     def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
@@ -340,3 +359,17 @@ class TadoX(Tado):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+        pass
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+        pass
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def set_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
+    ):
+        pass
