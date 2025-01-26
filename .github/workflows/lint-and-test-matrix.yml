@@ -5,9 +5,9 @@ name: Lint and test multiple Python versions
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, "support/*" ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, "support/*" ]
 
 jobs:
   lint:
@@ -24,12 +24,12 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -e '.[all]'
-        
+
     - name: Lint with black
       uses: psf/black@stable
       with:
@@ -51,7 +51,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

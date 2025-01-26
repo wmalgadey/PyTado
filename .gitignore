@@ -71,6 +71,12 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Ruff cache
+.ruff_cache
+
+# Example dev
+/examples/example_dev.py
+
 # PyBuilder
 .pybuilder/
 target/
@@ -158,3 +164,7 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+.DS_Store
+junit.xml
+.envrc.private
+examples/example_dev.py
