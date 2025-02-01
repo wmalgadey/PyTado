@@ -1,0 +1,22 @@
+{
+  "name": "pytado",
+  "version": "1.0.0",
+  "description": "PyTado is a Python module implementing an interface to the Tado web API. It allows a user to interact with their Tado heating system for the purposes of monitoring or controlling their heating system, beyond what Tado themselves currently offer",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests",
+    "src": "PyTado",
+    "docs": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@11ty/eleventy": "^3.0.0"
+  }
+}
