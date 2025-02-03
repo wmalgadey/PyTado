@@ -346,3 +346,30 @@ class TadoX(Tado):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
+
+    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+        """
+        Set the flow temperature optimization.
+
+        max_flow_temperature: float, the maximum flow temperature in Celsius
+        """
+
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+        request.payload = {"maxFlowTemperature": max_flow_temperature}
+
+        return self._http.request(request)
+
+    def get_flow_temperature_optimization(self):
+        """
+        Get the current flow temperature optimization
+        """
+
+        request = TadoXRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+
+        return self._http.request(request)
