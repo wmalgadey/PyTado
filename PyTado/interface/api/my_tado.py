@@ -4,6 +4,8 @@ PyTado interface implementation for app.tado.com.
 
 from typing import Any, overload
 
+from numpy import isin
+
 from PyTado.exceptions import TadoException
 from PyTado.http import Action, Domain, Mode, TadoRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
@@ -77,9 +79,14 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = "zoneStates"
 
+        response = self._http.request(request)
+
+        if not isinstance(response, dict):
+            raise TadoException("Invalid response from Tado API")
+
         return {
             key: ZoneState.model_validate(value)
-            for key, value in self._http.request(request).items()
+            for key, value in response.items()
         }
 
     def get_state(self, zone: int) -> ZoneState:
@@ -90,9 +97,14 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = f"zones/{zone}/state"
 
+        response = self._http.request(request)
+
+        if not isinstance(response, dict):
+            raise TadoException("Invalid response from Tado API")
+
         data = {
-            **self._http.request(request),
-            **self.get_zone_overlay_default(zone),
+            **response,
+            **self.get_zone_overlay_default(zone).to_dict(),
         }
 
         return ZoneState.model_validate(self._http.request(request))
@@ -128,6 +140,9 @@ class Tado(TadoBase):
         request.mode = Mode.PLAIN
         data = self._http.request(request)
 
+        if not isinstance(data, dict):
+            raise TadoException("Invalid response from Tado API")
+
         if "id" not in data:
             raise TadoException(f'Returned data did not contain "id" : {str(data)}')
 
@@ -147,7 +162,12 @@ class Tado(TadoBase):
         request.payload = {"id": timetable}
         request.mode = Mode.PLAIN
 
-        return Timetable(self._http.request(request).get("id"))
+        response = self._http.request(request)
+
+        if not isinstance(response, dict):
+            raise TadoException("Invalid response from Tado API")
+
+        return Timetable(int(response.get("id", -1)))
 
     @overload
     def get_schedule(
@@ -307,6 +327,9 @@ class Tado(TadoBase):
         """
 
         data = self.get_state(zone)
+
+        if not isinstance(data, dict):
+            raise TadoException("Invalid response from Tado API")
 
         if "openWindowDetected" in data:
             return {"openWindowDetected": data["openWindowDetected"]}

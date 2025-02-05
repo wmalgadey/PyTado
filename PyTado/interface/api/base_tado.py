@@ -8,7 +8,7 @@ from datetime import date
 from functools import cached_property
 from typing import Any, overload
 
-from PyTado.exceptions import TadoNotSupportedException
+from PyTado.exceptions import TadoException, TadoNotSupportedException
 from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
 from PyTado.logger import Logger
 from PyTado.models import Capabilities, Climate, Historic
@@ -379,9 +379,14 @@ class TadoBase(metaclass=ABCMeta):
         request.action = Action.GET
         request.endpoint = Endpoint.EIQ
 
+        respones = self._http.request(request)
+
+        if not isinstance(respones, dict):
+            raise TadoException("Invalid response from Tado")
+
         return [
             EIQMeterReading.model_validate(reading)
-            for reading in self._http.request(request).get("readings", [])
+            for reading in respones.get("readings", [])
         ]
 
     def set_eiq_meter_readings(self, date: date = date.today(), reading: int = 0):
