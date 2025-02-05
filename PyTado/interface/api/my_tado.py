@@ -8,9 +8,11 @@ from typing import Any, overload
 from PyTado.interface.api.base_tado import TadoBase, Timetable
 from PyTado.models.home import AirComfort
 from PyTado.models.line_x.schedule import SetSchedule
+from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationState
 from PyTado.models.pre_line_x.device import Device
 from PyTado.models.line_x import Schedule as ScheduleX
-from PyTado.models.pre_line_x.zone import Zone, ZoneState
+from PyTado.models.pre_line_x.home import HeatingCircuit
+from PyTado.models.pre_line_x.zone import Zone, ZoneControl, ZoneState
 from PyTado.models.pre_line_x.schedule import Schedule, Schedules
 from PyTado.models.return_models import Capabilities, Climate, TemperatureOffset
 from PyTado.types import (
@@ -373,7 +375,7 @@ class Tado(TadoBase):
 
         return TemperatureOffset.model_validate(self._http.request(request))
 
-    def get_heating_circuits(self):
+    def get_heating_circuits(self) -> list[HeatingCircuit]:
         """
         Gets available heating circuits
         """
@@ -381,9 +383,9 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = "heatingCircuits"
 
-        return self._http.request(request)
+        return [HeatingCircuit.model_validate(d) for d in self._http.request(request)]
 
-    def get_zone_control(self, zone):
+    def get_zone_control(self, zone: int) -> ZoneControl:
         """
         Get zone control information
         """
@@ -391,9 +393,9 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = f"zones/{zone:d}/control"
 
-        return self._http.request(request)
+        return ZoneControl.model_validate(self._http.request(request))
 
-    def set_zone_heating_circuit(self, zone, heating_circuit):
+    def set_zone_heating_circuit(self, zone: int, heating_circuit: int) -> ZoneControl:
         """
         Sets the heating circuit for a zone
         """
@@ -403,9 +405,9 @@ class Tado(TadoBase):
         request.action = Action.CHANGE
         request.payload = {"circuitNumber": heating_circuit}
 
-        return self._http.request(request)
+        return ZoneControl.model_validate(self._http.request(request))
 
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str) -> WiringInstallationState:
         """
         Get the boiler wiring installation state from home by bridge endpoint
         """
@@ -417,9 +419,9 @@ class Tado(TadoBase):
         request.command = "boilerWiringInstallationState"
         request.params = {"authKey": auth_key}
 
-        return self._http.request(request)
+        return WiringInstallationState.model_validate(self._http.request(request))
 
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str) -> MaxOutputTemp:
         """
         Get the boiler max output temperature from home by bridge endpoint
         """
@@ -431,11 +433,11 @@ class Tado(TadoBase):
         request.command = "boilerMaxOutputTemperature"
         request.params = {"authKey": auth_key}
 
-        return self._http.request(request)
+        return MaxOutputTemp.model_validate(self._http.request(request))
 
     def set_boiler_max_output_temperature(
         self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
+    ) -> None:
         """
         Set the boiler max output temperature with home by bridge endpoint
         """
@@ -450,4 +452,4 @@ class Tado(TadoBase):
             "boilerMaxOutputTemperatureInCelsius": temperature_in_celcius
         }
 
-        return self._http.request(request)
+        self._http.request(request)
