@@ -306,10 +306,12 @@ class TadoX(TadoBase):
         with option to get specific info i.e. cmd='temperatureOffset'
         """
         request = TadoXRequest()
-        request.command = f"devices/{device_id}"    
+        request.command = f"devices/{device_id}"
         return Device.model_validate(self._http.request(request))
 
-    def set_temp_offset(self, device_id: str, offset: float = 0, measure: str = "celsius") -> None:
+    def set_temp_offset(
+        self, device_id: str, offset: float = 0, measure: str = "celsius"
+    ) -> None:
         """
         Set the Temperature offset on the device.
         """

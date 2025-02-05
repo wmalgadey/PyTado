@@ -8,7 +8,7 @@ import json
 import logging
 import pprint
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import Any
 from urllib.parse import urlencode
 
 import requests
@@ -56,9 +56,11 @@ class Mode(enum.Enum):
     OBJECT = 1
     PLAIN = 2
 
+
 @dataclass
 class TadoRequest:
     """Data Container for my.tado.com API Requests"""
+
     endpoint: Endpoint = Endpoint.MY_API
     command: str | None = None
     action: Action | str = Action.GET
@@ -72,13 +74,14 @@ class TadoRequest:
 @dataclass
 class TadoXRequest(TadoRequest):
     """Data Container for hops.tado.com (Tado X) API Requests"""
+
     endpoint: Endpoint = Endpoint.HOPS_API
     _action: Action | str = Action.GET
-    
+
     def __post_init__(self) -> None:
         self._action = self.action
 
-    @property
+    @property # type: ignore
     def action(self) -> Action | str:
         """Get request action for Tado X"""
         if self._action == Action.CHANGE:
@@ -104,6 +107,7 @@ _DEFAULT_RETRIES = 5
 
 class Http:
     """API Request Class"""
+
     _refresh_at: datetime
     _session: requests.Session
     _headers: dict[str, str]
@@ -139,7 +143,9 @@ class Http:
     def is_x_line(self) -> bool:
         return self._x_api
 
-    def _log_response(self, response: requests.Response, *args: Any, **kwargs: Any) -> None:
+    def _log_response(
+        self, response: requests.Response, *args: Any, **kwargs: Any
+    ) -> None:
         og_request_method = response.request.method
         og_request_url = response.request.url
         og_request_headers = response.request.headers
@@ -354,7 +360,12 @@ class Http:
         request.action = Action.GET
         request.domain = Domain.ME
 
-        homes_ = self.request(request)["homes"]
+        response = self.request(request)
+
+        if not isinstance(response, dict):
+            raise TadoException("Unexpected response type")
+
+        homes_ = response["homes"]
 
         return int(homes_[0]["id"])
 
@@ -366,5 +377,8 @@ class Http:
         request.command = ""
 
         home_ = self.request(request)
+
+        if not isinstance(home_, dict):
+            raise TadoException("Unexpected response type")
 
         return "generation" in home_ and home_["generation"] == "LINE_X"

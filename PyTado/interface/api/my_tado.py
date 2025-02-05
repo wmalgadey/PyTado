@@ -4,8 +4,6 @@ PyTado interface implementation for app.tado.com.
 
 from typing import Any, overload
 
-from numpy import isin
-
 from PyTado.exceptions import TadoException
 from PyTado.http import Action, Domain, Mode, TadoRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
@@ -84,10 +82,7 @@ class Tado(TadoBase):
         if not isinstance(response, dict):
             raise TadoException("Invalid response from Tado API")
 
-        return {
-            key: ZoneState.model_validate(value)
-            for key, value in response.items()
-        }
+        return {key: ZoneState.model_validate(value) for key, value in response.items()}
 
     def get_state(self, zone: int) -> ZoneState:
         """
@@ -96,16 +91,6 @@ class Tado(TadoBase):
 
         request = TadoRequest()
         request.command = f"zones/{zone}/state"
-
-        response = self._http.request(request)
-
-        if not isinstance(response, dict):
-            raise TadoException("Invalid response from Tado API")
-
-        data = {
-            **response,
-            **self.get_zone_overlay_default(zone).to_dict(),
-        }
 
         return ZoneState.model_validate(self._http.request(request))
 
@@ -386,8 +371,9 @@ class Tado(TadoBase):
 
         return TemperatureOffset.model_validate(self._http.request(request))
 
-
-    def set_temp_offset(self, device_id: str, offset: float = 0, measure: str = "celsius") -> TemperatureOffset:
+    def set_temp_offset(
+        self, device_id: str, offset: float = 0, measure: str = "celsius"
+    ) -> TemperatureOffset:
         """
         Set the Temperature offset on the device.
         """
@@ -433,7 +419,9 @@ class Tado(TadoBase):
 
         return ZoneControl.model_validate(self._http.request(request))
 
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str) -> WiringInstallationState:
+    def get_boiler_install_state(
+        self, bridge_id: str, auth_key: str
+    ) -> WiringInstallationState:
         """
         Get the boiler wiring installation state from home by bridge endpoint
         """
@@ -447,7 +435,9 @@ class Tado(TadoBase):
 
         return WiringInstallationState.model_validate(self._http.request(request))
 
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str) -> MaxOutputTemp:
+    def get_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str
+    ) -> MaxOutputTemp:
         """
         Get the boiler max output temperature from home by bridge endpoint
         """

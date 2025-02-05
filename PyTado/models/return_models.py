@@ -16,6 +16,7 @@ class Climate(Base):
 class Capabilities(Base):
     type: ZoneType
 
+
 class TemperatureOffset(Base):
     celsius: float
     fahrenheit: float

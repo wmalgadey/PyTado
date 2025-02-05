@@ -48,6 +48,7 @@ DEVICE_DOMAIN = "devices"
 
 HTTP_CODES_OK = [200, 201, 202, 204]
 
+
 class Unit(enum.Enum):
     """unit Enum"""
 
