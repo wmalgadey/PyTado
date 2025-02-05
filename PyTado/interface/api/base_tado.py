@@ -34,6 +34,7 @@ from PyTado.models.pre_line_x import Device
 from PyTado.models.pre_line_x import Zone, ZoneState
 
 from PyTado.models import Capabilities, Climate
+from PyTado.models.return_models import TemperatureOffset
 from PyTado.zone.hops_zone import TadoXZone
 from PyTado.zone.my_zone import TadoZone
 from PyTado.types import (
@@ -332,13 +333,13 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_device_info(self, device_id: int, cmd: str = "") -> dict[str, Any]:
+    def get_device_info(self, device_id: str) -> Device | DeviceX: 
         pass
 
     @abstractmethod
     def set_temp_offset(
-        self, device_id: int, offset: int = 0, measure: str = "celsius"
-    ) -> dict[str, Any]:
+        self, device_id: str, offset: float = 0, measure: str = "celsius"
+    ) -> TemperatureOffset | None:
         pass
 
     @abstractmethod

@@ -12,7 +12,7 @@ from PyTado.models.pre_line_x.device import Device
 from PyTado.models.line_x import Schedule as ScheduleX
 from PyTado.models.pre_line_x.zone import Zone, ZoneState
 from PyTado.models.pre_line_x.schedule import Schedule, Schedules
-from PyTado.models.return_models import Capabilities, Climate
+from PyTado.models.return_models import Capabilities, Climate, TemperatureOffset
 from PyTado.types import (
     DayType,
     FanMode,
@@ -333,21 +333,33 @@ class Tado(TadoBase):
 
         return self._http.request(request)
 
-    def get_device_info(self, device_id, cmd=""):
+    def get_device_info(self, device_id: str) -> Device:
         """
         Gets information about devices
-        with option to get specific info i.e. cmd='temperatureOffset'
         """
 
         request = TadoRequest()
-        request.command = cmd
+        request.command = ""
         request.action = Action.GET
         request.domain = Domain.DEVICES
         request.device = device_id
 
-        return self._http.request(request)
+        return Device.model_validate(self._http.request(request))
 
-    def set_temp_offset(self, device_id, offset=0, measure="celsius"):
+    def get_temp_offset(self, device_id: str) -> TemperatureOffset:
+        """
+        Get the Temperature offset on the device.
+        """
+        request = TadoRequest()
+        request.command = "temperatureOffset"
+        request.action = Action.GET
+        request.domain = Domain.DEVICES
+        request.device = device_id
+
+        return TemperatureOffset.model_validate(self._http.request(request))
+
+
+    def set_temp_offset(self, device_id: str, offset: float = 0, measure: str = "celsius") -> TemperatureOffset:
         """
         Set the Temperature offset on the device.
         """
@@ -359,7 +371,7 @@ class Tado(TadoBase):
         request.device = device_id
         request.payload = {measure: offset}
 
-        return self._http.request(request)
+        return TemperatureOffset.model_validate(self._http.request(request))
 
     def get_heating_circuits(self):
         """

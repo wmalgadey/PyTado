@@ -298,31 +298,22 @@ class TadoX(TadoBase):
         pass
 
     @not_supported("This method is not currently supported by the Tado X API")
-    def reset_open_window(self, zone):
+    def reset_open_window(self, zone: int) -> None:
         """
         Sets the window in zone to closed
         """
         pass
 
-    def get_device_info(self, device_id, cmd=""):
+    def get_device_info(self, device_id: str) -> Device:
         """
         Gets information about devices
         with option to get specific info i.e. cmd='temperatureOffset'
         """
+        request = TadoXRequest()
+        request.command = f"devices/{device_id}"    
+        return Device.model_validate(self._http.request(request))
 
-        if cmd:
-            request = TadoRequest()
-            request.command = cmd
-        else:
-            request = TadoXRequest()
-
-        request.action = Action.GET
-        request.domain = Domain.DEVICES
-        request.device = device_id
-
-        return self._http.request(request)
-
-    def set_temp_offset(self, device_id, offset=0, measure="celsius"):
+    def set_temp_offset(self, device_id: str, offset: float = 0, measure: str = "celsius") -> None:
         """
         Set the Temperature offset on the device.
         """
@@ -332,7 +323,7 @@ class TadoX(TadoBase):
         request.action = Action.CHANGE
         request.payload = {"temperatureOffset": offset}
 
-        return self._http.request(request)
+        self._http.request(request)
 
     def set_child_lock(self, device_id, child_lock):
         """ "
