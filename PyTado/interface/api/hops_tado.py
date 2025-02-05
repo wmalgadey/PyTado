@@ -271,7 +271,7 @@ class TadoX(TadoBase):
         self._http.request(request)
 
     @not_supported("Concept of zones is not available by Tado X API, they use rooms")
-    def get_zone_overlay_default(self, zone: int):
+    def get_zone_overlay_default(self, zone: int) -> None:
         """
         Get current overlay default settings for zone.
         """
@@ -290,7 +290,7 @@ class TadoX(TadoBase):
             return {"openWindowDetected": False}
 
     @not_supported("This method is not currently supported by the Tado X API")
-    def set_open_window(self, zone):
+    def set_open_window(self, zone: int) -> None:
         """
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
@@ -325,7 +325,7 @@ class TadoX(TadoBase):
 
         self._http.request(request)
 
-    def set_child_lock(self, device_id, child_lock):
+    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
         """ "
         Set and toggle the child lock on the device.
         """
@@ -346,13 +346,13 @@ class TadoX(TadoBase):
     @not_supported(
         "This method is not currently supported by Tado X Bridges (missing authKey)"
     )
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str) -> None:
         pass
 
     @not_supported(
         "This method is not currently supported by Tado X Bridges (missing authKey)"
     )
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str) -> None:
         pass
 
     @not_supported(
@@ -360,5 +360,5 @@ class TadoX(TadoBase):
     )
     def set_boiler_max_output_temperature(
         self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
+    ) -> None:
         pass

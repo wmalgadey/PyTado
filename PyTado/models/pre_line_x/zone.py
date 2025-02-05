@@ -11,6 +11,7 @@ from PyTado.types import (
     Power,
     Presence,
     VerticalSwing,
+    ZoneType,
 )
 
 
@@ -188,3 +189,25 @@ class ZoneState(Base):  # pylint: disable=too-many-instance-attributes
     activity_data_points: ActivityDataPoints
     sensor_data_points: SensorDataPoints
     termination_condition: TerminationCondition | None = None
+
+
+class Duties(Base):
+    """Duties model represents the duties configuration of a zone control."""
+    
+    type: str
+    leader: Device
+    drivers: list[Device]
+    uis: list[Device]
+
+class ZoneControl(Base):
+    """ZoneControl model represents the control settings of a zone."""
+
+    type: str
+    early_start_enabled: bool
+    heating_circuit: int
+    duties: Duties
+
+class ZoneOverlayDefault(Base):
+    """ZoneOverlayDefault model represents the default overlay settings of a zone."""
+
+    termination_condition: TerminationCondition

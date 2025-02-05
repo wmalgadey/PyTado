@@ -2,12 +2,13 @@
 Do all the API HTTP heavy lifting in this file
 """
 
+from dataclasses import dataclass
 import enum
 import json
 import logging
 import pprint
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 from urllib.parse import urlencode
 
 import requests
@@ -55,56 +56,27 @@ class Mode(enum.Enum):
     OBJECT = 1
     PLAIN = 2
 
-
+@dataclass
 class TadoRequest:
     """Data Container for my.tado.com API Requests"""
-
-    def __init__(
-        self,
-        endpoint: Endpoint = Endpoint.MY_API,
-        command: str | None = None,
-        action: Action | str = Action.GET,
-        payload: dict[str, Any] | list[Any] | None = None,
-        domain: Domain = Domain.HOME,
-        device: int | str | None = None,
-        mode: Mode = Mode.OBJECT,
-        params: dict[str, Any] | None = None,
-    ) -> None:
-        self.endpoint = endpoint
-        self.command = command
-        self.action = action
-        self.payload = payload
-        self.domain = domain
-        self.device = device
-        self.mode = mode
-        self.params = params
+    endpoint: Endpoint = Endpoint.MY_API
+    command: str | None = None
+    action: Action | str = Action.GET
+    payload: dict[str, Any] | list[Any] | None = None
+    domain: Domain = Domain.HOME
+    device: int | str | None = None
+    mode: Mode = Mode.OBJECT
+    params: dict[str, Any] | None = None
 
 
+@dataclass
 class TadoXRequest(TadoRequest):
     """Data Container for hops.tado.com (Tado X) API Requests"""
-
-    def __init__(
-        self,
-        endpoint: Endpoint = Endpoint.HOPS_API,
-        command: str | None = None,
-        action: Action | str = Action.GET,
-        payload: dict[str, Any] | list[Any] | None = None,
-        domain: Domain = Domain.HOME,
-        device: int | str | None = None,
-        mode: Mode = Mode.OBJECT,
-        params: dict[str, Any] | None = None,
-    ) -> None:
-        super().__init__(
-            endpoint=endpoint,
-            command=command,
-            action=action,
-            payload=payload,
-            domain=domain,
-            device=device,
-            mode=mode,
-            params=params,
-        )
-        self._action = action
+    endpoint: Endpoint = Endpoint.HOPS_API
+    _action: Action | str = Action.GET
+    
+    def __post_init__(self) -> None:
+        self._action = self.action
 
     @property
     def action(self) -> Action | str:
@@ -132,6 +104,14 @@ _DEFAULT_RETRIES = 5
 
 class Http:
     """API Request Class"""
+    _refresh_at: datetime
+    _session: requests.Session
+    _headers: dict[str, str]
+    _username: str
+    _password: str
+    _id: int
+    _token_refresh: str
+    _x_api: bool
 
     def __init__(
         self,
@@ -159,7 +139,7 @@ class Http:
     def is_x_line(self) -> bool:
         return self._x_api
 
-    def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
+    def _log_response(self, response: requests.Response, *args: Any, **kwargs: Any) -> None:
         og_request_method = response.request.method
         og_request_url = response.request.url
         og_request_headers = response.request.headers
@@ -178,7 +158,7 @@ class Http:
             f"\n\tData: {response_data}"
         )
 
-    def request(self, request: TadoRequest) -> dict[str, Any]:
+    def request(self, request: TadoRequest) -> dict[str, Any] | list[Any]:
         """Request something from the API with a TadoRequest"""
         self._refresh_token()
 
@@ -230,7 +210,11 @@ class Http:
                 f"Request failed with status code {response.status_code}"
             )
 
-        return response.json()
+        response_json = response.json()
+        if isinstance(response_json, dict) or isinstance(response_json, list):
+            return response_json
+        else:
+            raise TadoException("Unexpected response type")
 
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
@@ -280,7 +264,7 @@ class Http:
         self._refresh_at = self._refresh_at - timedelta(seconds=30)
 
         self._headers["Authorization"] = f"Bearer {access_token}"
-        return refresh_token
+        return str(refresh_token)
 
     def _refresh_token(self) -> None:
         """Refresh the token if it is about to expire"""
@@ -372,9 +356,9 @@ class Http:
 
         homes_ = self.request(request)["homes"]
 
-        return homes_[0]["id"]
+        return int(homes_[0]["id"])
 
-    def _check_x_line_generation(self):
+    def _check_x_line_generation(self) -> bool:
         # get home info
         request = TadoRequest()
         request.action = Action.GET

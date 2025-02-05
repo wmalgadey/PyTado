@@ -34,6 +34,8 @@ from PyTado.models.pre_line_x import Device
 from PyTado.models.pre_line_x import Zone, ZoneState
 
 from PyTado.models import Capabilities, Climate
+from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationState
+from PyTado.models.pre_line_x.zone import ZoneOverlayDefault
 from PyTado.models.return_models import TemperatureOffset
 from PyTado.zone.hops_zone import TadoXZone
 from PyTado.zone.my_zone import TadoZone
@@ -225,11 +227,11 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_zone_overlay_default(self, zone: int):
+    def get_zone_overlay_default(self, zone: int) -> ZoneOverlayDefault | None:
         pass
 
     @abstractmethod
-    def set_child_lock(self, device_id, child_lock) -> None:
+    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
         pass
 
     def set_home(self) -> None:
@@ -278,7 +280,7 @@ class TadoBase(metaclass=ABCMeta):
         Returns the state of the window for zone
         """
 
-        return {"openWindow": self.get_state(zone)["openWindow"]}
+        return {"openWindow": self.get_state(zone).open_window}
 
     def get_weather(self) -> Weather:
         """
@@ -343,17 +345,17 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str) -> WiringInstallationState | None:
         pass
 
     @abstractmethod
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str) -> MaxOutputTemp | None:
         pass
 
     @abstractmethod
     def set_boiler_max_output_temperature(
         self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
+    ) -> None:
         pass
 
     def get_eiq_tariffs(self) -> list[EIQTariff]:

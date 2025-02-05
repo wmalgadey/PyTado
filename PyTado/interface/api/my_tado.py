@@ -12,7 +12,7 @@ from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationSta
 from PyTado.models.pre_line_x.device import Device
 from PyTado.models.line_x import Schedule as ScheduleX
 from PyTado.models.pre_line_x.home import HeatingCircuit
-from PyTado.models.pre_line_x.zone import Zone, ZoneControl, ZoneState
+from PyTado.models.pre_line_x.zone import Zone, ZoneControl, ZoneOverlayDefault, ZoneState
 from PyTado.models.pre_line_x.schedule import Schedule, Schedules
 from PyTado.models.return_models import Capabilities, Climate, TemperatureOffset
 from PyTado.types import (
@@ -268,7 +268,7 @@ class Tado(TadoBase):
 
         return self._http.request(request)
 
-    def get_zone_overlay_default(self, zone: int):
+    def get_zone_overlay_default(self, zone: int) -> ZoneOverlayDefault:
         """
         Get current overlay default settings for zone.
         """
@@ -276,9 +276,9 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = f"zones/{zone:d}/defaultOverlay"
 
-        return self._http.request(request)
+        return ZoneOverlayDefault.model_validate(self._http.request(request))
 
-    def set_child_lock(self, device_id, child_lock) -> None:
+    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
         """
         Sets the child lock on a device
         """
@@ -310,7 +310,7 @@ class Tado(TadoBase):
         else:
             return {"openWindowDetected": False}
 
-    def set_open_window(self, zone):
+    def set_open_window(self, zone: int) -> None:
         """
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
@@ -321,9 +321,9 @@ class Tado(TadoBase):
         request.action = Action.SET
         request.mode = Mode.PLAIN
 
-        return self._http.request(request)
+        self._http.request(request)
 
-    def reset_open_window(self, zone):
+    def reset_open_window(self, zone: int) -> None:
         """
         Sets the window in zone to closed
         """
@@ -333,7 +333,7 @@ class Tado(TadoBase):
         request.action = Action.RESET
         request.mode = Mode.PLAIN
 
-        return self._http.request(request)
+        self._http.request(request)
 
     def get_device_info(self, device_id: str) -> Device:
         """

@@ -31,14 +31,14 @@ class Logger(logging.Logger):
                 pass
             return s
 
-        def format(self, record):
+        def format(self, record: logging.LogRecord) -> str:
             """
             Do the actual filtering
             """
             original = logging.Formatter.format(self, record)  # call parent method
             return self._filter(original)
 
-    def __init__(self, name: str, level=logging.NOTSET):
+    def __init__(self, name: str, level: int = logging.NOTSET) -> None:
         super().__init__(name)
         log_sh = logging.StreamHandler()
         log_fmt = self.SensitiveFormatter(
