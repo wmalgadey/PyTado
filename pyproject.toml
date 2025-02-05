@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "python-tado"
-version = "0.18.5"
+version = "1.0.0"
 description = "PyTado from chrism0dwk, modfied by w.malgadey, diplix, michaelarnauts, LenhartStephan, splifter, syssi, andersonshatch, Yippy, p0thi, Coffee2CodeNL, chiefdragon, FilBr, nikilase, albertomontesg, Moritz-Schmidt, palazzem"
 authors = [
     { name = "Chris Jewell", email = "chrism0dwk@gmail.com" },
@@ -49,7 +49,7 @@ all = [
 ]
 
 [project.scripts]
-pytado = "pytado.__main__:main"
+pytado = "PyTado.__main__:main"
 
 [tool.setuptools]
 platforms = ["any"]

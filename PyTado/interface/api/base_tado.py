@@ -2,43 +2,34 @@
 Base class for Tado API classes.
 """
 
-from datetime import date
-from functools import cached_property
 import logging
 from abc import ABCMeta, abstractmethod
+from datetime import date
+from functools import cached_property
 from typing import Any, overload
 
 from PyTado.exceptions import TadoNotSupportedException
 from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
 from PyTado.logger import Logger
-from PyTado.models import Historic
-from PyTado.models.common.schedule import ScheduleElement
+from PyTado.models import Capabilities, Climate, Historic
 from PyTado.models.home import (
     AirComfort,
     EIQMeterReading,
     EIQTariff,
+    HomeState,
     MobileDevice,
     RunningTimes,
     User,
-    HomeState,
     Weather,
 )
-
-from PyTado.models.line_x import DevicesRooms
-from PyTado.models.line_x import RoomState
 from PyTado.models.line_x import Device as DeviceX
+from PyTado.models.line_x import DevicesRooms, RoomState
 from PyTado.models.line_x import Schedule as ScheduleX
-from PyTado.models.line_x.schedule import SetSchedule, TempValue as TempValueX
-from PyTado.models.pre_line_x import Schedule
-from PyTado.models.pre_line_x import Device
-from PyTado.models.pre_line_x import Zone, ZoneState
-
-from PyTado.models import Capabilities, Climate
+from PyTado.models.line_x.schedule import SetSchedule
+from PyTado.models.pre_line_x import Device, Schedule, Zone, ZoneState
 from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationState
 from PyTado.models.pre_line_x.zone import ZoneOverlayDefault
 from PyTado.models.return_models import TemperatureOffset
-from PyTado.zone.hops_zone import TadoXZone
-from PyTado.zone.my_zone import TadoZone
 from PyTado.types import (
     DayType,
     FanMode,
@@ -52,6 +43,8 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
+from PyTado.zone.hops_zone import TadoXZone
+from PyTado.zone.my_zone import TadoZone
 
 _LOGGER = Logger(__name__)
 
@@ -335,7 +328,7 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_device_info(self, device_id: str) -> Device | DeviceX: 
+    def get_device_info(self, device_id: str) -> Device | DeviceX:
         pass
 
     @abstractmethod
@@ -345,11 +338,15 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str) -> WiringInstallationState | None:
+    def get_boiler_install_state(
+        self, bridge_id: str, auth_key: str
+    ) -> WiringInstallationState | None:
         pass
 
     @abstractmethod
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str) -> MaxOutputTemp | None:
+    def get_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str
+    ) -> MaxOutputTemp | None:
         pass
 
     @abstractmethod

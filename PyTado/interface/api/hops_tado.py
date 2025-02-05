@@ -6,15 +6,11 @@ import functools
 from typing import Any, Callable, overload
 
 from PyTado.interface.api.base_tado import TadoBase, Timetable
-from PyTado.models.common.schedule import ScheduleElement
 from PyTado.models.home import AirComfort
 from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
 from PyTado.models.line_x.room import RoomState
-from PyTado.models.line_x.schedule import (
-    Schedule as ScheduleX,
-    SetSchedule,
-    TempValue as TempValueX,
-)
+from PyTado.models.line_x.schedule import Schedule as ScheduleX
+from PyTado.models.line_x.schedule import SetSchedule
 from PyTado.models.pre_line_x import Schedule
 from PyTado.models.return_models import Capabilities, Climate
 from PyTado.types import (
@@ -29,10 +25,10 @@ from PyTado.types import (
     ZoneType,
 )
 
-from ...exceptions import TadoException, TadoNotSupportedException
-from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
-from ...logger import Logger
-from ...zone import TadoXZone, TadoZone
+from PyTado.exceptions import TadoException, TadoNotSupportedException
+from PyTado.http import Action, Http, Mode, TadoXRequest
+from PyTado.logger import Logger
+from PyTado.zone import TadoZone
 
 
 def not_supported(reason: str) -> Callable:

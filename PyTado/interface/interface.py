@@ -8,6 +8,7 @@ from typing import Any, Callable
 import warnings
 
 import PyTado.interface.api as API
+from PyTado.const import DEFAULT_DATE_FORMAT, Unit
 from PyTado.http import Http
 from PyTado.models.util import Base
 
@@ -288,11 +289,11 @@ class Tado:
     @deprecated("set_eiq_tariff")
     def setEIQTariff(
         self,
-        from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        tariff=0,
-        unit="m3",
-        is_period=False,
+        from_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        to_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        tariff: int = 0,
+        unit: Unit = Unit.M3,
+        is_period: bool = False,
     ):
         """Send Tariffs to Tado (Deprecated)
 
