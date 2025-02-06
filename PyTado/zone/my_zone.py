@@ -81,15 +81,23 @@ class TadoZone:
             sensor_data = data["sensorDataPoints"]
 
             if "insideTemperature" in sensor_data:
-                kwargs["current_temp"] = float(sensor_data["insideTemperature"]["celsius"])
-                kwargs["current_temp_timestamp"] = sensor_data["insideTemperature"]["timestamp"]
+                kwargs["current_temp"] = float(
+                    sensor_data["insideTemperature"]["celsius"]
+                )
+                kwargs["current_temp_timestamp"] = sensor_data["insideTemperature"][
+                    "timestamp"
+                ]
                 if "precision" in sensor_data["insideTemperature"]:
-                    kwargs["precision"] = sensor_data["insideTemperature"]["precision"]["celsius"]
+                    kwargs["precision"] = sensor_data["insideTemperature"]["precision"][
+                        "celsius"
+                    ]
 
             if "humidity" in sensor_data:
                 humidity = float(sensor_data["humidity"]["percentage"])
                 kwargs["current_humidity"] = humidity
-                kwargs["current_humidity_timestamp"] = sensor_data["humidity"]["timestamp"]
+                kwargs["current_humidity_timestamp"] = sensor_data["humidity"][
+                    "timestamp"
+                ]
 
         if "tadoMode" in data:
             kwargs["is_away"] = data["tadoMode"] == "AWAY"
@@ -103,7 +111,10 @@ class TadoZone:
 
         if "setting" in data:
             # temperature setting will not exist when device is off
-            if "temperature" in data["setting"] and data["setting"]["temperature"] is not None:
+            if (
+                "temperature" in data["setting"]
+                and data["setting"]["temperature"] is not None
+            ):
                 kwargs["target_temp"] = float(data["setting"]["temperature"]["celsius"])
 
             setting = data["setting"]
@@ -144,7 +155,9 @@ class TadoZone:
                 ):
                     # v2 devices do not have mode so we have to figure it out
                     # from type
-                    kwargs["current_hvac_mode"] = TADO_HVAC_ACTION_TO_MODES[setting["type"]]
+                    kwargs["current_hvac_mode"] = TADO_HVAC_ACTION_TO_MODES[
+                        setting["type"]
+                    ]
 
             # Not all devices have fans
             if "fanSpeed" in setting:
@@ -153,7 +166,9 @@ class TadoZone:
                     CONST_FAN_AUTO if power == "ON" else CONST_FAN_OFF,
                 )
             elif "type" in setting and setting["type"] == TYPE_AIR_CONDITIONING:
-                kwargs["current_fan_speed"] = CONST_FAN_AUTO if power == "ON" else CONST_FAN_OFF
+                kwargs["current_fan_speed"] = (
+                    CONST_FAN_AUTO if power == "ON" else CONST_FAN_OFF
+                )
 
             if "fanLevel" in setting:
                 kwargs["current_fan_level"] = setting.get(
@@ -161,7 +176,9 @@ class TadoZone:
                     (CONST_FAN_SPEED_AUTO if power == "ON" else CONST_FAN_SPEED_OFF),
                 )
 
-        kwargs["preparation"] = "preparation" in data and data["preparation"] is not None
+        kwargs["preparation"] = (
+            "preparation" in data and data["preparation"] is not None
+        )
         open_window = data.get("openWindow") is not None
         kwargs["open_window"] = open_window
         kwargs["open_window_detected"] = data.get("openWindowDetected", False)
@@ -178,9 +195,16 @@ class TadoZone:
                     kwargs["current_hvac_action"] = TADO_MODES_TO_HVAC_ACTION.get(
                         kwargs["current_hvac_mode"], CONST_HVAC_COOL
                     )
-            if "heatingPower" in activity_data and activity_data["heatingPower"] is not None:
-                kwargs["heating_power"] = activity_data["heatingPower"].get("value", None)
-                kwargs["heating_power_timestamp"] = activity_data["heatingPower"]["timestamp"]
+            if (
+                "heatingPower" in activity_data
+                and activity_data["heatingPower"] is not None
+            ):
+                kwargs["heating_power"] = activity_data["heatingPower"].get(
+                    "value", None
+                )
+                kwargs["heating_power_timestamp"] = activity_data["heatingPower"][
+                    "timestamp"
+                ]
                 kwargs["heating_power_percentage"] = float(
                     activity_data["heatingPower"].get("percentage", 0)
                 )
@@ -191,11 +215,16 @@ class TadoZone:
         # If there is no overlay
         # then we are running the smart schedule
         if "overlay" in data and data["overlay"] is not None:
-            if "termination" in data["overlay"] and "type" in data["overlay"]["termination"]:
-                kwargs["overlay_termination_type"] = data["overlay"]["termination"]["type"]
-                kwargs["overlay_termination_timestamp"] = data["overlay"]["termination"].get(
-                    "expiry", None
-                )
+            if (
+                "termination" in data["overlay"]
+                and "type" in data["overlay"]["termination"]
+            ):
+                kwargs["overlay_termination_type"] = data["overlay"]["termination"][
+                    "type"
+                ]
+                kwargs["overlay_termination_timestamp"] = data["overlay"][
+                    "termination"
+                ].get("expiry", None)
         else:
             kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
 
@@ -205,11 +234,11 @@ class TadoZone:
         kwargs["available"] = kwargs["link"] != CONST_LINK_OFFLINE
 
         if "terminationCondition" in data:
-            kwargs["default_overlay_termination_type"] = data["terminationCondition"].get(
-                "type", None
-            )
-            kwargs["default_overlay_termination_duration"] = data["terminationCondition"].get(
-                "durationInSeconds", None
-            )
+            kwargs["default_overlay_termination_type"] = data[
+                "terminationCondition"
+            ].get("type", None)
+            kwargs["default_overlay_termination_duration"] = data[
+                "terminationCondition"
+            ].get("durationInSeconds", None)
 
         return cls(zone_id=zone_id, **kwargs)

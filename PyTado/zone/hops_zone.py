@@ -47,11 +47,15 @@ class TadoXZone(TadoZone):
                     kwargs["current_temp"] = float(inside_temp["value"])
                 kwargs["current_temp_timestamp"] = None
                 if "precision" in sensor_data["insideTemperature"]:
-                    kwargs["precision"] = sensor_data["insideTemperature"]["precision"]["celsius"]
+                    kwargs["precision"] = sensor_data["insideTemperature"]["precision"][
+                        "celsius"
+                    ]
 
             # X-specific humidity parsing
             if "humidity" in sensor_data:
-                kwargs["current_humidity"] = float(sensor_data["humidity"]["percentage"])
+                kwargs["current_humidity"] = float(
+                    sensor_data["humidity"]["percentage"]
+                )
                 kwargs["current_humidity_timestamp"] = None
 
         # Tado mode processing
@@ -71,7 +75,10 @@ class TadoXZone(TadoZone):
         # Setting processing
         if "setting" in data:
             # X-specific temperature setting
-            if "temperature" in data["setting"] and data["setting"]["temperature"] is not None:
+            if (
+                "temperature" in data["setting"]
+                and data["setting"]["temperature"] is not None
+            ):
                 kwargs["target_temp"] = float(data["setting"]["temperature"]["value"])
 
             setting = data["setting"]
@@ -111,7 +118,9 @@ class TadoXZone(TadoZone):
                         CONST_MODE_HEAT if power == "ON" else CONST_MODE_OFF
                     )
                     kwargs["overlay_termination_type"] = manual_termination["type"]
-                    kwargs["overlay_termination_timestamp"] = manual_termination["projectedExpiry"]
+                    kwargs["overlay_termination_timestamp"] = manual_termination[
+                        "projectedExpiry"
+                    ]
                 else:
                     kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
                     kwargs["overlay_termination_type"] = None
@@ -120,16 +129,17 @@ class TadoXZone(TadoZone):
                 kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
 
         kwargs["available"] = (
-            kwargs.get("connection", CONST_CONNECTION_OFFLINE) != CONST_CONNECTION_OFFLINE
+            kwargs.get("connection", CONST_CONNECTION_OFFLINE)
+            != CONST_CONNECTION_OFFLINE
         )
 
         # Termination conditions
         if "terminationCondition" in data:
-            kwargs["default_overlay_termination_type"] = data["terminationCondition"].get(
-                "type", None
-            )
-            kwargs["default_overlay_termination_duration"] = data["terminationCondition"].get(
-                "durationInSeconds", None
-            )
+            kwargs["default_overlay_termination_type"] = data[
+                "terminationCondition"
+            ].get("type", None)
+            kwargs["default_overlay_termination_duration"] = data[
+                "terminationCondition"
+            ].get("durationInSeconds", None)
 
         return cls(zone_id=zone_id, **kwargs)
