@@ -43,6 +43,8 @@ class Tado(TadoBase):
                    t.get_climate(1) # Get climate, zone 1.
     """
 
+    ##################### Home methods #####################
+
     def get_devices(self) -> list[Device]:
         """
         Gets device information.
@@ -62,13 +64,6 @@ class Tado(TadoBase):
 
         return [Zone.model_validate(zone) for zone in self._http.request(request)]
 
-    def get_zone_state(self, zone: int) -> TadoZone:
-        """
-        Gets current state of Zone as a TadoZone object.
-        """
-
-        return self.get_state(zone)  # type: ignore # TODO: proper zone model
-
     def get_zone_states(self) -> dict[str, ZoneState]:
         """
         Gets current states of all zones.
@@ -83,6 +78,31 @@ class Tado(TadoBase):
             raise TadoException("Invalid response from Tado API")
 
         return {key: ZoneState.model_validate(value) for key, value in response.items()}
+
+    def get_air_comfort(self) -> AirComfort:
+        request = TadoRequest()
+        request.command = "airComfort"
+
+        return AirComfort.model_validate(self._http.request(request))
+
+    def get_heating_circuits(self) -> list[HeatingCircuit]:
+        """
+        Gets available heating circuits
+        """
+
+        request = TadoRequest()
+        request.command = "heatingCircuits"
+
+        return [HeatingCircuit.model_validate(d) for d in self._http.request(request)]
+
+    ##################### Zone methods #####################
+
+    def get_zone_state(self, zone: int) -> TadoZone:
+        """
+        Gets current state of Zone as a TadoZone object.
+        """
+
+        return self.get_state(zone)  # type: ignore # TODO: proper zone model
 
     def get_state(self, zone: int) -> ZoneState:
         """
@@ -286,26 +306,6 @@ class Tado(TadoBase):
 
         return ZoneOverlayDefault.model_validate(self._http.request(request))
 
-    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
-        """
-        Sets the child lock on a device
-        """
-
-        request = TadoRequest()
-        request.command = "childLock"
-        request.action = Action.CHANGE
-        request.device = device_id
-        request.domain = Domain.DEVICES
-        request.payload = {"childLockEnabled": child_lock}
-
-        self._http.request(request)
-
-    def get_air_comfort(self) -> AirComfort:
-        request = TadoRequest()
-        request.command = "airComfort"
-
-        return AirComfort.model_validate(self._http.request(request))
-
     def get_open_window_detected(self, zone):
         """
         Returns whether an open window is detected.
@@ -343,6 +343,44 @@ class Tado(TadoBase):
         request.command = f"zones/{zone:d}/state/openWindow"
         request.action = Action.RESET
         request.mode = Mode.PLAIN
+
+        self._http.request(request)
+
+    def get_zone_control(self, zone: int) -> ZoneControl:
+        """
+        Get zone control information
+        """
+
+        request = TadoRequest()
+        request.command = f"zones/{zone:d}/control"
+
+        return ZoneControl.model_validate(self._http.request(request))
+
+    def set_zone_heating_circuit(self, zone: int, heating_circuit: int) -> ZoneControl:
+        """
+        Sets the heating circuit for a zone
+        """
+
+        request = TadoRequest()
+        request.command = f"zones/{zone:d}/control/heatingCircuit"
+        request.action = Action.CHANGE
+        request.payload = {"circuitNumber": heating_circuit}
+
+        return ZoneControl.model_validate(self._http.request(request))
+
+    ##################### Device methods #####################
+
+    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
+        """
+        Sets the child lock on a device
+        """
+
+        request = TadoRequest()
+        request.command = "childLock"
+        request.action = Action.CHANGE
+        request.device = device_id
+        request.domain = Domain.DEVICES
+        request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
 
@@ -387,37 +425,7 @@ class Tado(TadoBase):
 
         return TemperatureOffset.model_validate(self._http.request(request))
 
-    def get_heating_circuits(self) -> list[HeatingCircuit]:
-        """
-        Gets available heating circuits
-        """
-
-        request = TadoRequest()
-        request.command = "heatingCircuits"
-
-        return [HeatingCircuit.model_validate(d) for d in self._http.request(request)]
-
-    def get_zone_control(self, zone: int) -> ZoneControl:
-        """
-        Get zone control information
-        """
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/control"
-
-        return ZoneControl.model_validate(self._http.request(request))
-
-    def set_zone_heating_circuit(self, zone: int, heating_circuit: int) -> ZoneControl:
-        """
-        Sets the heating circuit for a zone
-        """
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/control/heatingCircuit"
-        request.action = Action.CHANGE
-        request.payload = {"circuitNumber": heating_circuit}
-
-        return ZoneControl.model_validate(self._http.request(request))
+    ##################### Boiler methods #####################
 
     def get_boiler_install_state(
         self, bridge_id: str, auth_key: str

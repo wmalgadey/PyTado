@@ -27,8 +27,6 @@ from PyTado.models.line_x import DevicesRooms, RoomState
 from PyTado.models.line_x import Schedule as ScheduleX
 from PyTado.models.line_x.schedule import SetSchedule
 from PyTado.models.pre_line_x import Device, Schedule, Zone, ZoneState
-from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationState
-from PyTado.models.pre_line_x.zone import ZoneOverlayDefault
 from PyTado.models.return_models import TemperatureOffset
 from PyTado.types import (
     DayType,
@@ -63,6 +61,8 @@ class TadoBase(metaclass=ABCMeta):
 
         self._http = http
 
+    ##################### Home methods #####################
+
     def get_me(self) -> User:
         """Gets home information."""
 
@@ -82,16 +82,7 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_zone_state(self, zone: int) -> TadoZone | TadoXZone:
-        """Gets current state of Zone as a TadoZone object."""
-        pass
-
-    @abstractmethod
     def get_zone_states(self) -> dict[str, ZoneState] | dict[str, RoomState]:
-        pass
-
-    @abstractmethod
-    def get_state(self, zone: int) -> ZoneState | RoomState:
         pass
 
     def get_home_state(self) -> HomeState:
@@ -137,6 +128,111 @@ class TadoBase(metaclass=ABCMeta):
         """
         return self._auto_geofencing_supported
 
+    def set_home(self) -> None:
+        """
+        Sets HomeState to HOME
+        """
+
+        return self.change_presence(Presence.HOME)
+
+    def set_away(self) -> None:
+        """
+        Sets HomeState to AWAY
+        """
+
+        return self.change_presence(Presence.AWAY)
+
+    def change_presence(self, presence: Presence) -> None:
+        """
+        Sets HomeState to presence
+        """
+
+        request = TadoRequest()
+        request.command = "presenceLock"
+        request.action = Action.CHANGE
+        request.payload = {"homePresence": presence}
+
+        self._http.request(request)
+
+    def set_auto(self) -> None:
+        """
+        Sets HomeState to AUTO
+        """
+
+        # Only attempt to set Auto Geofencing if it is believed to be supported
+        if self._auto_geofencing_supported:
+            request = TadoRequest()
+            request.command = "presenceLock"
+            request.action = Action.RESET
+
+            self._http.request(request)
+        else:
+            raise TadoNotSupportedException("Auto mode is not known to be supported.")
+
+    def get_weather(self) -> Weather:
+        """
+        Gets outside weather data
+        """
+
+        request = TadoRequest()
+        request.command = "weather"
+
+        return Weather.model_validate(self._http.request(request))
+
+    @abstractmethod
+    def get_air_comfort(self) -> AirComfort:
+        """
+        Gets air quality information
+        """
+        pass
+
+    def get_users(self) -> list[User]:
+        """
+        Gets active users in home
+        """
+
+        request = TadoRequest()
+        request.command = "users"
+
+        return [User.model_validate(user) for user in self._http.request(request)]
+
+    def get_mobile_devices(self) -> list[MobileDevice]:
+        """
+        Gets information about mobile devices
+        """
+
+        request = TadoRequest()
+        request.command = "mobileDevices"
+
+        return [
+            MobileDevice.model_validate(device)
+            for device in self._http.request(request)
+        ]
+
+    def get_running_times(self, date: date = date.today()) -> RunningTimes:
+        """
+        Get the running times from the Minder API
+        """
+
+        request = TadoRequest()
+        request.command = "runningTimes"
+        request.action = Action.GET
+        request.endpoint = Endpoint.MINDER
+        request.params = {"from": date.strftime("%Y-%m-%d")}
+
+        return RunningTimes.model_validate(self._http.request(request))
+
+    ##################### Zone methods #####################
+
+    @abstractmethod
+    def get_zone_state(self, zone: int) -> TadoZone | TadoXZone:
+        """Gets current state of Zone as a TadoZone object."""
+        pass
+
+    @abstractmethod
+    def get_state(self, zone: int) -> ZoneState | RoomState:
+        pass
+
     @abstractmethod
     def get_capabilities(self, zone: int) -> Capabilities:
         pass
@@ -153,14 +249,6 @@ class TadoBase(metaclass=ABCMeta):
         request = TadoRequest()
         request.command = f"zones/{zone:d}/dayReport?date={date.strftime('%Y-%m-%d')}"
         return Historic.model_validate(self._http.request(request))
-
-    @abstractmethod
-    def get_timetable(self, zone: int) -> Timetable:
-        pass
-
-    @abstractmethod
-    def set_timetable(self, zone: int, timetable: Timetable) -> Timetable | None:
-        pass
 
     @overload
     def get_schedule(
@@ -219,55 +307,6 @@ class TadoBase(metaclass=ABCMeta):
     ) -> None | dict[str, Any]:
         pass
 
-    @abstractmethod
-    def get_zone_overlay_default(self, zone: int) -> ZoneOverlayDefault | None:
-        pass
-
-    @abstractmethod
-    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
-        pass
-
-    def set_home(self) -> None:
-        """
-        Sets HomeState to HOME
-        """
-
-        return self.change_presence(Presence.HOME)
-
-    def set_away(self) -> None:
-        """
-        Sets HomeState to AWAY
-        """
-
-        return self.change_presence(Presence.AWAY)
-
-    def change_presence(self, presence: Presence) -> None:
-        """
-        Sets HomeState to presence
-        """
-
-        request = TadoRequest()
-        request.command = "presenceLock"
-        request.action = Action.CHANGE
-        request.payload = {"homePresence": presence}
-
-        self._http.request(request)
-
-    def set_auto(self) -> None:
-        """
-        Sets HomeState to AUTO
-        """
-
-        # Only attempt to set Auto Geofencing if it is believed to be supported
-        if self._auto_geofencing_supported:
-            request = TadoRequest()
-            request.command = "presenceLock"
-            request.action = Action.RESET
-
-            self._http.request(request)
-        else:
-            raise TadoNotSupportedException("Auto mode is not known to be supported.")
-
     def get_window_state(self, zone):
         """
         Returns the state of the window for zone
@@ -275,56 +314,14 @@ class TadoBase(metaclass=ABCMeta):
 
         return {"openWindow": self.get_state(zone).open_window}
 
-    def get_weather(self) -> Weather:
-        """
-        Gets outside weather data
-        """
-
-        request = TadoRequest()
-        request.command = "weather"
-
-        return Weather.model_validate(self._http.request(request))
-
-    @abstractmethod
-    def get_air_comfort(self) -> AirComfort:
-        """
-        Gets air quality information
-        """
-        pass
-
-    def get_users(self) -> list[User]:
-        """
-        Gets active users in home
-        """
-
-        request = TadoRequest()
-        request.command = "users"
-
-        return [User.model_validate(user) for user in self._http.request(request)]
-
-    def get_mobile_devices(self) -> list[MobileDevice]:
-        """
-        Gets information about mobile devices
-        """
-
-        request = TadoRequest()
-        request.command = "mobileDevices"
-
-        return [
-            MobileDevice.model_validate(device)
-            for device in self._http.request(request)
-        ]
-
     @abstractmethod
     def get_open_window_detected(self, zone: int) -> dict[str, Any]:
         pass
 
-    @abstractmethod
-    def set_open_window(self, zone: int) -> dict[str, Any] | None:
-        pass
+    ##################### Device methods #####################
 
     @abstractmethod
-    def reset_open_window(self, zone: int) -> dict[str, Any] | None:
+    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
         pass
 
     @abstractmethod
@@ -337,23 +334,7 @@ class TadoBase(metaclass=ABCMeta):
     ) -> TemperatureOffset | None:
         pass
 
-    @abstractmethod
-    def get_boiler_install_state(
-        self, bridge_id: str, auth_key: str
-    ) -> WiringInstallationState | None:
-        pass
-
-    @abstractmethod
-    def get_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str
-    ) -> MaxOutputTemp | None:
-        pass
-
-    @abstractmethod
-    def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ) -> None:
-        pass
+    ##################### Energy IQ methods #####################
 
     def get_eiq_tariffs(self) -> list[EIQTariff]:
         """
@@ -439,16 +420,3 @@ class TadoBase(metaclass=ABCMeta):
         request.payload = payload
 
         return self._http.request(request)
-
-    def get_running_times(self, date: date = date.today()) -> RunningTimes:
-        """
-        Get the running times from the Minder API
-        """
-
-        request = TadoRequest()
-        request.command = "runningTimes"
-        request.action = Action.GET
-        request.endpoint = Endpoint.MINDER
-        request.params = {"from": date.strftime("%Y-%m-%d")}
-
-        return RunningTimes.model_validate(self._http.request(request))

@@ -2,8 +2,7 @@
 PyTado interface implementation for hops.tado.com (Tado X).
 """
 
-import functools
-from typing import Any, Callable, overload
+from typing import Any, overload
 
 from PyTado.exceptions import TadoException, TadoNotSupportedException
 from PyTado.http import Action, Http, Mode, TadoXRequest
@@ -30,19 +29,6 @@ from PyTado.types import (
 from PyTado.zone import TadoZone
 
 
-def not_supported(reason: str) -> Callable:
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> None:
-            raise TadoNotSupportedException(
-                f"{func.__name__} is not supported: {reason}"
-            )
-
-        return wrapper
-
-    return decorator
-
-
 _LOGGER = Logger(__name__)
 
 
@@ -66,6 +52,8 @@ class TadoX(TadoBase):
             )
 
         super().__init__(http=http, debug=debug)
+
+    ##################### Home methods #####################
 
     def get_devices(self) -> list[Device]:
         """
@@ -94,13 +82,6 @@ class TadoX(TadoBase):
 
         return DevicesResponse.model_validate(self._http.request(request)).rooms
 
-    def get_zone_state(self, zone: int) -> TadoZone:
-        """
-        Gets current state of zone/room as a TadoXZone object.
-        """
-
-        return self.get_state(zone)  # type: ignore # TODO: proper Zone model
-
     def get_zone_states(self) -> dict[str, RoomState]:
         """
         Gets current states of all zones/rooms.
@@ -112,6 +93,21 @@ class TadoX(TadoBase):
         rooms = [RoomState.model_validate(room) for room in self._http.request(request)]
 
         return {room.name: room for room in rooms}
+
+    def get_zone_state(self, zone: int) -> TadoZone:
+        """
+        Gets current state of zone/room as a TadoXZone object.
+        """
+
+        return self.get_state(zone)  # type: ignore # TODO: proper Zone model
+
+    def get_air_comfort(self) -> AirComfort:
+        request = TadoXRequest()
+        request.command = "airComfort"
+
+        return AirComfort.model_validate(self._http.request(request))
+
+    ##################### Zone methods #####################
 
     def get_state(self, zone: int) -> RoomState:
         """
@@ -146,20 +142,6 @@ class TadoX(TadoBase):
             temperature=data.sensor_data_points.inside_temperature.value,
             humidity=data.sensor_data_points.humidity.percentage,
         )
-
-    @not_supported("Tado X API only support seven days timetable")
-    def set_timetable(self, zone: int, timetable: Timetable) -> None:
-        """
-        Set the Timetable type currently active
-        id = 0 : ONE_DAY (MONDAY_TO_SUNDAY)
-        id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
-        id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
-        """
-        pass
-
-    @not_supported("Tado X API does not support historic data")
-    def get_timetable(self, zone: int) -> None:
-        pass
 
     @overload
     def get_schedule(
@@ -265,13 +247,6 @@ class TadoX(TadoBase):
 
         self._http.request(request)
 
-    @not_supported("Concept of zones is not available by Tado X API, they use rooms")
-    def get_zone_overlay_default(self, zone: int) -> None:
-        """
-        Get current overlay default settings for zone.
-        """
-        pass
-
     def get_open_window_detected(self, zone):
         """
         Returns whether an open window is detected.
@@ -284,20 +259,7 @@ class TadoX(TadoBase):
         else:
             return {"openWindowDetected": False}
 
-    @not_supported("This method is not currently supported by the Tado X API")
-    def set_open_window(self, zone: int) -> None:
-        """
-        Sets the window in zone to open
-        Note: This can only be set if an open window was detected in this zone
-        """
-        pass
-
-    @not_supported("This method is not currently supported by the Tado X API")
-    def reset_open_window(self, zone: int) -> None:
-        """
-        Sets the window in zone to closed
-        """
-        pass
+    ##################### Device methods #####################
 
     def get_device_info(self, device_id: str) -> Device:
         """
@@ -333,29 +295,3 @@ class TadoX(TadoBase):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
-
-    def get_air_comfort(self) -> AirComfort:
-        request = TadoXRequest()
-        request.command = "airComfort"
-
-        return AirComfort.model_validate(self._http.request(request))
-
-    @not_supported(
-        "This method is not currently supported by Tado X Bridges (missing authKey)"
-    )
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str) -> None:
-        pass
-
-    @not_supported(
-        "This method is not currently supported by Tado X Bridges (missing authKey)"
-    )
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str) -> None:
-        pass
-
-    @not_supported(
-        "This method is not currently supported by Tado X Bridges (missing authKey)"
-    )
-    def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ) -> None:
-        pass
