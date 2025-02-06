@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from PyTado.models.home import Temperature
 from PyTado.models.util import Base
 

@@ -1,5 +1,7 @@
 from typing import Any, Self
+
 from pydantic import model_validator
+
 from PyTado.models.util import Base
 
 

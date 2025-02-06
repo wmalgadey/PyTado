@@ -1,5 +1,4 @@
 from PyTado.models.util import Base
-
 from PyTado.types import ZoneType
 
 

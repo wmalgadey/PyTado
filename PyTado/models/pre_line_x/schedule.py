@@ -1,7 +1,9 @@
+from typing import List, TypeAlias
+
+from pydantic import TypeAdapter
+
 from PyTado.models.common.schedule import ScheduleElement
 from PyTado.models.util import Base
-from pydantic import TypeAdapter
-from typing import List, TypeAlias
 
 
 class TempValue(Base):

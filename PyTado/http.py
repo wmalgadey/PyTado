@@ -2,11 +2,11 @@
 Do all the API HTTP heavy lifting in this file
 """
 
-from dataclasses import dataclass
 import enum
 import json
 import logging
 import pprint
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 from urllib.parse import urlencode

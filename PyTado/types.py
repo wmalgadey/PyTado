@@ -1,4 +1,4 @@
-from enum import StrEnum, IntEnum
+from enum import IntEnum, StrEnum
 from typing import Any
 
 from PyTado.logger import Logger

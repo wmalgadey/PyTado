@@ -1,7 +1,9 @@
 from datetime import date, datetime
-from PyTado.models.util import Base
-from pydantic import model_validator
 from typing import Any, Dict
+
+from pydantic import model_validator
+
+from PyTado.models.util import Base
 
 
 class User(Base):

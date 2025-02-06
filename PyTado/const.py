@@ -1,9 +1,9 @@
 """Constant values for the Tado component."""
 
 # Api credentials
-from PyTado.types import HvacMode
-
 import enum
+
+from PyTado.types import HvacMode
 
 CLIENT_ID = "tado-web-app"  # nosec B105
 CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"  # nosec B105

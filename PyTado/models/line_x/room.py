@@ -1,7 +1,6 @@
-from PyTado.models.util import Base
-from enum import StrEnum
 from datetime import datetime
 
+from PyTado.models.util import Base
 from PyTado.types import ConnectionState, OverlayMode
 
 

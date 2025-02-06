@@ -1,8 +1,9 @@
-from pydantic import field_validator
-from PyTado.models.util import Base
-from typing import TypeVar, Generic
+from typing import Generic, TypeVar
 
-from PyTado.types import Power, ZoneType, DayType
+from pydantic import field_validator
+
+from PyTado.models.util import Base
+from PyTado.types import DayType, Power, ZoneType
 
 T = TypeVar("T")
 

@@ -1,15 +1,16 @@
-from re import L
-from typing import Any, Self, Union, get_origin, get_args
+from typing import Any, Self
+
 from pydantic import (
+    AliasChoices,
     AliasGenerator,
     BaseModel,
     ConfigDict,
     ModelWrapValidatorHandler,
     ValidationError,
     model_validator,
-    AliasChoices,
 )
 from pydantic.alias_generators import to_camel
+
 from PyTado.logger import Logger
 
 LOGGER = Logger(__name__)

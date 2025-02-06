@@ -1,9 +1,10 @@
-from typing import Generic, TypeVar
-from pydantic import Field
-from PyTado.models.util import Base
 from datetime import datetime
+from typing import Generic, TypeVar
 
-from PyTado.types import HvacMode, Power, StrEnumMissing, ZoneType
+from pydantic import Field
+
+from PyTado.models.util import Base
+from PyTado.types import Power, StrEnumMissing, ZoneType
 
 T = TypeVar("T")
 

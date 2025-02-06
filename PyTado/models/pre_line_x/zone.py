@@ -1,13 +1,14 @@
 from datetime import datetime
-from PyTado.models.util import Base
+
+from PyTado.models.home import Temperature, TempPrecision
 from PyTado.models.pre_line_x.device import Device
-from PyTado.models.home import TempPrecision, Temperature
+from PyTado.models.util import Base
 from PyTado.types import (
     FanMode,
     FanSpeed,
     HorizontalSwing,
-    LinkState,
     HvacMode,
+    LinkState,
     Power,
     Presence,
     VerticalSwing,

@@ -4,8 +4,8 @@ PyTado interface abstraction to use app.tado.com or hops.tado.com
 
 import datetime
 import functools
-from typing import Any, Callable
 import warnings
+from typing import Any, Callable
 
 import PyTado.interface.api as API
 from PyTado.const import DEFAULT_DATE_FORMAT, Unit

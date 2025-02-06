@@ -5,7 +5,10 @@ PyTado interface implementation for hops.tado.com (Tado X).
 import functools
 from typing import Any, Callable, overload
 
+from PyTado.exceptions import TadoException, TadoNotSupportedException
+from PyTado.http import Action, Http, Mode, TadoXRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
+from PyTado.logger import Logger
 from PyTado.models.home import AirComfort
 from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
 from PyTado.models.line_x.room import RoomState
@@ -24,10 +27,6 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
-
-from PyTado.exceptions import TadoException, TadoNotSupportedException
-from PyTado.http import Action, Http, Mode, TadoXRequest
-from PyTado.logger import Logger
 from PyTado.zone import TadoZone
 
 
