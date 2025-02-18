@@ -137,3 +137,34 @@ class TadoTestCase(unittest.TestCase):
 
             # Verify the response
             self.assertTrue(response["success"])
+
+    def test_set_flow_temperature_optimization(self):
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value=json.loads(
+                common.load_fixture("set_flow_temperature_optimization_issue_143.json")
+            ),
+        ) as mock_request:
+            self.tado_client.set_flow_temperature_optimization(50)
+
+            mock_request.assert_called_once()
+            args, _ = mock_request.call_args
+            request: TadoRequest = args[0]
+
+            self.assertEqual(request.command, "flowTemperatureOptimization")
+            self.assertEqual(request.action, "PUT")
+            self.assertEqual(request.payload, {"maxFlowTemperature": 50})
+
+    def test_get_flow_temperature_optimization(self):
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value=json.loads(
+                common.load_fixture("set_flow_temperature_optimization_issue_143.json")
+            ),
+        ) as mock_request:
+            response = self.tado_client.get_flow_temperature_optimization()
+
+            mock_request.assert_called_once()
+
+            # Verify the response
+            self.assertEqual(response["maxFlowTemperature"], 50)
