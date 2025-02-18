@@ -16,7 +16,7 @@ class TadoZoneTestCase(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         login_patch = mock.patch(
-            "PyTado.http.Http._login", return_value=(1, "foo")
+            "PyTado.http.Http._login_device_flow", return_value=(1, "foo")
         )
         get_me_patch = mock.patch("PyTado.interface.api.Tado.get_me")
         login_patch.start()
@@ -24,7 +24,7 @@ class TadoZoneTestCase(unittest.TestCase):
         self.addCleanup(login_patch.stop)
         self.addCleanup(get_me_patch.stop)
 
-        self.http = Http("my@username.com", "mypassword")
+        self.http = Http()
         self.tado_client = Tado(self.http)
 
     def set_fixture(self, filename: str) -> None:

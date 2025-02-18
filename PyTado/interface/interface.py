@@ -36,16 +36,12 @@ class Tado:
 
     def __init__(
         self,
-        username: str,
-        password: str,
         http_session=None,
         debug: bool = False,
     ):
         """Class Constructor"""
 
         self._http = Http(
-            username=username,
-            password=password,
             http_session=http_session,
             debug=debug,
         )
@@ -61,6 +57,10 @@ class Tado:
 
     # region Deprecated Methods
     # pylint: disable=invalid-name
+
+    def device_activation(self) -> None:
+        """Activates the device."""
+        return self._http.device_activation()
 
     @deprecated("get_me")
     def getMe(self):

@@ -13,7 +13,7 @@ from urllib.parse import urlencode
 
 import requests
 
-from PyTado.const import CLIENT_ID, CLIENT_SECRET
+from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
 
@@ -136,8 +136,6 @@ class Http:
 
     def __init__(
         self,
-        username: str,
-        password: str,
         http_session: requests.Session | None = None,
         debug: bool = False,
     ) -> None:
@@ -146,20 +144,30 @@ class Http:
         else:
             _LOGGER.setLevel(logging.WARNING)
 
-        self._refresh_at = datetime.now() + timedelta(minutes=5)
+        self._refresh_at = datetime.now() + timedelta(minutes=10)
         self._session = http_session or requests.Session()
         self._session.hooks["response"].append(self._log_response)
         self._headers = {"Referer": "https://app.tado.com/"}
-        self._username = username
-        self._password = password
-        self._device_code = None
-        self._id, self._token_refresh = self._login_device_flow()
+        self._user_code = None
+        self._device_verification_url = None
+        self._expires_at = None
 
-        self._x_api = self._check_x_line_generation()
+        self._login_device_flow()
+        self._id = None
+        self._token_refresh = None
+        self._x_api = False
 
     @property
     def is_x_line(self) -> bool:
         return self._x_api
+
+    @property
+    def user_code(self) -> str | None:
+        return self._user_code
+
+    @property
+    def device_verification_url(self) -> str | None:
+        return self._device_verification_url
 
     def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
         og_request_method = response.request.method
@@ -270,12 +278,10 @@ class Http:
         if self._refresh_at >= datetime.now():
             return
 
-        url = "https://auth.tado.com/oauth/token"
+        url = "https://login.tado.com/oauth2/token"
         data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
+            "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "scope": "home.user",
             "refresh_token": self._token_refresh,
         }
         self._session.close()
@@ -310,8 +316,7 @@ class Http:
         """Login to the API using the device flow"""
         url = "https://login.tado.com/oauth2/device_authorize"
         data = {
-            # TODO: make a constant and retrieve the agreed CLIENT ID from Tado
-            "client_id": "1bb50063-6b0c-4d11-bd99-387f4a91cc46",
+            "client_id": CLIENT_ID_DEVICE,
             "scope": "offline_access",
         }
 
@@ -335,34 +340,41 @@ class Http:
                 f"Login failed. Status code: {response.status_code} and reason: {response.reason}"
             )
 
-        response_data = response.json()
-        _LOGGER.debug("Device flow response: %s", response_data)
+        self._device_flow_data = response.json()
+        _LOGGER.debug("Device flow response: %s", self._device_flow_data)
 
-        visit_url = response_data["verification_uri"] + "?user_code=" + response_data["user_code"]
+        user_code = urlencode({"user_code": self._device_flow_data["user_code"]})
+        visit_url = f"{self._device_flow_data['verification_uri']}?{user_code}"
+        self._user_code = self._device_flow_data["user_code"]
+        self._device_verification_url = visit_url
+
         _LOGGER.info("Please visit the following URL: %s", visit_url)
 
-        expires_in_seconds = response_data["expires_in"]
-        expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
+        expires_in_seconds = self._device_flow_data["expires_in"]
+        self._expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
 
-        # Format the expires_at time
-        formatted_expires_at = expires_at.strftime("%Y-%m-%d %H:%M:%S")
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
-            formatted_expires_at)
+            self._expires_at.strftime("%Y-%m-%d %H:%M:%S"))
+
+    def device_activation(self) -> None:
+        """Activate the device and get the refresh token"""
+        if self._expires_at is None or self._device_flow_data is None:
+            raise TadoException("User has not yet authorized the device")
+
         while True:
-            if datetime.timestamp(datetime.now()) > datetime.timestamp(expires_at):
+            if datetime.timestamp(datetime.now()) > datetime.timestamp(self._expires_at):
                 raise TadoException("User took too long to enter key")
 
-            # Wait for 5 seconds before polling the API
-            time.sleep(response_data["interval"])
-
+            # Await the desired interval, before polling the API again
+            time.sleep(self._device_flow_data["interval"])
             try:
                 token_response = self._session.request(
                     method="post",
                     url="https://login.tado.com/oauth2/token",
                     params={
-                        "client_id": "1bb50063-6b0c-4d11-bd99-387f4a91cc46",
-                        "device_code": response_data["device_code"],
+                        "client_id": CLIENT_ID_DEVICE,
+                        "device_code": self._device_flow_data["device_code"],
                         "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
                     }
                 )
@@ -370,51 +382,23 @@ class Http:
                 raise TadoException(e) from e
 
             if token_response.status_code != 200:
+                # The user has not yet authorized the device, let's continue
+                if token_response.status_code == 400 and token_response.json()[
+                        "error"] == "authorization_pending":
+                    _LOGGER.info(
+                        "Authorization pending, waiting for user to authorize. Continue polling.")
+                    continue
+
                 raise TadoException(
                     f"Login failed. Reason: {token_response.reason}"
                 )
 
-    def _login(self) -> tuple[int, str]:
-        """Login to the API and get the refresh token"""
+            if token_response.status_code == 200:
+                self._set_oauth_header(token_response.json())
+                break
 
-        url = "https://auth.tado.com/oauth/token"
-        data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "grant_type": "password",
-            "password": self._password,
-            "scope": "home.user",
-            "username": self._username,
-        }
-
-        try:
-            response = self._session.request(
-                "post",
-                url,
-                params=data,
-                timeout=_DEFAULT_TIMEOUT,
-                data=json.dumps({}).encode("utf8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Referer": "https://app.tado.com/",
-                },
-            )
-        except requests.exceptions.ConnectionError as e:
-            _LOGGER.error("Connection error: %s", e)
-            raise TadoException(e)
-
-        if response.status_code == 400:
-            raise TadoWrongCredentialsException("Your username or password is invalid")
-
-        if response.status_code != 200:
-            raise TadoException(
-                f"Login failed for unknown reason with status code {response.status_code}"
-            )
-
-        refresh_token = self._set_oauth_header(response.json())
-        id_ = self._get_id()
-
-        return id_, refresh_token
+        self._id = self._get_id()
+        self._x_api = self._check_x_line_generation()
 
     def _get_id(self) -> int:
         request = TadoRequest()
