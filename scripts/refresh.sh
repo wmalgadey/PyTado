@@ -14,11 +14,11 @@ exit_on_error () {
 
 cmd="git stash -m WIP"
 exit_on_error
-cmd="git checkout dev"
+cmd="git checkout master"
 exit_on_error
 cmd="git fetch upstream"
 exit_on_error
-cmd="git reset --hard upstream/dev"
+cmd="git reset --hard upstream/master"
 exit_on_error
 cmd="git push"
 exit_on_error
