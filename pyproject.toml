@@ -36,7 +36,7 @@ Source = "https://github.com/wmalgadey/PyTado"
 dev = ["pre-commit", "pytype", "types-requests"]
 
 lint = ["black>=24.3", "pylint"]
-test = ["responses", "pytest", "pytest-mock", "pytest-cov"]
+test = ["responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
 
 all = [
   "python-tado[dev]",

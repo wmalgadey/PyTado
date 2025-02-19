@@ -168,7 +168,8 @@ class TadoZoneTestCase(unittest.TestCase):
         assert room_1['roomName'] == 'Room 1'
         assert room_1['devices'][0]['serialNumber'] == 'VA1234567890'
 
-    def test_set_window_open(self):
+    @mock.patch("PyTado.http.Http.request", return_value={})
+    def test_set_window_open(self, _mock_http_request):
         """ Test get_devices method """
         self.set_get_devices_fixture("tadox/rooms_and_devices.json")
 
@@ -177,7 +178,8 @@ class TadoZoneTestCase(unittest.TestCase):
             result = self.tado_client.set_open_window(zone=room)
             assert isinstance(result, dict)
 
-    def test_reset_window_open(self):
+    @mock.patch("PyTado.http.Http.request", return_value={})
+    def test_reset_window_open(self, _mock_http_request):
         """ Test get_devices method """
         self.set_get_devices_fixture("tadox/rooms_and_devices.json")
 

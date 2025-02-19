@@ -21,6 +21,11 @@ class TadoTestCase(unittest.TestCase):
         get_me_patch.start()
         self.addCleanup(login_patch.stop)
         self.addCleanup(get_me_patch.stop)
+        check_x_patch = mock.patch(
+            "PyTado.http.Http._check_x_line_generation", return_value=False
+        )
+        check_x_patch.start()
+        self.addCleanup(check_x_patch.stop)
 
         self.http = Http("my@username.com", "mypassword")
         self.tado_client = Tado(self.http)
