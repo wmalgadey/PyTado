@@ -150,6 +150,7 @@ class Http:
         self._headers = {"Referer": "https://app.tado.com/"}
         self._user_code = None
         self._device_verification_url = None
+        self._device_activation_status = "NOT_STARTED"
         self._expires_at = None
 
         self._login_device_flow()
@@ -164,6 +165,10 @@ class Http:
     @property
     def user_code(self) -> str | None:
         return self._user_code
+
+    @property
+    def device_activation_status(self) -> str:
+        return self._device_activation_status
 
     @property
     def device_verification_url(self) -> str | None:
@@ -356,6 +361,7 @@ class Http:
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
             self._expires_at.strftime("%Y-%m-%d %H:%M:%S"))
+        self._device_activation_status = "PENDING"
 
     def device_activation(self) -> None:
         """Activate the device and get the refresh token"""
@@ -399,6 +405,9 @@ class Http:
 
         self._id = self._get_id()
         self._x_api = self._check_x_line_generation()
+        self._user_code = None
+        self._device_verification_url = None
+        self._device_activation_status = "COMPLETED"
 
     def _get_id(self) -> int:
         request = TadoRequest()

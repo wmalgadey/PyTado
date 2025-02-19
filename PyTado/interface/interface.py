@@ -58,6 +58,14 @@ class Tado:
     # region Deprecated Methods
     # pylint: disable=invalid-name
 
+    def device_verification_url(self) -> str | None:
+        """Returns the URL for device verification."""
+        return self._http.device_verification_url
+
+    def device_activation_status(self) -> str | None:
+        """Returns the status of the device activation."""
+        return self._http.device_activation_status
+
     def device_activation(self) -> None:
         """Activates the device."""
         return self._http.device_activation()
