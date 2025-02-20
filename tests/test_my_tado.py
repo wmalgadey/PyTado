@@ -15,14 +15,14 @@ class TadoTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        login_patch = mock.patch("PyTado.http.Http._login", return_value=(1, "foo"))
+        login_patch = mock.patch("PyTado.http.Http._login_device_flow", return_value=(1, "foo"))
         get_me_patch = mock.patch("PyTado.interface.api.Tado.get_me")
         login_patch.start()
         get_me_patch.start()
         self.addCleanup(login_patch.stop)
         self.addCleanup(get_me_patch.stop)
 
-        self.http = Http("my@username.com", "mypassword")
+        self.http = Http()
         self.tado_client = Tado(self.http)
 
     def test_home_set_to_manual_mode(
