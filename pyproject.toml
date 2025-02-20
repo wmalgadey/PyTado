@@ -65,6 +65,7 @@ source = ["PyTado"]
 [tool.black]
 line-length = 100
 target-version = ["py311"]
+required-version = "24.3.0"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
