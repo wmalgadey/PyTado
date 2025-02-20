@@ -41,6 +41,7 @@ responses = "*"
 pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+pytest-socket = "*"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
