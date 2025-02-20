@@ -44,7 +44,7 @@ pytest-cov = "*"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
-lint = ["black>=24.3", "pylint"]
+lint = ["black", "pylint"]
 test = ["responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
 all = ["pre-commit", "pytype", "types-requests", "black", "pylint", "responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
 
