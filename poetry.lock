@@ -960,6 +960,21 @@ pytest = ">=6.2.5"
 dev = ["pre-commit", "pytest-asyncio", "tox"]
 
 [[package]]
+name = "pytest-socket"
+version = "0.3.3"
+description = "Pytest Plugin to disable socket calls during tests"
+optional = false
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"test\" or extra == \"all\""
+files = [
+    {file = "pytest-socket-0.3.3.tar.gz", hash = "sha256:a90401b7a6db7091add1e33fc94a29dae6b449fdc469a725bd7cea303d12a7ed"},
+]
+
+[package.dependencies]
+pytest = ">=3.6.3"
+
+[[package]]
 name = "pytype"
 version = "2024.10.11"
 description = "Python type inferencer"
@@ -1214,12 +1229,12 @@ docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.2,!=7.3)", "s
 test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7)", "packaging (>=23.1)", "pytest (>=7.4)", "pytest-env (>=0.8.2)", "pytest-freezer (>=0.4.8)", "pytest-mock (>=3.11.1)", "pytest-randomly (>=3.12)", "pytest-timeout (>=2.1)", "setuptools (>=68)", "time-machine (>=2.10)"]
 
 [extras]
-all = ["black", "pre-commit", "pylint", "pytest", "pytest-cov", "pytest-mock", "pytype", "responses", "types-requests"]
+all = ["black", "pre-commit", "pylint", "pytest", "pytest-cov", "pytest-mock", "pytest-socket", "pytype", "responses", "types-requests"]
 dev = ["pre-commit", "pytype", "types-requests"]
 lint = ["black", "pylint"]
-test = ["pytest", "pytest-cov", "pytest-mock", "responses"]
+test = ["pytest", "pytest-cov", "pytest-mock", "pytest-socket", "responses"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "3c8c75adcbd3397f5940b9fe08eddeaba9627cbfcded3d4d62f7fc6481b84e36"
+content-hash = "bc9f6e37c918858283c7b7adff254cbce6045716c94f0cc6909bfe31e0be4ccf"
