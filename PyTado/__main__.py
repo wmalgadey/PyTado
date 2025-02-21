@@ -69,17 +69,23 @@ def main():
     show_config_parser = subparsers.add_parser("get_me", help="Get home information.")
     show_config_parser.set_defaults(func=get_me)
 
-    start_activity_parser = subparsers.add_parser("get_state", help="Get state of zone.")
+    start_activity_parser = subparsers.add_parser(
+        "get_state", help="Get state of zone."
+    )
     start_activity_parser.add_argument("--zone", help="Zone to get the state of.")
     start_activity_parser.set_defaults(func=get_state)
 
-    start_activity_parser = subparsers.add_parser("get_states", help="Get states of all zones.")
+    start_activity_parser = subparsers.add_parser(
+        "get_states", help="Get states of all zones."
+    )
     start_activity_parser.set_defaults(func=get_states)
 
     start_activity_parser = subparsers.add_parser(
         "get_capabilities", help="Get capabilities of zone."
     )
-    start_activity_parser.add_argument("--zone", help="Zone to get the capabilities of.")
+    start_activity_parser.add_argument(
+        "--zone", help="Zone to get the capabilities of."
+    )
     start_activity_parser.set_defaults(func=get_capabilities)
 
     args = parser.parse_args()

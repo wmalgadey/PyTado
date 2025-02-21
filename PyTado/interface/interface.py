@@ -5,22 +5,28 @@ PyTado interface abstraction to use app.tado.com or hops.tado.com
 import datetime
 import functools
 import warnings
+from typing import Any, Callable
 
 import PyTado.interface.api as API
+from PyTado.const import DEFAULT_DATE_FORMAT, Unit
 from PyTado.http import Http
+from PyTado.models.util import Base
 
 
-def deprecated(new_func_name):
-    def decorator(func):
+def deprecated(new_func_name: str) -> Callable:
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             warnings.warn(
                 f"The '{func.__name__}' method is deprecated, use '{new_func_name}' instead. "
                 "Deprecated methods will be removed with 1.0.0.",
                 DeprecationWarning,
                 stacklevel=2,
             )
-            return getattr(args[0], new_func_name)(*args, **kwargs)
+            result = getattr(args[0], new_func_name)(*args[1:], **kwargs)
+            if isinstance(result, Base):
+                return result.to_dict()
+            return result
 
         return wrapper
 
@@ -51,7 +57,7 @@ class Tado:
         )
 
         if self._http.is_x_line:
-            self._api: API.Tado | API.TadoX = API.TadoX(http=self._http, debug=debug)
+            self._api: API.TadoBase = API.TadoX(http=self._http, debug=debug)
         else:
             self._api = API.Tado(http=self._http, debug=debug)
 
@@ -271,7 +277,9 @@ class Tado:
         return self.get_eiq_meter_readings()
 
     @deprecated("set_eiq_meter_readings")
-    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
+    def setEIQMeterReadings(
+        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
+    ):
         """Send Meter Readings to Tado (Deprecated)
 
         date format is YYYY-MM-DD, reading is without decimals
@@ -281,11 +289,11 @@ class Tado:
     @deprecated("set_eiq_tariff")
     def setEIQTariff(
         self,
-        from_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        to_date=datetime.datetime.now().strftime("%Y-%m-%d"),
-        tariff=0,
-        unit="m3",
-        is_period=False,
+        from_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        to_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
+        tariff: int = 0,
+        unit: Unit = Unit.M3,
+        is_period: bool = False,
     ):
         """Send Tariffs to Tado (Deprecated)
 
