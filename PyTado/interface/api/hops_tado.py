@@ -85,6 +85,7 @@ class TadoX(TadoBase):
     def get_zone_states(self) -> dict[str, RoomState]:
         """
         Gets current states of all zones/rooms.
+        Gets current states of all zones/rooms.
         """
 
         request = TadoXRequest()
@@ -123,6 +124,7 @@ class TadoX(TadoBase):
     def get_capabilities(self, zone: int) -> Capabilities:
         """
         Gets current capabilities of zone/room.
+        Gets current capabilities of zone/room.
         """
 
         _LOGGER.warning(
@@ -134,6 +136,7 @@ class TadoX(TadoBase):
 
     def get_climate(self, zone: int) -> Climate:
         """
+        Gets temp (centigrade) and humidity (% RH) for zone/room.
         Gets temp (centigrade) and humidity (% RH) for zone/room.
         """
 
@@ -295,3 +298,44 @@ class TadoX(TadoBase):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
+
+    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+        """
+        Set the flow temperature optimization.
+
+        max_flow_temperature: float, the maximum flow temperature in Celsius
+        """
+
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+        request.payload = {"maxFlowTemperature": max_flow_temperature}
+
+        return self._http.request(request)
+
+    def get_flow_temperature_optimization(self):
+        """
+        Get the current flow temperature optimization
+        """
+
+        request = TadoXRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+
+        return self._http.request(request)
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
+        pass
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
+        pass
+
+    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
+    def set_boiler_max_output_temperature(
+        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
+    ):
+        pass

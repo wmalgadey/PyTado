@@ -9,6 +9,7 @@ from typing import Any, Callable
 
 import PyTado.interface.api as API
 from PyTado.const import DEFAULT_DATE_FORMAT, Unit
+from PyTado.const import DEFAULT_DATE_FORMAT, Unit
 from PyTado.http import Http
 from PyTado.models.util import Base
 

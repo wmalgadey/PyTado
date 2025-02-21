@@ -15,14 +15,18 @@ class TadoZoneTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        login_patch = mock.patch(
-            "PyTado.http.Http._login", return_value=(1, "foo")
-        )
+        login_patch = mock.patch("PyTado.http.Http._login", return_value=(1, "foo"))
         get_me_patch = mock.patch("PyTado.interface.api.Tado.get_me")
+        check_x_patch = mock.patch(
+            "PyTado.http.Http._check_x_line_generation", return_value=False
+        )
+
         login_patch.start()
         get_me_patch.start()
+        check_x_patch.start()
         self.addCleanup(login_patch.stop)
         self.addCleanup(get_me_patch.stop)
+        self.addCleanup(check_x_patch.stop)
 
         self.http = Http("my@username.com", "mypassword")
         self.tado_client = Tado(self.http)
