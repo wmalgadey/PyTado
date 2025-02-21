@@ -7,8 +7,14 @@ import logging
 from typing import Any, Self
 
 from PyTado.const import DEFAULT_TADOX_PRECISION
-from PyTado.types import FanMode, HorizontalSwing, HvacAction, HvacMode, LinkState, VerticalSwing
-
+from PyTado.types import (
+    FanMode,
+    HorizontalSwing,
+    HvacAction,
+    HvacMode,
+    LinkState,
+    VerticalSwing,
+)
 
 from .my_zone import TadoZone
 

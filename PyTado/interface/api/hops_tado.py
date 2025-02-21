@@ -26,7 +26,6 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
-from PyTado.zone import TadoZone
 
 _LOGGER = Logger(__name__)
 

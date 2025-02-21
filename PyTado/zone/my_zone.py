@@ -6,11 +6,18 @@ import dataclasses
 import logging
 from typing import Any, Self
 
-from PyTado.const import (
-    CONST_LINK_OFFLINE,
-    DEFAULT_TADO_PRECISION,
+from PyTado.const import CONST_LINK_OFFLINE, DEFAULT_TADO_PRECISION
+from PyTado.types import (
+    TADO_HVAC_ACTION_TO_MODES,
+    TADO_MODES_TO_HVAC_ACTION,
+    FanMode,
+    FanSpeed,
+    HorizontalSwing,
+    HvacAction,
+    HvacMode,
+    VerticalSwing,
+    ZoneType,
 )
-from PyTado.types import TADO_HVAC_ACTION_TO_MODES, TADO_MODES_TO_HVAC_ACTION, FanMode, FanSpeed, HorizontalSwing, HvacAction, HvacMode, VerticalSwing, ZoneType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -149,11 +156,11 @@ class TadoZone:
             if "fanSpeed" in setting:
                 kwargs["current_fan_speed"] = setting.get(
                     "fanSpeed",
-                   FanMode.AUTO if power == "ON" else FanMode.OFF,
+                    FanMode.AUTO if power == "ON" else FanMode.OFF,
                 )
             elif "type" in setting and setting["type"] == ZoneType.AIR_CONDITIONING:
                 kwargs["current_fan_speed"] = (
-                   FanMode.AUTO if power == "ON" else FanMode.OFF
+                    FanMode.AUTO if power == "ON" else FanMode.OFF
                 )
 
             if "fanLevel" in setting:

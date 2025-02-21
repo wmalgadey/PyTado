@@ -125,7 +125,7 @@ class TadoTestCase(unittest.TestCase):
             json=json.loads(common.load_fixture("home_by_bridge.boiler_max_output_temperature.json")),
             status=200,
         )
-       
+
         boiler_temperature = self.tado_client.get_boiler_max_output_temperature(
             "IB123456789", "authcode"
         )
