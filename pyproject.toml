@@ -42,6 +42,7 @@ pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pytest-socket = "*"
+pydantic = "^2.10.6"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]

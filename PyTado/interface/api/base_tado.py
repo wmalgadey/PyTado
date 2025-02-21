@@ -2,35 +2,49 @@
 Base class for Tado API classes.
 """
 
-import datetime
-import enum
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any
+from datetime import date
+from functools import cached_property
+from typing import Any, overload
 
-from PyTado.const import DEFAULT_DATE_FORMAT, Unit
-from PyTado.exceptions import TadoNotSupportedException
+from PyTado.exceptions import TadoException, TadoNotSupportedException
 from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
 from PyTado.logger import Logger
+from PyTado.models import Capabilities, Climate, Historic
+from PyTado.models.home import (
+    AirComfort,
+    EIQMeterReading,
+    EIQTariff,
+    HomeState,
+    MobileDevice,
+    RunningTimes,
+    User,
+    Weather,
+)
+from PyTado.models.line_x import Device as DeviceX
+from PyTado.models.line_x import DevicesRooms, RoomState
+from PyTado.models.line_x import Schedule as ScheduleX
+from PyTado.models.line_x.schedule import SetSchedule
+from PyTado.models.pre_line_x import Device, Schedule, Zone, ZoneState
+from PyTado.models.return_models import TemperatureOffset
+from PyTado.types import (
+    DayType,
+    FanMode,
+    FanSpeed,
+    HorizontalSwing,
+    HvacMode,
+    OverlayMode,
+    Power,
+    Presence,
+    Timetable,
+    VerticalSwing,
+    ZoneType,
+)
 from PyTado.zone.hops_zone import TadoXZone
 from PyTado.zone.my_zone import TadoZone
 
 _LOGGER = Logger(__name__)
-
-
-class Presence(enum.StrEnum):
-    """Presence Enum"""
-
-    HOME = "HOME"
-    AWAY = "AWAY"
-
-
-class Timetable(enum.IntEnum):
-    """Timetable Enum"""
-
-    ONE_DAY = 0
-    THREE_DAY = 1
-    SEVEN_DAY = 2
 
 
 class TadoBase(metaclass=ABCMeta):
@@ -38,7 +52,6 @@ class TadoBase(metaclass=ABCMeta):
     Provides all common functionality for pre line X and line X systems."""
 
     _http: Http
-    _auto_geofencing_supported: bool | None
 
     def __init__(self, http: Http, debug: bool = False):
         if debug:
@@ -48,43 +61,31 @@ class TadoBase(metaclass=ABCMeta):
 
         self._http = http
 
-        # Track whether the user's Tado instance supports auto-geofencing,
-        # set to None until explicitly set
-        self._auto_geofencing_supported = None
+    ##################### Home methods #####################
 
-    def get_me(self):
+    def get_me(self) -> User:
         """Gets home information."""
 
         request = TadoRequest()
         request.action = Action.GET
         request.domain = Domain.ME
 
-        return self._http.request(request)
+        return User.model_validate(self._http.request(request))
 
     @abstractmethod
-    def get_devices(self) -> dict[str, Any] | list[Any]:  # TODO: Typing
+    def get_devices(self) -> list[Device] | list[DeviceX]:
         """Gets device information."""
         pass
 
     @abstractmethod
-    def get_zones(self) -> Any:  # TODO: Typing
-        """Gets zones information."""
+    def get_zones(self) -> list[Zone] | list[DevicesRooms]:
         pass
 
     @abstractmethod
-    def get_zone_state(self, zone: int) -> TadoZone | TadoXZone:
-        """Gets current state of Zone as a TadoZone object."""
+    def get_zone_states(self) -> dict[str, ZoneState] | dict[str, RoomState]:
         pass
 
-    @abstractmethod
-    def get_zone_states(self) -> Any:  # TODO: Typing
-        pass
-
-    @abstractmethod
-    def get_state(self, zone: int) -> Any:  # TODO: Typing
-        pass
-
-    def get_home_state(self):
+    def get_home_state(self) -> HomeState:
         """Gets current state of Home."""
         # Without an auto assist skill, presence is not switched automatically.
         # Instead a button is shown in the app - showHomePresenceSwitchButton,
@@ -105,101 +106,27 @@ class TadoBase(metaclass=ABCMeta):
 
         request = TadoRequest()
         request.command = "state"
-        data = self._http.request(request)
+        data = HomeState.model_validate(self._http.request(request))
+        return data
 
+    @cached_property
+    def _auto_geofencing_supported(self) -> bool:
+        data = self.get_home_state()
         # Check whether Auto Geofencing is permitted via the presence of
         # showSwitchToAutoGeofencingButton or currently enabled via the
         # presence of presenceLocked = False
-        if "showSwitchToAutoGeofencingButton" in data:
-            self._auto_geofencing_supported = data["showSwitchToAutoGeofencingButton"]
-        elif "presenceLocked" in data:
-            if not data["presenceLocked"]:
-                self._auto_geofencing_supported = True
-            else:
-                self._auto_geofencing_supported = False
+        if data.show_switch_to_auto_geofencing_button is not None:
+            return data.show_switch_to_auto_geofencing_button
+        elif data.presence_locked is not None:
+            return not data.presence_locked
         else:
-            self._auto_geofencing_supported = False
-
-        return data
+            return False
 
     def get_auto_geofencing_supported(self) -> bool:
         """
         Return whether the Tado Home supports auto geofencing
         """
-
-        if self._auto_geofencing_supported is None:
-            self.get_home_state()
-
-        # get_home_state() narrows the type to bool
-        return self._auto_geofencing_supported  # type: ignore
-
-    @abstractmethod
-    def get_capabilities(self, zone: int):  # TODO: typing
-        pass
-
-    @abstractmethod
-    def get_climate(self, zone: int):  # TODO: typing
-        pass
-
-    def get_historic(self, zone: int, date: str) -> dict[str, Any]:
-        """
-        Gets historic information on given date for zone
-        """
-
-        try:
-            day = datetime.datetime.strptime(date, f"{DEFAULT_DATE_FORMAT}")
-        except ValueError as err:
-            raise ValueError("Incorrect date format, should be YYYY-MM-DD") from err
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/dayReport?date={day.strftime(f'{DEFAULT_DATE_FORMAT}')}"
-        return self._http.request(request)
-
-    @abstractmethod
-    def get_timetable(self, zone: int) -> Timetable:
-        pass
-
-    @abstractmethod
-    def set_timetable(self, zone: int, timetable: Timetable):
-        pass
-
-    @abstractmethod
-    def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
-        pass
-
-    @abstractmethod
-    def set_schedule(self, zone: int, timetable: Timetable, day, data):
-        pass
-
-    @abstractmethod
-    def reset_zone_overlay(self, zone: int):
-        pass
-
-    @abstractmethod
-    def set_zone_overlay(
-        self,
-        zone,
-        overlay_mode,
-        set_temp=None,
-        duration=None,
-        device_type="HEATING",
-        power="ON",
-        mode=None,
-        fan_speed=None,
-        swing=None,
-        fan_level=None,
-        vertical_swing=None,
-        horizontal_swing=None,
-    ):
-        pass
-
-    @abstractmethod
-    def get_zone_overlay_default(self, zone: int):
-        pass
-
-    @abstractmethod
-    def set_child_lock(self, device_id, child_lock) -> None:
-        pass
+        return self._auto_geofencing_supported
 
     def set_home(self) -> None:
         """
@@ -227,7 +154,7 @@ class TadoBase(metaclass=ABCMeta):
 
         self._http.request(request)
 
-    def set_auto(self) -> dict[str, Any]:
+    def set_auto(self) -> None:
         """
         Sets HomeState to AUTO
         """
@@ -238,18 +165,11 @@ class TadoBase(metaclass=ABCMeta):
             request.command = "presenceLock"
             request.action = Action.RESET
 
-            return self._http.request(request)
+            self._http.request(request)
         else:
             raise TadoNotSupportedException("Auto mode is not known to be supported.")
 
-    def get_window_state(self, zone):
-        """
-        Returns the state of the window for zone
-        """
-
-        return {"openWindow": self.get_state(zone)["openWindow"]}
-
-    def get_weather(self):
+    def get_weather(self) -> Weather:
         """
         Gets outside weather data
         """
@@ -257,19 +177,16 @@ class TadoBase(metaclass=ABCMeta):
         request = TadoRequest()
         request.command = "weather"
 
-        return self._http.request(request)
+        return Weather.model_validate(self._http.request(request))
 
-    def get_air_comfort(self):
+    @abstractmethod
+    def get_air_comfort(self) -> AirComfort:
         """
         Gets air quality information
         """
+        pass
 
-        request = TadoRequest()
-        request.command = "airComfort"
-
-        return self._http.request(request)
-
-    def get_users(self):
+    def get_users(self) -> list[User]:
         """
         Gets active users in home
         """
@@ -277,9 +194,9 @@ class TadoBase(metaclass=ABCMeta):
         request = TadoRequest()
         request.command = "users"
 
-        return self._http.request(request)
+        return [User.model_validate(user) for user in self._http.request(request)]
 
-    def get_mobile_devices(self):
+    def get_mobile_devices(self) -> list[MobileDevice]:
         """
         Gets information about mobile devices
         """
@@ -287,45 +204,139 @@ class TadoBase(metaclass=ABCMeta):
         request = TadoRequest()
         request.command = "mobileDevices"
 
-        return self._http.request(request)
+        return [
+            MobileDevice.model_validate(device)
+            for device in self._http.request(request)
+        ]
+
+    def get_running_times(self, date: date = date.today()) -> RunningTimes:
+        """
+        Get the running times from the Minder API
+        """
+
+        request = TadoRequest()
+        request.command = "runningTimes"
+        request.action = Action.GET
+        request.endpoint = Endpoint.MINDER
+        request.params = {"from": date.strftime("%Y-%m-%d")}
+
+        return RunningTimes.model_validate(self._http.request(request))
+
+    ##################### Zone methods #####################
+
+    @abstractmethod
+    def get_zone_state(self, zone: int) -> TadoZone | TadoXZone:
+        """Gets current state of Zone as a TadoZone object."""
+        pass
+
+    @abstractmethod
+    def get_state(self, zone: int) -> ZoneState | RoomState:
+        pass
+
+    @abstractmethod
+    def get_capabilities(self, zone: int) -> Capabilities:
+        pass
+
+    @abstractmethod
+    def get_climate(self, zone: int) -> Climate:
+        pass
+
+    def get_historic(self, zone: int, date: date) -> Historic:
+        """
+        Gets historic information on given date for zone
+        """
+
+        request = TadoRequest()
+        request.command = f"zones/{zone:d}/dayReport?date={date.strftime('%Y-%m-%d')}"
+        return Historic.model_validate(self._http.request(request))
+
+    @overload
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
+
+    @overload
+    def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
+
+    @overload
+    def get_schedule(self, zone: int) -> ScheduleX: ...
+
+    @abstractmethod
+    def get_schedule(
+        self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
+    ) -> ScheduleX | list[Schedule]:
+        pass
+
+    @overload
+    def set_schedule(
+        self, zone: int, data: list[Schedule], timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
+
+    @overload
+    def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
+
+    @abstractmethod
+    def set_schedule(
+        self,
+        zone: int,
+        data: list[Schedule] | SetSchedule,
+        timetable: Timetable | None = None,
+        day: DayType | None = None,
+    ) -> None | list[Schedule]:
+        pass
+
+    @abstractmethod
+    def reset_zone_overlay(self, zone: int) -> None:
+        pass
+
+    @abstractmethod
+    def set_zone_overlay(
+        self,
+        zone: int,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: int | None = None,
+        device_type: ZoneType = ZoneType.HEATING,
+        power: Power = Power.ON,
+        mode: HvacMode | None = None,
+        fan_speed: FanSpeed | None = None,
+        swing: Any = None,
+        fan_level: FanMode | None = None,
+        vertical_swing: VerticalSwing | None = None,
+        horizontal_swing: HorizontalSwing | None = None,
+    ) -> None | dict[str, Any]:
+        pass
+
+    def get_window_state(self, zone):
+        """
+        Returns the state of the window for zone
+        """
+
+        return {"openWindow": self.get_state(zone).open_window}
 
     @abstractmethod
     def get_open_window_detected(self, zone: int) -> dict[str, Any]:
         pass
 
+    ##################### Device methods #####################
+
     @abstractmethod
-    def set_open_window(self, zone: int) -> dict[str, Any] | None:
+    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
         pass
 
     @abstractmethod
-    def reset_open_window(self, zone: int) -> dict[str, Any] | None:
-        pass
-
-    @abstractmethod
-    def get_device_info(self, device_id: int, cmd: str = "") -> dict[str, Any]:
+    def get_device_info(self, device_id: str) -> Device | DeviceX:
         pass
 
     @abstractmethod
     def set_temp_offset(
-        self, device_id: int, offset: int = 0, measure: str = "celsius"
-    ) -> dict[str, Any]:
+        self, device_id: str, offset: float = 0, measure: str = "celsius"
+    ) -> TemperatureOffset | None:
         pass
 
-    @abstractmethod
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
-        pass
+    ##################### Energy IQ methods #####################
 
-    @abstractmethod
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
-        pass
-
-    @abstractmethod
-    def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
-        pass
-
-    def get_eiq_tariffs(self):
+    def get_eiq_tariffs(self) -> list[EIQTariff]:
         """
         Get Energy IQ tariff history
         """
@@ -335,9 +346,11 @@ class TadoBase(metaclass=ABCMeta):
         request.action = Action.GET
         request.endpoint = Endpoint.EIQ
 
-        return self._http.request(request)
+        return [
+            EIQTariff.model_validate(tariff) for tariff in self._http.request(request)
+        ]
 
-    def get_eiq_meter_readings(self):
+    def get_eiq_meter_readings(self) -> list[EIQMeterReading]:
         """
         Get Energy IQ meter readings
         """
@@ -347,10 +360,17 @@ class TadoBase(metaclass=ABCMeta):
         request.action = Action.GET
         request.endpoint = Endpoint.EIQ
 
-        return self._http.request(request)
+        respones = self._http.request(request)
 
-    def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime(
-            "{DEFAULT_DATE_FORMAT}"), reading=0):
+        if not isinstance(respones, dict):
+            raise TadoException("Invalid response from Tado")
+
+        return [
+            EIQMeterReading.model_validate(reading)
+            for reading in respones.get("readings", [])
+        ]
+
+    def set_eiq_meter_readings(self, date: date = date.today(), reading: int = 0):
         """
         Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals
         """
@@ -359,16 +379,16 @@ class TadoBase(metaclass=ABCMeta):
         request.command = "meterReadings"
         request.action = Action.SET
         request.endpoint = Endpoint.EIQ
-        request.payload = {"date": date, "reading": reading}
+        request.payload = {"date": date.strftime("%Y-%m-%d"), "reading": reading}
 
         return self._http.request(request)
 
     def set_eiq_tariff(
         self,
-        from_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
-        to_date=datetime.datetime.now().strftime(f"{DEFAULT_DATE_FORMAT}"),
-        tariff: int = 0,
-        unit: Unit = Unit.M3,
+        from_date: date = date.today(),
+        to_date: date = date.today(),
+        tariff: float = 0,
+        unit: str = "m3",
         is_period: bool = False,
     ):
         """
@@ -383,14 +403,14 @@ class TadoBase(metaclass=ABCMeta):
             payload = {
                 "tariffInCents": tariff_in_cents,
                 "unit": unit,
-                "startDate": from_date,
-                "endDate": to_date,
+                "startDate": from_date.strftime("%Y-%m-%d"),
+                "endDate": to_date.strftime("%Y-%m-%d"),
             }
         else:
             payload = {
                 "tariffInCents": tariff_in_cents,
                 "unit": unit,
-                "startDate": from_date,
+                "startDate": from_date.strftime("%Y-%m-%d"),
             }
 
         request = TadoRequest()
@@ -398,19 +418,5 @@ class TadoBase(metaclass=ABCMeta):
         request.action = Action.SET
         request.endpoint = Endpoint.EIQ
         request.payload = payload
-
-        return self._http.request(request)
-
-    def get_running_times(self, date=datetime.datetime.now().strftime(
-            f"{DEFAULT_DATE_FORMAT}")) -> dict:
-        """
-        Get the running times from the Minder API
-        """
-
-        request = TadoRequest()
-        request.command = "runningTimes"
-        request.action = Action.GET
-        request.endpoint = Endpoint.MINDER
-        request.params = {"from": date}
 
         return self._http.request(request)
