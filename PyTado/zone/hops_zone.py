@@ -33,7 +33,8 @@ class TadoXZone(TadoZone):
     @classmethod
     def from_data(cls, zone_id: int, data: dict[str, Any]) -> Self:
         """Handle update callbacks for X zones with specific parsing."""
-        _LOGGER.debug("Processing data from X zone %d", zone_id)
+        _LOGGER.debug("Processing data from X room %d", zone_id)
+
         kwargs: dict[str, Any] = {}
 
         # X-specific temperature parsing
@@ -118,7 +119,9 @@ class TadoXZone(TadoZone):
             else:
                 kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
 
-        kwargs["available"] = kwargs.get("connection") != CONST_CONNECTION_OFFLINE
+        kwargs["available"] = (
+            kwargs.get("connection", CONST_CONNECTION_OFFLINE) != CONST_CONNECTION_OFFLINE
+        )
 
         # Termination conditions
         if "terminationCondition" in data:
