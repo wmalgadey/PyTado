@@ -153,3 +153,10 @@ class ConnectionState(StrEnumMissing):
 
     CONNECTED = "CONNECTED"
     DISCONNECTED = "DISCONNECTED"
+
+class BatteryState(StrEnumMissing):
+    """Battery State Enum"""
+
+    LOW = "LOW"
+    DEPLETED = "DEPLETED"
+    NORMAL = "NORMAL"
