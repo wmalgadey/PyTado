@@ -6,18 +6,9 @@ import dataclasses
 import logging
 from typing import Any, Self
 
-from PyTado.const import (
-    CONST_CONNECTION_OFFLINE,
-    CONST_HORIZONTAL_SWING_OFF,
-    CONST_HVAC_HEAT,
-    CONST_HVAC_IDLE,
-    CONST_HVAC_OFF,
-    CONST_MODE_HEAT,
-    CONST_MODE_OFF,
-    CONST_MODE_SMART_SCHEDULE,
-    CONST_VERTICAL_SWING_OFF,
-    DEFAULT_TADOX_PRECISION,
-)
+from PyTado.const import DEFAULT_TADOX_PRECISION
+from PyTado.types import FanMode, HorizontalSwing, HvacAction, HvacMode, LinkState, VerticalSwing
+
 
 from .my_zone import TadoZone
 
@@ -70,7 +61,7 @@ class TadoXZone(TadoZone):
             kwargs["connection"] = data["connection"]["state"]
 
         # Default HVAC action
-        kwargs["current_hvac_action"] = CONST_HVAC_OFF
+        kwargs["current_hvac_action"] = HvacAction.OFF
 
         # Setting processing
         if "setting" in data:
@@ -88,10 +79,10 @@ class TadoXZone(TadoZone):
                 {
                     "current_fan_speed": None,
                     "current_fan_level": None,
-                    "current_hvac_mode": CONST_MODE_OFF,
-                    "current_swing_mode": CONST_MODE_OFF,
-                    "current_vertical_swing_mode": CONST_VERTICAL_SWING_OFF,
-                    "current_horizontal_swing_mode": CONST_HORIZONTAL_SWING_OFF,
+                    "current_hvac_mode": HvacMode.OFF,
+                    "current_swing_mode": FanMode.OFF,
+                    "current_vertical_swing_mode": VerticalSwing.OFF,
+                    "current_horizontal_swing_mode": HorizontalSwing.OFF,
                 }
             )
 
@@ -101,36 +92,36 @@ class TadoXZone(TadoZone):
 
             if power == "ON":
                 if data.get("heatingPower", {}).get("percentage", 0) == 0:
-                    kwargs["current_hvac_action"] = CONST_HVAC_IDLE
+                    kwargs["current_hvac_action"] = HvacAction.IDLE
                 else:
-                    kwargs["current_hvac_action"] = CONST_HVAC_HEAT
+                    kwargs["current_hvac_action"] = HvacAction.HEAT
 
                 kwargs["heating_power_percentage"] = data["heatingPower"]["percentage"]
             else:
                 kwargs["heating_power_percentage"] = 0
-                kwargs["current_hvac_action"] = CONST_HVAC_OFF
+                kwargs["current_hvac_action"] = HvacAction.OFF
 
             # Manual control termination handling
             if "manualControlTermination" in data:
                 manual_termination = data["manualControlTermination"]
                 if manual_termination:
                     kwargs["current_hvac_mode"] = (
-                        CONST_MODE_HEAT if power == "ON" else CONST_MODE_OFF
+                        HvacMode.HEAT if power == "ON" else HvacMode.OFF
                     )
                     kwargs["overlay_termination_type"] = manual_termination["type"]
                     kwargs["overlay_termination_timestamp"] = manual_termination[
                         "projectedExpiry"
                     ]
                 else:
-                    kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
+                    kwargs["current_hvac_mode"] = HvacMode.SMART_SCHEDULE
                     kwargs["overlay_termination_type"] = None
                     kwargs["overlay_termination_timestamp"] = None
             else:
-                kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
+                kwargs["current_hvac_mode"] = HvacMode.SMART_SCHEDULE
 
         kwargs["available"] = (
-            kwargs.get("connection", CONST_CONNECTION_OFFLINE)
-            != CONST_CONNECTION_OFFLINE
+            kwargs.get("connection", LinkState.OFFLINE)
+            != LinkState.OFFLINE
         )
 
         # Termination conditions

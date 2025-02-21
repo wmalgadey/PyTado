@@ -5,7 +5,7 @@ PyTado interface implementation for hops.tado.com (Tado X).
 from typing import Any, overload
 
 from PyTado.exceptions import TadoException, TadoNotSupportedException
-from PyTado.http import Action, Http, Mode, TadoXRequest
+from PyTado.http import Action, Domain, Http, Mode, TadoXRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
 from PyTado.logger import Logger
 from PyTado.models.home import AirComfort
@@ -27,7 +27,6 @@ from PyTado.types import (
     ZoneType,
 )
 from PyTado.zone import TadoZone
-
 
 _LOGGER = Logger(__name__)
 
@@ -95,7 +94,7 @@ class TadoX(TadoBase):
 
         return {room.name: room for room in rooms}
 
-    def get_zone_state(self, zone: int) -> TadoZone:
+    def get_zone_state(self, zone: int) -> RoomState:
         """
         Gets current state of zone/room as a TadoXZone object.
         """
@@ -325,17 +324,3 @@ class TadoX(TadoBase):
         request.command = "settings/flowTemperatureOptimization"
 
         return self._http.request(request)
-
-    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
-    def get_boiler_install_state(self, bridge_id: str, auth_key: str):
-        pass
-
-    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
-    def get_boiler_max_output_temperature(self, bridge_id: str, auth_key: str):
-        pass
-
-    @not_supported("This method is not currently supported by Tado X Bridges (missing authKey)")
-    def set_boiler_max_output_temperature(
-        self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ):
-        pass

@@ -7,24 +7,10 @@ import logging
 from typing import Any, Self
 
 from PyTado.const import (
-    CONST_FAN_AUTO,
-    CONST_FAN_OFF,
-    CONST_FAN_SPEED_AUTO,
-    CONST_FAN_SPEED_OFF,
-    CONST_HORIZONTAL_SWING_OFF,
-    CONST_HVAC_COOL,
-    CONST_HVAC_HEAT,
-    CONST_HVAC_IDLE,
-    CONST_HVAC_OFF,
     CONST_LINK_OFFLINE,
-    CONST_MODE_OFF,
-    CONST_MODE_SMART_SCHEDULE,
-    CONST_VERTICAL_SWING_OFF,
     DEFAULT_TADO_PRECISION,
-    TADO_HVAC_ACTION_TO_MODES,
-    TADO_MODES_TO_HVAC_ACTION,
-    TYPE_AIR_CONDITIONING,
 )
+from PyTado.types import TADO_HVAC_ACTION_TO_MODES, TADO_MODES_TO_HVAC_ACTION, FanMode, FanSpeed, HorizontalSwing, HvacAction, HvacMode, VerticalSwing, ZoneType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +25,7 @@ class TadoZone:
     current_humidity: float | None = None
     current_humidity_timestamp: str | None = None
     is_away: bool | None = None
-    current_hvac_action: str = CONST_HVAC_OFF
+    current_hvac_action: str = HvacAction.OFF
     current_fan_speed: str | None = None
     current_fan_level: str | None = None
     current_hvac_mode: str | None = None
@@ -70,7 +56,7 @@ class TadoZone:
     @property
     def overlay_active(self) -> bool:
         """Overlay active."""
-        return self.current_hvac_mode != CONST_MODE_SMART_SCHEDULE
+        return self.current_hvac_mode != HvacMode.SMART_SCHEDULE
 
     @classmethod
     def from_data(cls, zone_id: int, data: dict[str, Any]) -> Self:
@@ -124,10 +110,10 @@ class TadoZone:
                 {
                     "current_fan_speed": None,
                     "current_fan_level": None,
-                    "current_hvac_mode": CONST_MODE_OFF,
-                    "current_swing_mode": CONST_MODE_OFF,
-                    "current_vertical_swing_mode": CONST_VERTICAL_SWING_OFF,
-                    "current_horizontal_swing_mode": CONST_HORIZONTAL_SWING_OFF,
+                    "current_hvac_mode": HvacMode.OFF,
+                    "current_swing_mode": HvacMode.OFF,
+                    "current_vertical_swing_mode": VerticalSwing.OFF,
+                    "current_horizontal_swing_mode": HorizontalSwing.OFF,
                 }
             )
 
@@ -147,7 +133,7 @@ class TadoZone:
             power = setting["power"]
             kwargs["power"] = power
             if power == "ON":
-                kwargs["current_hvac_action"] = CONST_HVAC_IDLE
+                kwargs["current_hvac_action"] = HvacAction.IDLE
                 if (
                     "mode" not in setting
                     and "type" in setting
@@ -163,17 +149,17 @@ class TadoZone:
             if "fanSpeed" in setting:
                 kwargs["current_fan_speed"] = setting.get(
                     "fanSpeed",
-                    CONST_FAN_AUTO if power == "ON" else CONST_FAN_OFF,
+                   FanMode.AUTO if power == "ON" else FanMode.OFF,
                 )
-            elif "type" in setting and setting["type"] == TYPE_AIR_CONDITIONING:
+            elif "type" in setting and setting["type"] == ZoneType.AIR_CONDITIONING:
                 kwargs["current_fan_speed"] = (
-                    CONST_FAN_AUTO if power == "ON" else CONST_FAN_OFF
+                   FanMode.AUTO if power == "ON" else FanMode.OFF
                 )
 
             if "fanLevel" in setting:
                 kwargs["current_fan_level"] = setting.get(
                     "fanLevel",
-                    (CONST_FAN_SPEED_AUTO if power == "ON" else CONST_FAN_SPEED_OFF),
+                    (FanSpeed.AUTO if power == "ON" else FanSpeed.OFF),
                 )
 
         kwargs["preparation"] = (
@@ -193,7 +179,7 @@ class TadoZone:
                     # acPower means the unit has power so we need to map the
                     # mode
                     kwargs["current_hvac_action"] = TADO_MODES_TO_HVAC_ACTION.get(
-                        kwargs["current_hvac_mode"], CONST_HVAC_COOL
+                        HvacMode(kwargs["current_hvac_mode"]), HvacAction.COOL
                     )
             if (
                 "heatingPower" in activity_data
@@ -210,7 +196,7 @@ class TadoZone:
                 )
 
                 if kwargs["heating_power_percentage"] > 0.0 and power == "ON":
-                    kwargs["current_hvac_action"] = CONST_HVAC_HEAT
+                    kwargs["current_hvac_action"] = HvacAction.HEAT
 
         # If there is no overlay
         # then we are running the smart schedule
@@ -226,7 +212,7 @@ class TadoZone:
                     "termination"
                 ].get("expiry", None)
         else:
-            kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
+            kwargs["current_hvac_mode"] = HvacMode.SMART_SCHEDULE
 
         kwargs["connection"] = (
             data["connectionState"]["value"] if "connectionState" in data else None
