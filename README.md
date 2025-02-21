@@ -104,12 +104,11 @@ commands in your terminal:
 python3 -m venv venv
 source venv/bin/activate
 
-# Upgrade pip and install all projects and their dependencies
-pip install --upgrade pip
-pip install -e '.[all]'
+# install all dependencies
+poetry install
 
 # Install pre-commit hooks
-pre-commit install
+poetry run pre-commit install
 ```
 
 ### Coding Guidelines

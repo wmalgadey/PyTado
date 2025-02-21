@@ -5,7 +5,7 @@ PyTado interface implementation for hops.tado.com (Tado X).
 from typing import Any, overload
 
 from PyTado.exceptions import TadoException, TadoNotSupportedException
-from PyTado.http import Action, Http, Mode, TadoXRequest
+from PyTado.http import Action, Domain, Http, Mode, TadoXRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
 from PyTado.logger import Logger
 from PyTado.models.home import AirComfort
@@ -26,8 +26,6 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
-from PyTado.zone import TadoZone
-
 
 _LOGGER = Logger(__name__)
 
@@ -85,6 +83,7 @@ class TadoX(TadoBase):
     def get_zone_states(self) -> dict[str, RoomState]:
         """
         Gets current states of all zones/rooms.
+        Gets current states of all zones/rooms.
         """
 
         request = TadoXRequest()
@@ -94,7 +93,7 @@ class TadoX(TadoBase):
 
         return {room.name: room for room in rooms}
 
-    def get_zone_state(self, zone: int) -> TadoZone:
+    def get_zone_state(self, zone: int) -> RoomState:
         """
         Gets current state of zone/room as a TadoXZone object.
         """
@@ -123,6 +122,7 @@ class TadoX(TadoBase):
     def get_capabilities(self, zone: int) -> Capabilities:
         """
         Gets current capabilities of zone/room.
+        Gets current capabilities of zone/room.
         """
 
         _LOGGER.warning(
@@ -134,6 +134,7 @@ class TadoX(TadoBase):
 
     def get_climate(self, zone: int) -> Climate:
         """
+        Gets temp (centigrade) and humidity (% RH) for zone/room.
         Gets temp (centigrade) and humidity (% RH) for zone/room.
         """
 
@@ -295,3 +296,30 @@ class TadoX(TadoBase):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
+
+    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+        """
+        Set the flow temperature optimization.
+
+        max_flow_temperature: float, the maximum flow temperature in Celsius
+        """
+
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+        request.payload = {"maxFlowTemperature": max_flow_temperature}
+
+        return self._http.request(request)
+
+    def get_flow_temperature_optimization(self):
+        """
+        Get the current flow temperature optimization
+        """
+
+        request = TadoXRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+
+        return self._http.request(request)

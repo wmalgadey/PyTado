@@ -12,6 +12,9 @@ from PyTado.models.line_x import Schedule as ScheduleX
 from PyTado.models.line_x.schedule import SetSchedule
 from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationState
 from PyTado.models.pre_line_x.device import Device
+from PyTado.models.pre_line_x.flow_temperature_optimization import (
+    FlowTemperatureOptimization,
+)
 from PyTado.models.pre_line_x.home import HeatingCircuit
 from PyTado.models.pre_line_x.schedule import Schedule, Schedules
 from PyTado.models.pre_line_x.zone import (
@@ -476,4 +479,31 @@ class Tado(TadoBase):
             "boilerMaxOutputTemperatureInCelsius": temperature_in_celcius
         }
 
-        self._http.request(request)
+        return self._http.request(request)
+
+    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+        """
+        Set the flow temperature optimization.
+
+        max_flow_temperature: float, the maximum flow temperature in Celsius
+        """
+
+        request = TadoRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.command = "flowTemperatureOptimization"
+        request.payload = {"maxFlowTemperature": max_flow_temperature}
+
+        return self._http.request(request)
+
+    def get_flow_temperature_optimization(self) -> FlowTemperatureOptimization:
+        """
+        Get the current flow temperature optimization
+        """
+
+        request = TadoRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME
+        request.command = "flowTemperatureOptimization"
+
+        return FlowTemperatureOptimization.model_validate(self._http.request(request))

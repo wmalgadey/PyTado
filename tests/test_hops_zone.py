@@ -3,7 +3,7 @@
 import json
 import unittest
 from unittest import mock
-
+import responses
 from . import common
 
 from PyTado.http import Http
@@ -16,7 +16,7 @@ class TadoZoneTestCase(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         login_patch = mock.patch(
-            "PyTado.http.Http._login", return_value=(1, "foo")
+            "PyTado.http.Http._login", return_value=(1234, "foo")
         )
         is_x_line_patch = mock.patch(
             "PyTado.http.Http._check_x_line_generation", return_value=True
@@ -29,32 +29,25 @@ class TadoZoneTestCase(unittest.TestCase):
         self.addCleanup(is_x_line_patch.stop)
         self.addCleanup(get_me_patch.stop)
 
+        responses.add(
+            responses.GET,
+            "https://hops.tado.com/homes/1234/roomsAndDevices",
+            json=json.loads(common.load_fixture("tadox/rooms_and_devices.json")),
+            status=200,
+        )
+
         self.http = Http("my@username.com", "mypassword")
         self.tado_client = TadoX(self.http)
 
     def set_fixture(self, filename: str) -> None:
-        def check_get_state(zone_id):
-            assert zone_id == 1
-            return json.loads(common.load_fixture(filename))
-
-        get_state_patch = mock.patch(
-            "PyTado.interface.api.TadoX.get_state",
-            side_effect=check_get_state,
+        responses.add(
+            responses.GET,
+            "https://hops.tado.com/homes/1234/rooms/1",
+            json=json.loads(common.load_fixture(filename)),
+            status=200,
         )
-        get_state_patch.start()
-        self.addCleanup(get_state_patch.stop)
 
-    def set_get_devices_fixture(self, filename: str) -> None:
-        def get_devices():
-            return json.loads(common.load_fixture(filename))
-
-        get_devices_patch = mock.patch(
-            "PyTado.interface.api.TadoX.get_devices",
-            side_effect=get_devices,
-        )
-        get_devices_patch.start()
-        self.addCleanup(get_devices_patch.stop)
-
+    @responses.activate
     def test_tadox_heating_auto_mode(self):
         """Test general homes response."""
 
@@ -157,13 +150,30 @@ class TadoZoneTestCase(unittest.TestCase):
         assert mode.target_temp is None
         assert mode.zone_id == 1
 
+    @responses.activate
     def test_get_devices(self):
         """ Test get_devices method """
-        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
 
-        devices_and_rooms = self.tado_client.get_devices()
-        rooms = devices_and_rooms['rooms']
+        rooms = self.tado_client.get_zones()
         assert len(rooms) == 2
         room_1 = rooms[0]
-        assert room_1['roomName'] == 'Room 1'
-        assert room_1['devices'][0]['serialNumber'] == 'VA1234567890'
+        assert room_1.room_name == 'Room 1'
+        assert room_1.devices[0].serial_number == 'VA1234567890'
+
+    @responses.activate
+    def test_set_window_open(self):
+        """ Test get_devices method """
+
+        devices_and_rooms = self.tado_client.get_zones()
+        for room in devices_and_rooms:
+            result = self.tado_client.set_open_window(zone=room.room_id)
+            assert isinstance(result, dict)
+
+    @responses.activate
+    def test_reset_window_open(self):
+        """ Test get_devices method """
+
+        devices_and_rooms = self.tado_client.get_zones()
+        for room in devices_and_rooms:
+            result = self.tado_client.reset_open_window(zone=room.room_id)
+            assert isinstance(result, dict)

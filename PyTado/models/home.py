@@ -37,7 +37,7 @@ class Temperature(Base):
     """Temperature model represents the temperature in Celsius and Fahrenheit."""
 
     celsius: float
-    fahrenheit: float
+    fahrenheit: float | None = None
     type: str | None = None
     timestamp: str | None = None
     precision: TempPrecision | None = None
