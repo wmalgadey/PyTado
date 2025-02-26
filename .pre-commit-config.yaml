@@ -82,4 +82,4 @@ repos:
       types: [python]
       pass_filenames: false
       always_run: true
-      additional_dependencies: [responses, pytest-mock]
+      additional_dependencies: [responses, pytest-mock, pytest-socket]

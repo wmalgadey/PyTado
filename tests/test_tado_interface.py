@@ -12,7 +12,9 @@ import PyTado.interface.api as API
 class TestTadoInterface(unittest.TestCase):
     """Test cases for main tado interface class"""
 
-    def test_interface_with_tado_api(self):
+    @mock.patch("PyTado.interface.api.my_tado.Tado.get_me")
+    @mock.patch("PyTado.interface.api.hops_tado.TadoX.get_me")
+    def test_interface_with_tado_api(self, mock_hops_get_me, mock_my_get_me):
         login_patch = mock.patch(
             "PyTado.http.Http._login_device_flow", return_value=(1, "foo")
         )
@@ -22,6 +24,7 @@ class TestTadoInterface(unittest.TestCase):
         )
         check_x_patch.start()
         self.addCleanup(check_x_patch.stop)
+        self.addCleanup(login_patch.stop)
 
         with mock.patch("PyTado.interface.api.my_tado.Tado.get_me") as mock_it:
             tado_interface = Tado()
@@ -36,9 +39,11 @@ class TestTadoInterface(unittest.TestCase):
             tado_interface = Tado()
             tado_interface.get_me()
 
-            mock_it.assert_not_called()
+        assert not tado_interface._http.is_x_line
+        mock_my_get_me.assert_called_once()
+        mock_hops_get_me.assert_not_called()
 
-        assert login_mock.call_count == 2
+        assert login_mock.call_count == 1
 
     def test_interface_with_tadox_api(self):
         login_patch = mock.patch(
