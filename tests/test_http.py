@@ -5,8 +5,8 @@ import json
 import responses
 import unittest
 
-from PyTado.const import CLIENT_ID, CLIENT_ID_DEVICE, CLIENT_SECRET
-from PyTado.exceptions import TadoException, TadoWrongCredentialsException
+from PyTado.const import CLIENT_ID_DEVICE
+from PyTado.exceptions import TadoException
 
 from . import common
 

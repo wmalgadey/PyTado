@@ -57,6 +57,12 @@ class Mode(enum.Enum):
     PLAIN = 2
 
 
+class DeviceActivationStatus(enum.Enum):
+    NOT_STARTED = "NOT_STARTED"
+    PENDING = "PENDING"
+    COMPLETED = "COMPLETED"
+
+
 class TadoRequest:
     """Data Container for my.tado.com API Requests"""
 
@@ -150,7 +156,7 @@ class Http:
         self._headers = {"Referer": "https://app.tado.com/"}
         self._user_code = None
         self._device_verification_url = None
-        self._device_activation_status = "NOT_STARTED"
+        self._device_activation_status = DeviceActivationStatus.NOT_STARTED
         self._expires_at = None
 
         self._login_device_flow()
@@ -167,7 +173,7 @@ class Http:
         return self._user_code
 
     @property
-    def device_activation_status(self) -> str:
+    def device_activation_status(self) -> DeviceActivationStatus:
         return self._device_activation_status
 
     @property
@@ -361,7 +367,7 @@ class Http:
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
             self._expires_at.strftime("%Y-%m-%d %H:%M:%S"))
-        self._device_activation_status = "PENDING"
+        self._device_activation_status = DeviceActivationStatus.PENDING
 
     def device_activation(self) -> None:
         """Activate the device and get the refresh token"""
@@ -407,7 +413,7 @@ class Http:
         self._x_api = self._check_x_line_generation()
         self._user_code = None
         self._device_verification_url = None
-        self._device_activation_status = "COMPLETED"
+        self._device_activation_status = DeviceActivationStatus.COMPLETED
 
     def _get_id(self) -> int:
         request = TadoRequest()

@@ -34,6 +34,7 @@ class TadoZoneTestCase(unittest.TestCase):
 
         self.http = Http()
         self.http.device_activation()
+        self.http._x_api = True
         self.tado_client = TadoX(self.http)
 
     def set_fixture(self, filename: str) -> None:
