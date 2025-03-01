@@ -8,5 +8,8 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "ansible.python.interpreterPath": "/Volumes/Daten/Projects/PyTado/.venv/bin/python"
+    "ansible.python.interpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
 }
