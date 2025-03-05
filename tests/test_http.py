@@ -5,8 +5,8 @@ import json
 import responses
 import unittest
 
-from PyTado.const import CLIENT_ID, CLIENT_SECRET
-from PyTado.exceptions import TadoException, TadoWrongCredentialsException
+from PyTado.const import CLIENT_ID_DEVICE
+from PyTado.exceptions import TadoException
 
 from . import common
 
@@ -23,6 +23,31 @@ class TestHttp(unittest.TestCase):
         responses.add(
             responses.POST,
             "https://auth.tado.com/oauth/token",
+            json={
+                "access_token": "value",
+                "expires_in": 1000,
+                "refresh_token": "another_value",
+            },
+            status=200,
+        )
+
+        responses.add(
+            responses.POST,
+            "https://login.tado.com/oauth2/device_authorize",
+            json={
+                "device_code": "XXX_code_XXX",
+                "expires_in": 300,
+                "interval": 1,
+                "user_code": "7BQ5ZQ",
+                "verification_uri": "https://login.tado.com/oauth2/device",
+                "verification_uri_complete": "https://login.tado.com/oauth2/device?user_code=7BQ5ZQ",
+            },
+            status=200,
+        )
+
+        responses.add(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
             json={
                 "access_token": "value",
                 "expires_in": 1000,
@@ -52,11 +77,8 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_login_successful(self):
 
-        instance = Http(
-            username="test_user",
-            password="test_pass",
-            debug=True,
-        )
+        instance = Http(debug=True)
+        instance.device_activation()
 
         # Verify that the login was successful
         self.assertEqual(instance._id, 1234)
@@ -67,24 +89,21 @@ class TestHttp(unittest.TestCase):
 
         responses.replace(
             responses.POST,
-            "https://auth.tado.com/oauth/token",
+            "https://login.tado.com/oauth2/token",
             json={"error": "invalid_grant"},
             status=400,
         )
 
         with self.assertRaises(
-            expected_exception=TadoWrongCredentialsException,
+            expected_exception=TadoException,
             msg="Your username or password is invalid",
         ):
-            Http(
-                username="test_user",
-                password="test_pass",
-                debug=True,
-            )
+            instance = Http(debug=True)
+            instance.device_activation()
 
         responses.replace(
             responses.POST,
-            "https://auth.tado.com/oauth/token",
+            "https://login.tado.com/oauth2/token",
             json={"error": "server failed"},
             status=503,
         )
@@ -93,11 +112,8 @@ class TestHttp(unittest.TestCase):
             expected_exception=TadoException,
             msg="Login failed for unknown reason with status code 503",
         ):
-            Http(
-                username="test_user",
-                password="test_pass",
-                debug=True,
-            )
+            instance = Http(debug=True)
+            instance.device_activation()
 
     @responses.activate
     def test_line_x(self):
@@ -111,11 +127,8 @@ class TestHttp(unittest.TestCase):
             status=200,
         )
 
-        instance = Http(
-            username="test_user",
-            password="test_pass",
-            debug=True,
-        )
+        instance = Http(debug=True)
+        instance.device_activation()
 
         # Verify that the login was successful
         self.assertEqual(instance._id, 1234)
@@ -123,23 +136,18 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_refresh_token_success(self):
-        instance = Http(
-            username="test_user",
-            password="test_pass",
-            debug=True,
-        )
+        instance = Http(debug=True)
+        instance.device_activation()
 
         expected_params = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
+            "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "scope": "home.user",
             "refresh_token": "another_value",
         }
         # Mock the refresh token response
         refresh_token = responses.replace(
             responses.POST,
-            "https://auth.tado.com/oauth/token",
+            "https://login.tado.com/oauth2/token",
             match=[
                 responses.matchers.query_param_matcher(expected_params),
             ],
@@ -162,16 +170,13 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_refresh_token_failure(self):
-        instance = Http(
-            username="test_user",
-            password="test_pass",
-            debug=True,
-        )
+        instance = Http(debug=True)
+        instance.device_activation()
 
         # Mock the refresh token response with failure
         refresh_token = responses.replace(
             responses.POST,
-            "https://auth.tado.com/oauth/token",
+            "https://login.tado.com/oauth2/token",
             json={"error": "invalid_grant"},
             status=400,
         )

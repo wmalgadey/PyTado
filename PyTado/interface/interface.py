@@ -3,11 +3,12 @@ PyTado interface abstraction to use app.tado.com or hops.tado.com
 """
 
 import datetime
-import warnings
 import functools
+import warnings
 
-from PyTado.http import Http
 import PyTado.interface.api as API
+from PyTado.exceptions import TadoException
+from PyTado.http import DeviceActivationStatus, Http
 
 
 def deprecated(new_func_name):
@@ -36,31 +37,46 @@ class Tado:
 
     def __init__(
         self,
-        username: str,
-        password: str,
         http_session=None,
         debug: bool = False,
     ):
         """Class Constructor"""
 
         self._http = Http(
-            username=username,
-            password=password,
             http_session=http_session,
             debug=debug,
         )
-
-        if self._http.is_x_line:
-            self._api = API.TadoX(http=self._http, debug=debug)
-        else:
-            self._api = API.Tado(http=self._http, debug=debug)
+        self._api: API.Tado | API.TadoX | None = None
+        self._debug = debug
 
     def __getattr__(self, name):
         """Delegiert den Aufruf von Methoden an die richtige API-Client-Implementierung."""
+
+        if self._api is None:
+            raise TadoException("API is not initialized. Please complete device authentication first.")
+
         return getattr(self._api, name)
 
     # region Deprecated Methods
     # pylint: disable=invalid-name
+
+    def device_verification_url(self) -> str | None:
+        """Returns the URL for device verification."""
+        return self._http.device_verification_url
+
+    def device_activation_status(self) -> DeviceActivationStatus:
+        """Returns the status of the device activation."""
+        return self._http.device_activation_status
+
+    def device_activation(self) -> None:
+        """Activates the device."""
+        self._http.device_activation()
+
+        if self._http.device_activation_status == DeviceActivationStatus.COMPLETED:
+            if self._http.is_x_line:
+                self._api = API.TadoX(http=self._http, debug=self._debug)
+            else:
+                self._api = API.Tado(http=self._http, debug=self._debug)
 
     @deprecated("get_me")
     def getMe(self):
@@ -258,9 +274,7 @@ class Tado:
     @deprecated("set_temp_offset")
     def setTempOffset(self, device_id, offset=0, measure="celsius"):
         """Set the Temperature offset on the device. (Deprecated)"""
-        return self.set_temp_offset(
-            device_id=device_id, offset=offset, measure=measure
-        )
+        return self.set_temp_offset(device_id=device_id, offset=offset, measure=measure)
 
     @deprecated("get_eiq_tariffs")
     def getEIQTariffs(self):
@@ -273,10 +287,11 @@ class Tado:
         return self.get_eiq_meter_readings()
 
     @deprecated("set_eiq_meter_readings")
-    def setEIQMeterReadings(
-        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
-    ):
-        """Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals (Deprecated)"""
+    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
+        """Send Meter Readings to Tado (Deprecated)
+
+        date format is YYYY-MM-DD, reading is without decimals
+        """
         return self.set_eiq_meter_readings(date=date, reading=reading)
 
     @deprecated("set_eiq_tariff")
@@ -288,8 +303,10 @@ class Tado:
         unit="m3",
         is_period=False,
     ):
-        """Send Tariffs to Tado, date format is YYYY-MM-DD,
-        tariff is with decimals, unit is either m3 or kWh, set is_period to true to set a period of price (Deprecated)
+        """Send Tariffs to Tado (Deprecated)
+
+        date format is YYYY-MM-DD, tariff is with decimals, unit is either
+        m3 or kWh, set is_period to true to set a period of price
         """
         return self.set_eiq_tariff(
             from_date=from_date,
