@@ -7,7 +7,8 @@ import functools
 import warnings
 
 import PyTado.interface.api as API
-from PyTado.http import Http
+from PyTado.exceptions import TadoException
+from PyTado.http import DeviceActivationStatus, Http
 
 
 def deprecated(new_func_name):
@@ -45,14 +46,15 @@ class Tado:
             http_session=http_session,
             debug=debug,
         )
-
-        if self._http.is_x_line:
-            self._api: API.Tado | API.TadoX = API.TadoX(http=self._http, debug=debug)
-        else:
-            self._api = API.Tado(http=self._http, debug=debug)
+        self._api: API.Tado | API.TadoX | None = None
+        self._debug = debug
 
     def __getattr__(self, name):
         """Delegiert den Aufruf von Methoden an die richtige API-Client-Implementierung."""
+
+        if self._api is None:
+            raise TadoException("API is not initialized. Please complete device authentication first.")
+
         return getattr(self._api, name)
 
     # region Deprecated Methods
@@ -62,13 +64,19 @@ class Tado:
         """Returns the URL for device verification."""
         return self._http.device_verification_url
 
-    def device_activation_status(self) -> str | None:
+    def device_activation_status(self) -> DeviceActivationStatus:
         """Returns the status of the device activation."""
         return self._http.device_activation_status
 
     def device_activation(self) -> None:
         """Activates the device."""
-        return self._http.device_activation()
+        self._http.device_activation()
+
+        if self._http.device_activation_status == DeviceActivationStatus.COMPLETED:
+            if self._http.is_x_line:
+                self._api = API.TadoX(http=self._http, debug=self._debug)
+            else:
+                self._api = API.Tado(http=self._http, debug=self._debug)
 
     @deprecated("get_me")
     def getMe(self):

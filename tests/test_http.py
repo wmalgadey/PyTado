@@ -40,7 +40,7 @@ class TestHttp(unittest.TestCase):
                 "interval": 1,
                 "user_code": "7BQ5ZQ",
                 "verification_uri": "https://login.tado.com/oauth2/device",
-                "verification_uri_complete": "https://login.tado.com/oauth2/device?user_code=7BQ5ZQ"
+                "verification_uri_complete": "https://login.tado.com/oauth2/device?user_code=7BQ5ZQ",
             },
             status=200,
         )

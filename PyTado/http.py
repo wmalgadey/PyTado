@@ -58,6 +58,7 @@ class Mode(enum.Enum):
 
 
 class DeviceActivationStatus(enum.Enum):
+    """Device Activation Status Enum"""	
     NOT_STARTED = "NOT_STARTED"
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
@@ -154,18 +155,19 @@ class Http:
         self._session = http_session or requests.Session()
         self._session.hooks["response"].append(self._log_response)
         self._headers = {"Referer": "https://app.tado.com/"}
-        self._user_code = None
-        self._device_verification_url = None
-        self._device_activation_status = DeviceActivationStatus.NOT_STARTED
-        self._expires_at = None
 
-        self._login_device_flow()
-        self._id = None
-        self._token_refresh = None
-        self._x_api = False
+        self._user_code: str | None = None
+        self._device_verification_url: str | None = None
+        self._device_activation_status = DeviceActivationStatus.NOT_STARTED
+        self._expires_at: datetime | None = None
+
+        self._id: int | None = None
+        self._token_refresh: str | None = None
+        self._x_api: bool | None = None
+        self._device_activation_status = self._login_device_flow()
 
     @property
-    def is_x_line(self) -> bool:
+    def is_x_line(self) -> bool | None:
         return self._x_api
 
     @property
@@ -317,14 +319,17 @@ class Http:
 
         if response.status_code != 200:
             raise TadoWrongCredentialsException(
-                "Failed to refresh token, probably wrong credentials. "
-                f"Status code: {response.status_code}"
+                "Failed to refresh token, probably wrong credentials. " f"Status code: {response.status_code}"
             )
 
         self._set_oauth_header(response.json())
 
-    def _login_device_flow(self):
-        """Login to the API using the device flow"""
+    def _login_device_flow(self) -> DeviceActivationStatus:
+        """Start the login to the API using the device flow"""
+
+        if self._device_activation_status != DeviceActivationStatus.NOT_STARTED:
+            raise TadoException("The device has been started already")
+
         url = "https://login.tado.com/oauth2/device_authorize"
         data = {
             "client_id": CLIENT_ID_DEVICE,
@@ -347,9 +352,7 @@ class Http:
             raise TadoException(e) from e
 
         if response.status_code != 200:
-            raise TadoException(
-                f"Login failed. Status code: {response.status_code} and reason: {response.reason}"
-            )
+            raise TadoException(f"Login failed. Status code: {response.status_code} and reason: {response.reason}")
 
         self._device_flow_data = response.json()
         _LOGGER.debug("Device flow response: %s", self._device_flow_data)
@@ -366,47 +369,50 @@ class Http:
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
-            self._expires_at.strftime("%Y-%m-%d %H:%M:%S"))
-        self._device_activation_status = DeviceActivationStatus.PENDING
+            self._expires_at.strftime("%Y-%m-%d %H:%M:%S"),
+        )
+
+        return DeviceActivationStatus.PENDING
+
+    def _check_device_activation(self) -> bool:
+        if self._expires_at is not None and datetime.timestamp(datetime.now()) > datetime.timestamp(self._expires_at):
+            raise TadoException("User took too long to enter key")
+
+        # Await the desired interval, before polling the API again
+        time.sleep(self._device_flow_data["interval"])
+
+        try:
+            token_response = self._session.request(
+                method="post",
+                url="https://login.tado.com/oauth2/token",
+                params={
+                    "client_id": CLIENT_ID_DEVICE,
+                    "device_code": self._device_flow_data["device_code"],
+                    "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                },
+            )
+        except requests.exceptions.ConnectionError as e:
+            raise TadoException(e) from e
+
+        if token_response.status_code == 200:
+            self._set_oauth_header(token_response.json())
+            return True
+
+        # The user has not yet authorized the device, let's continue
+        if token_response.status_code == 400 and token_response.json()["error"] == "authorization_pending":
+            _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
+            return False
+
+        raise TadoException(f"Login failed. Reason: {token_response.reason}")
 
     def device_activation(self) -> None:
         """Activate the device and get the refresh token"""
-        if self._expires_at is None or self._device_flow_data is None:
-            raise TadoException("User has not yet authorized the device")
+
+        if self._device_activation_status == DeviceActivationStatus.NOT_STARTED:
+            raise TadoException("The device flow has not yet started")
 
         while True:
-            if datetime.timestamp(datetime.now()) > datetime.timestamp(self._expires_at):
-                raise TadoException("User took too long to enter key")
-
-            # Await the desired interval, before polling the API again
-            time.sleep(self._device_flow_data["interval"])
-            try:
-                token_response = self._session.request(
-                    method="post",
-                    url="https://login.tado.com/oauth2/token",
-                    params={
-                        "client_id": CLIENT_ID_DEVICE,
-                        "device_code": self._device_flow_data["device_code"],
-                        "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-                    }
-                )
-            except requests.exceptions.ConnectionError as e:
-                raise TadoException(e) from e
-
-            if token_response.status_code != 200:
-                # The user has not yet authorized the device, let's continue
-                if token_response.status_code == 400 and token_response.json()[
-                        "error"] == "authorization_pending":
-                    _LOGGER.info(
-                        "Authorization pending, waiting for user to authorize. Continue polling.")
-                    continue
-
-                raise TadoException(
-                    f"Login failed. Reason: {token_response.reason}"
-                )
-
-            if token_response.status_code == 200:
-                self._set_oauth_header(token_response.json())
+            if self._check_device_activation():
                 break
 
         self._id = self._get_id()

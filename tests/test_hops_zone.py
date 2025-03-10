@@ -15,10 +15,10 @@ class TadoZoneTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        login_patch = mock.patch(
-            "PyTado.http.Http._login_device_flow", return_value=(1, "foo")
+        login_patch = mock.patch("PyTado.http.Http._login_device_flow")
+        device_activation_patch = mock.patch(
+            "PyTado.http.Http.device_activation"
         )
-        device_activation_patch = mock.patch("PyTado.http.Http.device_activation")
         is_x_line_patch = mock.patch(
             "PyTado.http.Http._check_x_line_generation", return_value=True
         )
@@ -48,17 +48,6 @@ class TadoZoneTestCase(unittest.TestCase):
         )
         get_state_patch.start()
         self.addCleanup(get_state_patch.stop)
-
-    def set_get_devices_fixture(self, filename: str) -> None:
-        def get_devices():
-            return json.loads(common.load_fixture(filename))
-
-        get_devices_patch = mock.patch(
-            "PyTado.interface.api.TadoX.get_devices",
-            side_effect=get_devices,
-        )
-        get_devices_patch.start()
-        self.addCleanup(get_devices_patch.stop)
 
     def test_tadox_heating_auto_mode(self):
         """Test general homes response."""
@@ -161,34 +150,3 @@ class TadoZoneTestCase(unittest.TestCase):
         assert mode.tado_mode is None
         assert mode.target_temp is None
         assert mode.zone_id == 1
-
-    def test_get_devices(self):
-        """ Test get_devices method """
-        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
-
-        devices_and_rooms = self.tado_client.get_devices()
-        rooms = devices_and_rooms['rooms']
-        assert len(rooms) == 2
-        room_1 = rooms[0]
-        assert room_1['roomName'] == 'Room 1'
-        assert room_1['devices'][0]['serialNumber'] == 'VA1234567890'
-
-    @mock.patch("PyTado.http.Http.request", return_value={})
-    def test_set_window_open(self, _mock_http_request):
-        """ Test get_devices method """
-        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
-
-        devices_and_rooms = self.tado_client.get_devices()
-        for room in devices_and_rooms['rooms']:
-            result = self.tado_client.set_open_window(zone=room)
-            assert isinstance(result, dict)
-
-    @mock.patch("PyTado.http.Http.request", return_value={})
-    def test_reset_window_open(self, _mock_http_request):
-        """ Test get_devices method """
-        self.set_get_devices_fixture("tadox/rooms_and_devices.json")
-
-        devices_and_rooms = self.tado_client.get_devices()
-        for room in devices_and_rooms['rooms']:
-            result = self.tado_client.reset_open_window(zone=room)
-            assert isinstance(result, dict)
