@@ -57,7 +57,7 @@ class Mode(enum.Enum):
     PLAIN = 2
 
 
-class DeviceActivationStatus(enum.Enum):
+class DeviceActivationStatus(enum.StrEnum):
     NOT_STARTED = "NOT_STARTED"
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
