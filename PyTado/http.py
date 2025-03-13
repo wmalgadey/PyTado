@@ -5,9 +5,13 @@ Do all the API HTTP heavy lifting in this file
 import enum
 import json
 import logging
+import os
 import pprint
 import time
 from datetime import datetime, timedelta
+from json import dump as json_dump
+from json import load as json_load
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 
@@ -58,7 +62,8 @@ class Mode(enum.Enum):
 
 
 class DeviceActivationStatus(enum.Enum):
-    """Device Activation Status Enum"""	
+    """Device Activation Status Enum"""
+
     NOT_STARTED = "NOT_STARTED"
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
@@ -143,6 +148,7 @@ class Http:
 
     def __init__(
         self,
+        token_file_path: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
     ) -> None:
@@ -164,25 +170,58 @@ class Http:
         self._id: int | None = None
         self._token_refresh: str | None = None
         self._x_api: bool | None = None
-        self._device_activation_status = self._login_device_flow()
+        self._token_file_path = token_file_path
+
+        if not self._load_token() or not self._refresh_token():
+            self._device_activation_status = self._login_device_flow()
+        else:
+            self._device_activation_status = DeviceActivationStatus.COMPLETED
 
     @property
     def is_x_line(self) -> bool | None:
+        """
+        Check if the current line is an X line.
+
+        Returns:
+            bool | None: True if the current line is an X line, False otherwise.
+                         None if the api is not ready yet.
+        """
         return self._x_api
 
     @property
     def user_code(self) -> str | None:
+        """
+        Retrieve the user code.
+
+        Returns:
+            str | None: The user code if available, otherwise None.
+        """
         return self._user_code
 
     @property
     def device_activation_status(self) -> DeviceActivationStatus:
+        """
+        Retrieve the activation status of the device.
+
+        Returns:
+            DeviceActivationStatus: The current activation status of the device.
+        """
         return self._device_activation_status
 
     @property
     def device_verification_url(self) -> str | None:
+        """
+        Retrieve the url to activate the device.
+
+        Returns:
+            str | None: The current url for device activation or none if
+                        authentication is not started.
+        """
         return self._device_verification_url
 
-    def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
+    def _log_response(
+        self, response: requests.Response, *args, **kwargs
+    ) -> None:
         og_request_method = response.request.method
         og_request_url = response.request.url
         og_request_headers = response.request.headers
@@ -209,7 +248,9 @@ class Http:
         data = self._configure_payload(headers, request)
         url = self._configure_url(request)
 
-        http_request = requests.Request(method=request.action, url=url, headers=headers, data=data)
+        http_request = requests.Request(
+            method=request.action, url=url, headers=headers, data=data
+        )
         prepped = http_request.prepare()
         prepped.hooks["response"].append(self._log_response)
 
@@ -245,7 +286,10 @@ class Http:
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{request.endpoint}{request.command}"
-        elif request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE:
+        elif (
+            request.domain == Domain.DEVICES
+            or request.domain == Domain.HOME_BY_BRIDGE
+        ):
             url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
@@ -258,7 +302,9 @@ class Http:
 
         return url
 
-    def _configure_payload(self, headers: dict[str, str], request: TadoRequest) -> bytes:
+    def _configure_payload(
+        self, headers: dict[str, str], request: TadoRequest
+    ) -> bytes:
         if request.payload is None:
             return b""
 
@@ -284,12 +330,37 @@ class Http:
         self._refresh_at = self._refresh_at - timedelta(seconds=30)
 
         self._headers["Authorization"] = f"Bearer {access_token}"
+
+        self._save_token()
+
         return refresh_token
 
-    def _refresh_token(self) -> None:
+    def _load_token(self) -> bool:
+        """Load the refresh token from a file."""
+
+        if not self._token_file_path or not os.path.exists(
+            self._token_file_path
+        ):
+            return False
+
+        try:
+            with open(self._token_file_path, encoding="utf-8") as f:
+                data = json_load(f)
+                self._token_refresh = data.get("refresh_token")
+                self._refresh_at = data.get("refresh_at")
+
+            _LOGGER.debug("Refresh token loaded from %s", self._token_file_path)
+
+            return True
+        except (OSError, json.JSONDecodeError) as e:
+            _LOGGER.error("Failed to load refresh token: %s", e)
+            raise TadoException(e) from e
+
+    def _refresh_token(self, force_refresh: bool = False) -> bool:
         """Refresh the token if it is about to expire"""
-        if self._refresh_at >= datetime.now():
-            return
+
+        if self._refresh_at >= datetime.now() and not force_refresh:
+            return True
 
         url = "https://login.tado.com/oauth2/token"
         data = {
@@ -313,16 +384,44 @@ class Http:
                     "Referer": "https://app.tado.com/",
                 },
             )
+
         except requests.exceptions.ConnectionError as e:
             _LOGGER.error("Connection error: %s", e)
-            raise TadoException(e)
+            raise TadoException(e) from e
 
         if response.status_code != 200:
             raise TadoWrongCredentialsException(
-                "Failed to refresh token, probably wrong credentials. " f"Status code: {response.status_code}"
+                "Failed to refresh token, probably wrong credentials. "
+                f"Status code: {response.status_code}"
             )
 
         self._set_oauth_header(response.json())
+
+        return True
+
+    def _save_token(self):
+        """Save the refresh token to a file."""
+        if not self._token_file_path or not self._token_refresh:
+            return
+
+        try:
+            token_dir = os.path.dirname(self._token_file_path)
+            if token_dir and not os.path.exists(token_dir):
+                Path(token_dir).mkdir(parents=True, exist_ok=True)
+
+            with open(self._token_file_path, "w", encoding="utf-8") as f:
+                json_dump(
+                    {
+                        "refresh_token": self._token_refresh,
+                        "refresh_at": self._refresh_at,
+                    },
+                    f,
+                )
+
+            _LOGGER.debug("Refresh token saved to %s", self._token_file_path)
+        except Exception as e:
+            _LOGGER.error("Failed to save refresh token: %s", e)
+            raise TadoException(e) from e
 
     def _login_device_flow(self) -> DeviceActivationStatus:
         """Start the login to the API using the device flow"""
@@ -352,12 +451,16 @@ class Http:
             raise TadoException(e) from e
 
         if response.status_code != 200:
-            raise TadoException(f"Login failed. Status code: {response.status_code} and reason: {response.reason}")
+            raise TadoException(
+                f"Login failed. Status code: {response.status_code} and reason: {response.reason}"
+            )
 
         self._device_flow_data = response.json()
         _LOGGER.debug("Device flow response: %s", self._device_flow_data)
 
-        user_code = urlencode({"user_code": self._device_flow_data["user_code"]})
+        user_code = urlencode(
+            {"user_code": self._device_flow_data["user_code"]}
+        )
         visit_url = f"{self._device_flow_data['verification_uri']}?{user_code}"
         self._user_code = self._device_flow_data["user_code"]
         self._device_verification_url = visit_url
@@ -365,7 +468,9 @@ class Http:
         _LOGGER.info("Please visit the following URL: %s", visit_url)
 
         expires_in_seconds = self._device_flow_data["expires_in"]
-        self._expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
+        self._expires_at = datetime.now() + timedelta(
+            seconds=expires_in_seconds
+        )
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
@@ -375,7 +480,9 @@ class Http:
         return DeviceActivationStatus.PENDING
 
     def _check_device_activation(self) -> bool:
-        if self._expires_at is not None and datetime.timestamp(datetime.now()) > datetime.timestamp(self._expires_at):
+        if self._expires_at is not None and datetime.timestamp(
+            datetime.now()
+        ) > datetime.timestamp(self._expires_at):
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
@@ -399,8 +506,13 @@ class Http:
             return True
 
         # The user has not yet authorized the device, let's continue
-        if token_response.status_code == 400 and token_response.json()["error"] == "authorization_pending":
-            _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
+        if (
+            token_response.status_code == 400
+            and token_response.json()["error"] == "authorization_pending"
+        ):
+            _LOGGER.info(
+                "Authorization pending, waiting for user to authorize. Continue polling."
+            )
             return False
 
         raise TadoException(f"Login failed. Reason: {token_response.reason}")
