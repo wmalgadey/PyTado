@@ -30,6 +30,7 @@ the GNU Public Licence version 3, and should therefore not be used where it may 
 cause discomfort and inconvenience to others.
 
 ## Usage
+
 As of the 15th of March 2025, Tado has updated their OAuth2 authentication flow. It will now use the device flow, instead of a username/password flow. This means that the user will have to authenticate the device using a browser, and then enter the code that is displayed on the browser into the terminal.
 
 PyTado handles this as following:
@@ -42,11 +43,13 @@ PyTado handles this as following:
 The `device_verification_url()` will be reset to `None` and the `device_activation_status()` will return `COMPLETED`.
 
 ### Screenshots of the device flow
+
 ![Tado device flow: invoking](/screenshots/tado-device-flow-0.png)
 ![Tado device flow: browser](/screenshots/tado-device-flow-1.png)
 ![Tado device flow: complete](/screenshots/tado-device-flow-2.png)
 
 ## Example code
+
 ```python
 """Example client for PyTado"""
 
