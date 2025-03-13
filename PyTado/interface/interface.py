@@ -14,6 +14,17 @@ from PyTado.http import DeviceActivationStatus, Http
 
 
 def deprecated(new_func_name):
+    """
+    A decorator to mark functions as deprecated. It will result in a warning being emitted
+    when the function is used, advising the user to use the new function instead.
+
+    Args:
+        new_func_name (str): The name of the new function that should be used instead.
+
+    Returns:
+        function: A decorator that wraps the deprecated function and emits a warning.
+    """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
