@@ -172,7 +172,7 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
 
-        if not self._load_token() or not self._refresh_token():
+        if not self._load_token() or not self._refresh_token(force_refresh=True):
             self._device_activation_status = self._login_device_flow()
         else:
             self._device_activation_status = DeviceActivationStatus.COMPLETED
@@ -390,6 +390,12 @@ class Http:
             raise TadoException(e) from e
 
         if response.status_code != 200:
+            if force_refresh:
+                _LOGGER.error(
+                    "Failed to refresh token, probably wrong credentials. "
+                    "Status code: %s", response.status_code)
+                return False
+
             raise TadoWrongCredentialsException(
                 "Failed to refresh token, probably wrong credentials. "
                 f"Status code: {response.status_code}"
