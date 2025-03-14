@@ -48,6 +48,38 @@ The `device_verification_url()` will be reset to `None` and the `device_activati
 ![Tado device flow: browser](/screenshots/tado-device-flow-1.png)
 ![Tado device flow: complete](/screenshots/tado-device-flow-2.png)
 
+### How to not authenticate the device again
+
+It is possible to save the refresh token and reuse to skip the next login.
+
+The following code will use the `refresh_token` file to save the refresh-token after login, and load the refresh-token if you create the Tado interface class again.
+
+If the file doesn't exists, the webbrowser is started and the device authentication url is automatically opened. You can activate the device in the browser. Wenn you restart the program, the refresh-token is reused and no webbrowser will be opened.
+```python
+import webbrowser   # only needed for direct web browser access
+
+from PyTado.interface.interface import Tado
+
+tado = Tado(token_file_path="/var/tado/refresh_token")
+
+status = tado.device_activation_status()
+
+if status == "PENDING":
+    url = tado_instance.device_verification_url()
+
+    webbrowser.open_new_tab(url)
+
+    tado_instance.device_activation()
+
+    status = tado_instance.device_activation_status()
+
+if status == "COMPLETED":
+    print("Login successful")
+else
+    print(f"Login status is {status}")
+```
+
+
 ## Example code
 
 ```python
