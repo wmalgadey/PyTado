@@ -53,7 +53,8 @@ class Tado:
         """Delegiert den Aufruf von Methoden an die richtige API-Client-Implementierung."""
 
         if self._api is None:
-            raise TadoException("API is not initialized. Please complete device authentication first.")
+            raise TadoException(
+                "API is not initialized. Please complete device authentication first.")
 
         return getattr(self._api, name)
 
@@ -67,6 +68,10 @@ class Tado:
     def device_activation_status(self) -> DeviceActivationStatus:
         """Returns the status of the device activation."""
         return self._http.device_activation_status
+
+    def get_access_token(self) -> str | None:
+        """Returns the access token."""
+        return self._http.access_token
 
     def device_activation(self) -> None:
         """Activates the device."""
