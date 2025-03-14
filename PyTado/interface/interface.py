@@ -97,7 +97,8 @@ class Tado:
                     self._api = API.Tado(http=self._http, debug=self._debug)
             else:
                 raise TadoException(
-                    "API is not initialized. Please complete device authentication first.")
+                    "API is not initialized. Please complete device authentication first."
+                )
 
     @deprecated("get_me")
     def getMe(self):

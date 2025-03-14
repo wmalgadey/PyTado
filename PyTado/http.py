@@ -61,7 +61,7 @@ class Mode(enum.Enum):
     PLAIN = 2
 
 
-class DeviceActivationStatus(enum.Enum):
+class DeviceActivationStatus(enum.StrEnum):
     """Device Activation Status Enum"""
 
     NOT_STARTED = "NOT_STARTED"
@@ -336,7 +336,6 @@ class Http:
             with open(self._token_file_path, encoding="utf-8") as f:
                 data = json_load(f)
                 self._token_refresh = data.get("refresh_token")
-                self._refresh_at = data.get("refresh_at")
 
             _LOGGER.debug("Refresh token loaded from %s", self._token_file_path)
 
@@ -407,10 +406,7 @@ class Http:
 
             with open(self._token_file_path, "w", encoding="utf-8") as f:
                 json_dump(
-                    {
-                        "refresh_token": self._token_refresh,
-                        "refresh_at": self._refresh_at,
-                    },
+                    {"refresh_token": self._token_refresh},
                     f,
                 )
 
@@ -520,7 +516,7 @@ class Http:
         self._device_ready()
 
     def _device_ready(self):
-        """ after device refresh code has been obtained """
+        """after device refresh code has been obtained"""
         self._id = self._get_id()
         self._x_api = self._check_x_line_generation()
         self._user_code = None
