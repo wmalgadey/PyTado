@@ -58,7 +58,7 @@ class Mode(enum.Enum):
 
 
 class DeviceActivationStatus(enum.Enum):
-    """Device Activation Status Enum"""	
+    """Device Activation Status Enum"""
     NOT_STARTED = "NOT_STARTED"
     PENDING = "PENDING"
     COMPLETED = "COMPLETED"
@@ -165,6 +165,7 @@ class Http:
         self._token_refresh: str | None = None
         self._x_api: bool | None = None
         self._device_activation_status = self._login_device_flow()
+        self._access_token: str | None = None
 
     @property
     def is_x_line(self) -> bool | None:
@@ -181,6 +182,10 @@ class Http:
     @property
     def device_verification_url(self) -> str | None:
         return self._device_verification_url
+
+    @property
+    def access_token(self) -> str | None:
+        return self._access_token
 
     def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
         og_request_method = response.request.method
@@ -277,6 +282,7 @@ class Http:
         refresh_token = data["refresh_token"]
 
         self._token_refresh = refresh_token
+        self._access_token = access_token
         self._refresh_at = datetime.now()
         self._refresh_at = self._refresh_at + timedelta(seconds=expires_in)
         # We subtract 30 seconds from the correct refresh time.
@@ -327,6 +333,10 @@ class Http:
     def _login_device_flow(self) -> DeviceActivationStatus:
         """Start the login to the API using the device flow"""
 
+        # Means we have already logged in, let the refresh token handle the rest
+        if self._access_token is not None:
+            return DeviceActivationStatus.COMPLETED
+
         if self._device_activation_status != DeviceActivationStatus.NOT_STARTED:
             raise TadoException("The device has been started already")
 
@@ -352,7 +362,8 @@ class Http:
             raise TadoException(e) from e
 
         if response.status_code != 200:
-            raise TadoException(f"Login failed. Status code: {response.status_code} and reason: {response.reason}")
+            raise TadoException(
+                f"Login failed. Status code: {response.status_code} and reason: {response.reason}")
 
         self._device_flow_data = response.json()
         _LOGGER.debug("Device flow response: %s", self._device_flow_data)
@@ -375,7 +386,8 @@ class Http:
         return DeviceActivationStatus.PENDING
 
     def _check_device_activation(self) -> bool:
-        if self._expires_at is not None and datetime.timestamp(datetime.now()) > datetime.timestamp(self._expires_at):
+        if self._expires_at is not None and datetime.timestamp(
+                datetime.now()) > datetime.timestamp(self._expires_at):
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
@@ -399,7 +411,8 @@ class Http:
             return True
 
         # The user has not yet authorized the device, let's continue
-        if token_response.status_code == 400 and token_response.json()["error"] == "authorization_pending":
+        if token_response.status_code == 400 and token_response.json()[
+                "error"] == "authorization_pending":
             _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
             return False
 
