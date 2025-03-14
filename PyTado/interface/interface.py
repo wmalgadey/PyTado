@@ -67,10 +67,7 @@ class Tado:
     def __getattr__(self, name):
         """Delegiert den Aufruf von Methoden an die richtige API-Client-Implementierung."""
 
-        if self._api is None:
-            raise TadoException(
-                "API is not initialized. Please complete device authentication first."
-            )
+        self._ensure_api_initialized()
 
         return getattr(self._api, name)
 
@@ -88,15 +85,19 @@ class Tado:
     def device_activation(self) -> None:
         """Activates the device."""
         self._http.device_activation()
+        self._ensure_api_initialized()
 
-        if (
-            self._http.device_activation_status
-            == DeviceActivationStatus.COMPLETED
-        ):
-            if self._http.is_x_line:
-                self._api = API.TadoX(http=self._http, debug=self._debug)
+    def _ensure_api_initialized(self):
+        """Ensures the API client is initialized."""
+        if self._api is None:
+            if self._http.device_activation_status == DeviceActivationStatus.COMPLETED:
+                if self._http.is_x_line:
+                    self._api = API.TadoX(http=self._http, debug=self._debug)
+                else:
+                    self._api = API.Tado(http=self._http, debug=self._debug)
             else:
-                self._api = API.Tado(http=self._http, debug=self._debug)
+                raise TadoException(
+                    "API is not initialized. Please complete device authentication first.")
 
     @deprecated("get_me")
     def getMe(self):
@@ -294,9 +295,7 @@ class Tado:
     @deprecated("set_temp_offset")
     def setTempOffset(self, device_id, offset=0, measure="celsius"):
         """Set the Temperature offset on the device. (Deprecated)"""
-        return self.set_temp_offset(
-            device_id=device_id, offset=offset, measure=measure
-        )
+        return self.set_temp_offset(device_id=device_id, offset=offset, measure=measure)
 
     @deprecated("get_eiq_tariffs")
     def getEIQTariffs(self):
@@ -309,9 +308,7 @@ class Tado:
         return self.get_eiq_meter_readings()
 
     @deprecated("set_eiq_meter_readings")
-    def setEIQMeterReadings(
-        self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0
-    ):
+    def setEIQMeterReadings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
         """Send Meter Readings to Tado (Deprecated)
 
         date format is YYYY-MM-DD, reading is without decimals
