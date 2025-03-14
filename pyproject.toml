@@ -45,8 +45,8 @@ platforms = ["any"]
 zip-safe = false
 
 [tool.black]
-line-length = 80
-target-version = ['py311']
+line-length = 100
+target-version = ["py311"]
 
 [tool.pytype]
 python_version = '3.11'

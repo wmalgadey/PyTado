@@ -1,35 +1,25 @@
 """Test the Http class."""
 
 from datetime import datetime, timedelta
+import io
 import json
-import responses
 import unittest
+from unittest import mock
+import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException
+from PyTado.http import Domain, Endpoint, Http, TadoRequest
 
 from . import common
 
-from PyTado.http import Http
-
 
 class TestHttp(unittest.TestCase):
-    """Testcases for Http class."""
+    """Test cases for the Http class."""
 
     def setUp(self):
+        """Set up mock responses for HTTP requests."""
         super().setUp()
-
-        # Mock the login response
-        responses.add(
-            responses.POST,
-            "https://auth.tado.com/oauth/token",
-            json={
-                "access_token": "value",
-                "expires_in": 1000,
-                "refresh_token": "another_value",
-            },
-            status=200,
-        )
 
         responses.add(
             responses.POST,
@@ -76,7 +66,7 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_login_successful(self):
-
+        """Test that login is successful and sets the correct properties."""
         instance = Http(debug=True)
         instance.device_activation()
 
@@ -86,7 +76,7 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_login_failed(self):
-
+        """Test that login fails with appropriate exceptions."""
         responses.replace(
             responses.POST,
             "https://login.tado.com/oauth2/token",
@@ -117,7 +107,7 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_line_x(self):
-
+        """Test that the we correctly identified new TadoX environments."""
         responses.replace(
             responses.GET,
             "https://my.tado.com/api/v2/homes/1234/",
@@ -136,6 +126,7 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_refresh_token_success(self):
+        """Test that the refresh token is successfully updated."""
         instance = Http(debug=True)
         instance.device_activation()
 
@@ -170,6 +161,7 @@ class TestHttp(unittest.TestCase):
 
     @responses.activate
     def test_refresh_token_failure(self):
+        """Test that refresh token failure raises an exception."""
         instance = Http(debug=True)
         instance.device_activation()
 
@@ -188,3 +180,89 @@ class TestHttp(unittest.TestCase):
             instance._refresh_token()
 
         assert refresh_token.call_count == 1
+
+    @responses.activate
+    def test_configure_url_endpoint_mobile(self):
+        """Test URL configuration for the MOBILE endpoint."""
+        http = Http()
+        request = TadoRequest(endpoint=Endpoint.MOBILE, command="test")
+        url = http._configure_url(request)
+        self.assertEqual(url, "https://my.tado.com/mobile/1.9/test")
+
+    @responses.activate
+    def test_configure_url_domain_device(self):
+        """Test URL configuration for the DEVICES domain."""
+        http = Http()
+        request = TadoRequest(command="test", domain=Domain.DEVICES, device="id1234")
+        url = http._configure_url(request)
+        self.assertEqual(url, "https://my.tado.com/api/v2/devices/id1234/test")
+
+    @responses.activate
+    def test_configure_url_domain_me(self):
+        """Test URL configuration for the ME domain."""
+        http = Http()
+        request = TadoRequest(command="test", domain=Domain.ME)
+        url = http._configure_url(request)
+        self.assertEqual(url, "https://my.tado.com/api/v2/me")
+
+    @responses.activate
+    def test_configure_url_domain_home_with_params(self):
+        """Test URL configuration for the ME domain."""
+        http = Http()
+        http._id = 123
+        request = TadoRequest(command="test", domain=Domain.HOME, params={"test": "value"})
+        url = http._configure_url(request)
+        self.assertEqual(url, "https://my.tado.com/api/v2/homes/123/test?test=value")
+
+    @responses.activate
+    @mock.patch("time.sleep", return_value=None)
+    def test_check_device_activation(self, mock_sleep):
+        """Test the device activation check process."""
+
+        http = Http()
+        http._device_flow_data = {"interval": 5, "device_code": "mock_code"}
+        http._expires_at = datetime.now() + timedelta(minutes=5)
+
+        result = http._check_device_activation()
+        self.assertTrue(result)
+        mock_sleep.assert_called_once_with(5)
+
+    @responses.activate
+    def test_save_refresh_token(self):
+        """Test if refresh token is saved."""
+
+        buffer = io.StringIO()
+
+        # We need to disable the `close` method, since we can't call
+        # getvalue() on a closed StringIO object.
+        buffer.close = lambda: None
+
+        mock_open = mock.mock_open()
+        mock_open.return_value = buffer
+
+        with mock.patch("builtins.open", mock_open) as mock_file:
+            http = Http(token_file_path="path/to/open")
+            http._check_device_activation()
+
+        mock_file.assert_called_with("path/to/open", 'w', encoding='utf-8')
+        assert mock_open.return_value.getvalue() == '{"refresh_token": "another_value"}'
+
+
+    @responses.activate
+    @mock.patch('os.path.exists')
+    @mock.patch('PyTado.http.Http._save_token')
+    def test_load_refresh_token(self, mock_save, mock_exists):
+        """Test if token is loaded."""
+        def side_effect(filename):
+            if filename == 'path/to/open':
+                return True
+            else:
+                return False
+        mock_exists.side_effect = side_effect
+
+        with mock.patch("builtins.open", mock.mock_open(read_data='{"refresh_token": "saved_value"}')) as mock_file:
+            http = Http(token_file_path="path/to/open")
+
+        mock_save.assert_called_once()
+        mock_file.assert_called_with("path/to/open", encoding='utf-8')
+        assert http._device_activation_status == "COMPLETED"
