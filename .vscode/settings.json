@@ -15,5 +15,11 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "files.insertFinalNewline": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-    "python.terminal.shellIntegration.enabled": true
+    "python.terminal.shellIntegration.enabled": true,
+    "pylint.args": [
+        "--max-line-length=100"
+    ],
+    "pylint.interpreter": [
+        ".venv/bin/python"
+    ]
 }

@@ -158,7 +158,7 @@ class Http:
             _LOGGER.setLevel(logging.WARNING)
 
         self._refresh_at = datetime.now() + timedelta(minutes=10)
-        self._session = http_session or requests.Session()
+        self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
         self._headers = {"Referer": "https://app.tado.com/"}
 
@@ -219,6 +219,11 @@ class Http:
         """
         return self._device_verification_url
 
+    def _create_session(self) -> requests.Session:
+        session = requests.Session()
+        session.hooks["response"].append(self._log_response)
+        return session
+
     def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
         og_request_method = response.request.method
         og_request_url = response.request.url
@@ -263,8 +268,7 @@ class Http:
                 if retries > 0:
                     _LOGGER.warning("Connection error: %s", e)
                     self._session.close()
-                    self._session = requests.Session()
-                    self._session.hooks["response"].append(self._log_response)
+                    self._session = self._create_session()
                     retries -= 1
                 else:
                     _LOGGER.error(
@@ -357,8 +361,7 @@ class Http:
             "refresh_token": self._token_refresh,
         }
         self._session.close()
-        self._session = requests.Session()
-        self._session.hooks["response"].append(self._log_response)
+        self._session = self._create_session()
 
         try:
             response = self._session.request(
