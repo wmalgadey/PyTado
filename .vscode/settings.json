@@ -8,8 +8,6 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "ansible.python.activationScript": "${workspaceFolder}/.venv/bin/activate",
-    "ansible.python.interpreterPath": "${workspaceFolder}/.venv/bin/python",
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "editor.defaultFormatter": "ms-python.black-formatter",
