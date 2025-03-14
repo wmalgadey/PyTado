@@ -164,8 +164,8 @@ class Http:
         self._id: int | None = None
         self._token_refresh: str | None = None
         self._x_api: bool | None = None
-        self._device_activation_status = self._login_device_flow()
         self._access_token: str | None = None
+        self._device_activation_status = self._login_device_flow()
 
     @property
     def is_x_line(self) -> bool | None:
