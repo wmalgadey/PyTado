@@ -11,7 +11,10 @@ from PyTado.interface import Tado
 
 def log_in(args):
     """
-    Log in to the Tado API and activate the device.
+    Log in to the Tado API by activating the current device.
+
+    Add --token_file_path to the command line arguments to store the
+    refresh token in a file.
 
     Args:
         args (argparse.Namespace): The parsed command-line arguments.
