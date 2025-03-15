@@ -9,32 +9,32 @@ import sys
 from PyTado.interface import Tado
 
 
-def log_in(username, password):
+def log_in():
     t = Tado()
     t.device_activation()
     return t
 
 
-def get_me(args):
-    t = Tado(args.email, args.password)
+def get_me():
+    t = log_in()
     me = t.get_me()
     print(me)
 
 
 def get_state(args):
-    t = Tado(args.email, args.password)
+    t = log_in()
     zone = t.get_state(int(args.zone))
     print(zone)
 
 
 def get_states(args):
-    t = Tado(args.email, args.password)
+    t = log_in()
     zone = t.get_zone_states()
     print(zone)
 
 
 def get_capabilities(args):
-    t = Tado(args.email, args.password)
+    t = log_in()
     capabilities = t.get_capabilities(int(args.zone))
     print(capabilities)
 
@@ -45,16 +45,6 @@ def main():
         description="Pytado - Tado thermostat device control",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-
-    required_flags = parser.add_argument_group("required arguments")
-
-    # Required flags go here.
-    required_flags.add_argument(
-        "--email",
-        required=True,
-        help=("Tado username in the form of an email address."),
-    )
-    required_flags.add_argument("--password", required=True, help="Tado password.")
 
     # Flags with default values go here.
     log_levels = {logging.getLevelName(level): level for level in [10, 20, 30, 40, 50]}
