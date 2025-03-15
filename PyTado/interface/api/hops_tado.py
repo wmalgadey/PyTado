@@ -30,7 +30,8 @@ _LOGGER = Logger(__name__)
 class TadoX(Tado):
     """Interacts with a Tado thermostat via hops.tado.com (Tado X) API.
 
-    Example usage: http = Http('me@somewhere.com', 'mypasswd')
+    Example usage: http = Http()
+                   http.device_activation() # Activate the device
                    t = TadoX(http)
                    t.get_climate(1) # Get climate, room 1.
     """
