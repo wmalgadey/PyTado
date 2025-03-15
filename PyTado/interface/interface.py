@@ -44,7 +44,8 @@ def deprecated(new_func_name):
 class Tado:
     """Interacts with a Tado thermostat via public API.
 
-    Example usage: t = Tado('me@somewhere.com', 'mypasswd')
+    Example usage: t = Tado()
+                   t.device_activation() # Activate device
                    t.get_climate(1) # Get climate, zone 1.
     """
 
