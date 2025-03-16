@@ -149,9 +149,26 @@ class Http:
     def __init__(
         self,
         token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
     ) -> None:
+        """
+        Initialize the HTTP client for interacting with the Tado API.
+
+        Args:
+            token_file_path (str | None): Path to the file where the token is stored.
+                If None, the token will not be saved to a file.
+            saved_refresh_token (str | None): A previously saved refresh token to use for
+                authentication. If None, a new token will be requested.
+            http_session (requests.Session | None): An optional pre-configured HTTP session.
+                If None, a new session will be created.
+            debug (bool): If True, enables debug logging. Defaults to False.
+
+        Returns:
+            None
+        """
+
         if debug:
             _LOGGER.setLevel(logging.DEBUG)
         else:
@@ -172,10 +189,11 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
 
-        if not self._load_token() or not self._refresh_token(force_refresh=True):
-            self._device_activation_status = self._login_device_flow()
+        if saved_refresh_token or self._load_token():
+            if self._refresh_token(refresh_token=saved_refresh_token, force_refresh=True):
+                self._device_ready()
         else:
-            self._device_ready()
+            self._device_activation_status = self._login_device_flow()
 
     @property
     def is_x_line(self) -> bool | None:
@@ -218,6 +236,16 @@ class Http:
                         authentication is not started.
         """
         return self._device_verification_url
+
+    @property
+    def refresh_token(self) -> str | None:
+        """
+        Retrieve the current refresh token for the tado api connection.
+
+        Returns:
+            str | None: The current refresh token, or None if not available.
+        """
+        return self._token_refresh
 
     def _create_session(self) -> requests.Session:
         session = requests.Session()
@@ -348,8 +376,25 @@ class Http:
             _LOGGER.error("Failed to load refresh token: %s", e)
             raise TadoException(e) from e
 
-    def _refresh_token(self, force_refresh: bool = False) -> bool:
-        """Refresh the token if it is about to expire"""
+    def _refresh_token(self, refresh_token: str | None = None, force_refresh: bool = False) -> bool:
+        """
+        Refresh the OAuth token if it is about to expire or if forced.
+
+        Args:
+            refresh_token (str | None, optional): The refresh token to use for obtaining a new
+                access token.
+            force_refresh (bool, optional): If True, forces a token refresh regardless of
+                expiration. Defaults to False.
+
+        Returns:
+            bool: True if the token was successfully refreshed, False if the refresh failed due
+                  to invalid credentials.
+
+        Raises:
+            TadoException: If a connection error occurs during the token refresh process.
+            TadoWrongCredentialsException: If the token refresh fails due to invalid credentials
+                and force_refresh is False.
+        """
 
         if self._refresh_at >= datetime.now() and not force_refresh:
             return True
@@ -358,7 +403,7 @@ class Http:
         data = {
             "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "refresh_token": self._token_refresh,
+            "refresh_token": refresh_token or self._token_refresh,
         }
         self._session.close()
         self._session = self._create_session()
@@ -383,7 +428,7 @@ class Http:
         if response.status_code != 200:
             if force_refresh:
                 _LOGGER.error(
-                    "Failed to refresh token, probably wrong credentials. " "Status code: %s",
+                    "Failed to refresh token, probably wrong credentials. Status code: %s",
                     response.status_code,
                 )
                 return False

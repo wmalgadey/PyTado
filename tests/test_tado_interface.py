@@ -79,3 +79,8 @@ class TestTadoInterface(unittest.TestCase):
                 tado_interface.get_me()
 
                 self.assertIn("API Error", str(context.exception))
+
+    def test_get_refresh_token(self):
+        tado = Tado()
+        with mock.patch.object(tado._http, "_token_refresh", new="mock_refresh_token"):
+            self.assertEqual(tado.get_refresh_token(), "mock_refresh_token")

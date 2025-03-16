@@ -52,13 +52,26 @@ class Tado:
     def __init__(
         self,
         token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
     ):
-        """Class Constructor"""
+        """
+        Initializes the interface class.
+
+        Args:
+            token_file_path (str | None, optional): Path to a file which will be used to persist
+                the refresh_token token. Defaults to None.
+            saved_refresh_token (str | None, optional): A previously saved refresh token.
+                Defaults to None.
+            http_session (requests.Session | None, optional): An optional HTTP session to use for
+                requests (can be used in unit tests). Defaults to None.
+            debug (bool, optional): Flag to enable or disable debug mode. Defaults to False.
+        """
 
         self._http = Http(
             token_file_path=token_file_path,
+            saved_refresh_token=saved_refresh_token,
             http_session=http_session,
             debug=debug,
         )
@@ -66,14 +79,11 @@ class Tado:
         self._debug = debug
 
     def __getattr__(self, name):
-        """Delegiert den Aufruf von Methoden an die richtige API-Client-Implementierung."""
+        """Delegate the called method to api implementation (hops_tado.py or my_tado.py)."""
 
         self._ensure_api_initialized()
 
         return getattr(self._api, name)
-
-    # region Deprecated Methods
-    # pylint: disable=invalid-name
 
     def device_verification_url(self) -> str | None:
         """Returns the URL for device verification."""
@@ -88,6 +98,15 @@ class Tado:
         self._http.device_activation()
         self._ensure_api_initialized()
 
+    def get_refresh_token(self) -> str | None:
+        """
+        Retrieve the refresh token from the current api connection.
+
+        Returns:
+            str | None: The current refresh token, or None if not available.
+        """
+        return self._http.refresh_token
+
     def _ensure_api_initialized(self):
         """Ensures the API client is initialized."""
         if self._api is None:
@@ -100,6 +119,9 @@ class Tado:
                 raise TadoException(
                     "API is not initialized. Please complete device authentication first."
                 )
+
+    # region Deprecated Methods
+    # pylint: disable=invalid-name
 
     @deprecated("get_me")
     def getMe(self):
