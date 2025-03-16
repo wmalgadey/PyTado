@@ -266,3 +266,20 @@ class TestHttp(unittest.TestCase):
         mock_save.assert_called_once()
         mock_file.assert_called_with("path/to/open", encoding='utf-8')
         assert http._device_activation_status == "COMPLETED"
+
+    @mock.patch("PyTado.http.Http._refresh_token", return_value=True)
+    @mock.patch("PyTado.http.Http._device_ready")
+    @mock.patch("PyTado.http.Http._load_token")
+    @mock.patch("PyTado.http.Http._login_device_flow")
+    def test_constructor_with_valid_refresh_token(self, mock_load_token, mock_login_device_flow, mock_device_ready, mock_refresh_token):
+        """
+        Test that the Http constructor correctly uses a provided valid refresh token.
+        """
+        refresh_token = "mock_refresh_token"
+
+        Http(saved_refresh_token=refresh_token)
+
+        mock_refresh_token.assert_called_once_with(refresh_token=refresh_token, force_refresh=True)
+        mock_device_ready.assert_called_once()
+        mock_load_token.assert_not_called()
+        mock_login_device_flow.assert_not_called()
