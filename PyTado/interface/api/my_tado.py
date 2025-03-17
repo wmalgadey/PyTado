@@ -8,8 +8,8 @@ import logging
 from typing import Any
 
 from ...exceptions import TadoException, TadoNotSupportedException
+from ...http import Action, Domain, Endpoint, Http, Mode, TadoRequest
 from ...logger import Logger
-from ...token_manager.http import Action, Domain, Endpoint, Http, Mode, TadoRequest
 from ...zone import TadoZone
 
 

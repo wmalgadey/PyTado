@@ -6,8 +6,8 @@ import logging
 from typing import Any
 
 from ...exceptions import TadoNotSupportedException
+from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
-from ...token_manager.http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...zone import TadoXZone, TadoZone
 from .my_tado import Tado, Timetable
 
