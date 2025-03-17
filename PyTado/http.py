@@ -189,9 +189,10 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
 
-        if saved_refresh_token or self._load_token():
-            if self._refresh_token(refresh_token=saved_refresh_token, force_refresh=True):
-                self._device_ready()
+        if (saved_refresh_token or self._load_token()) and self._refresh_token(
+            refresh_token=saved_refresh_token, force_refresh=True
+        ):
+            self._device_ready()
         else:
             self._device_activation_status = self._login_device_flow()
 
