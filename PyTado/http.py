@@ -5,13 +5,9 @@ Do all the API HTTP heavy lifting in this file
 import enum
 import json
 import logging
-import os
 import pprint
 import time
 from datetime import datetime, timedelta
-from json import dump as json_dump
-from json import load as json_load
-from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
 
@@ -20,6 +16,7 @@ import requests
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
+from PyTado.token_manager import PersistingTokenManager, TokenManagerInterface
 
 _LOGGER = Logger(__name__)
 
@@ -148,15 +145,15 @@ class Http:
 
     def __init__(
         self,
-        token_file_path: str | None = None,
-        saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
+        token_manager: TokenManagerInterface = PersistingTokenManager(),
         debug: bool = False,
     ) -> None:
         """
         Initialize the HTTP client for interacting with the Tado API.
 
         Args:
+            token_manager (TokenManager): An instance of TokenManager to handle token persistence.
             token_file_path (str | None): Path to the file where the token is stored.
                 If None, the token will not be saved to a file.
             saved_refresh_token (str | None): A previously saved refresh token to use for authentication.
@@ -174,9 +171,9 @@ class Http:
         else:
             _LOGGER.setLevel(logging.WARNING)
 
+        self._token_manager = token_manager
         self._refresh_at = datetime.now() + timedelta(minutes=10)
         self._session = http_session or self._create_session()
-        self._session.hooks["response"].append(self._log_response)
         self._headers = {"Referer": "https://app.tado.com/"}
 
         self._user_code: str | None = None
@@ -185,11 +182,10 @@ class Http:
         self._expires_at: datetime | None = None
 
         self._id: int | None = None
-        self._token_refresh: str | None = None
         self._x_api: bool | None = None
-        self._token_file_path = token_file_path
 
-        if saved_refresh_token or self._load_token():
+        saved_refresh_token = self._token_manager.load_token()
+        if saved_refresh_token:
             if self._refresh_token(refresh_token=saved_refresh_token, force_refresh=True):
                 self._device_ready()
         else:
@@ -245,7 +241,7 @@ class Http:
         Returns:
             str | None: The current refresh token, or None if not available.
         """
-        return self._token_refresh
+        return self._token_manager.load_token()
 
     def _create_session(self) -> requests.Session:
         session = requests.Session()
@@ -338,7 +334,7 @@ class Http:
         headers["Mime-Type"] = "application/json;charset=UTF-8"
         return json.dumps(request.payload).encode("utf8")
 
-    def _set_oauth_header(self, data: dict[str, Any]) -> str:
+    def _set_oauth_header(self, data: dict[str, Any]) -> None:
         """Set the OAuth header and return the refresh token"""
 
         access_token = data["access_token"]
@@ -354,27 +350,7 @@ class Http:
 
         self._headers["Authorization"] = f"Bearer {access_token}"
 
-        self._save_token()
-
-        return refresh_token
-
-    def _load_token(self) -> bool:
-        """Load the refresh token from a file."""
-
-        if not self._token_file_path or not os.path.exists(self._token_file_path):
-            return False
-
-        try:
-            with open(self._token_file_path, encoding="utf-8") as f:
-                data = json_load(f)
-                self._token_refresh = data.get("refresh_token")
-
-            _LOGGER.debug("Refresh token loaded from %s", self._token_file_path)
-
-            return True
-        except (OSError, json.JSONDecodeError) as e:
-            _LOGGER.error("Failed to load refresh token: %s", e)
-            raise TadoException(e) from e
+        self._token_manager.save_token(refresh_token)
 
     def _refresh_token(self, refresh_token: str | None = None, force_refresh: bool = False) -> bool:
         """
@@ -403,7 +379,7 @@ class Http:
         data = {
             "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "refresh_token": refresh_token or self._token_refresh,
+            "refresh_token": refresh_token or self._token_manager.load_token(),
         }
         self._session.close()
         self._session = self._create_session()
@@ -440,27 +416,6 @@ class Http:
         self._set_oauth_header(response.json())
 
         return True
-
-    def _save_token(self):
-        """Save the refresh token to a file."""
-        if not self._token_file_path or not self._token_refresh:
-            return
-
-        try:
-            token_dir = os.path.dirname(self._token_file_path)
-            if token_dir and not os.path.exists(token_dir):
-                Path(token_dir).mkdir(parents=True, exist_ok=True)
-
-            with open(self._token_file_path, "w", encoding="utf-8") as f:
-                json_dump(
-                    {"refresh_token": self._token_refresh},
-                    f,
-                )
-
-            _LOGGER.debug("Refresh token saved to %s", self._token_file_path)
-        except Exception as e:
-            _LOGGER.error("Failed to save refresh token: %s", e)
-            raise TadoException(e) from e
 
     def _login_device_flow(self) -> DeviceActivationStatus:
         """Start the login to the API using the device flow"""
@@ -513,11 +468,14 @@ class Http:
         return DeviceActivationStatus.PENDING
 
     def _check_device_activation(self) -> bool:
+        if self.device_activation_status == DeviceActivationStatus.COMPLETED:
+            return True
+
         if self._expires_at is not None and datetime.timestamp(datetime.now()) > datetime.timestamp(self._expires_at):
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
-        time.sleep(self._device_flow_data["interval"])
+        time.sleep((self._device_flow_data or {}).get("interval", 10))
 
         try:
             token_response = self._session.request(
