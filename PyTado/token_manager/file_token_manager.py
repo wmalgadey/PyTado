@@ -22,7 +22,10 @@ class FileTokenManager(TokenManagerInterface):
             saved_refresh_token (str | None): A refresh token which should be used, no mather what.
         """
         self._token_file_path = token_file_path
-        self._refresh_token = saved_refresh_token
+        self._refresh_token: str | None = None
+
+        if saved_refresh_token:
+            self.save_token(saved_refresh_token)
 
     def save_token(self, refresh_token: str) -> None:
         """Save the refresh token to a file."""
