@@ -6,11 +6,8 @@ on:
       - gh-pages
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
 
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,9 +35,25 @@ jobs:
       - run: npm install
       - run: npm run build-ghpages
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/gh-pages'
+      - name: Upload gh-pages artifacts
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./_site
+          name: github-pages
+          path: ./_site
+
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
