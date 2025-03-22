@@ -42,13 +42,11 @@ pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pytest-socket = "*"
-pydoc-markdown = "*"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
 lint = ["black", "pylint"]
 test = ["responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
-docs = ["pydoc-markdown"]
 all = ["pre-commit", "pytype", "types-requests", "black", "pylint", "responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
 
 [tool.poetry.scripts]
@@ -74,10 +72,3 @@ required-version = "24.10.0"
 exclude_dirs = ["tests"]
 tests = []
 skips = []
-
-[[tool.pydoc-markdown.loaders]]
-type = "python"
-search_path = [ "../PyTado" ]
-
-[tool.pydoc-markdown.renderer]
-type = "markdown"
