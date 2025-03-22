@@ -220,8 +220,7 @@ class TestHttp(unittest.TestCase):
         """Test the device activation check process."""
 
         http = Http()
-        http._device_flow_data = {"interval": 5, "device_code": "mock_code"}
-        http._expires_at = datetime.now() + timedelta(minutes=5)
+        http._set_device_auth_data({"interval": 5, "device_code": "mock_code", "expires_in": 5})
 
         result = http._check_device_activation()
         self.assertTrue(result)
