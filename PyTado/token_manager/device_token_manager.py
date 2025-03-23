@@ -44,7 +44,8 @@ class DeviceTokenManager(TokenManagerInterface):
 
     def has_pending_device_data(self) -> bool:
         """Check if there is pending device data."""
-        device_data = self.load_pending_device_data()
+        device_data = self._load_sync_file()
+
         if device_data and "pending_device" in device_data:
             return True
 
