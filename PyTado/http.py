@@ -183,7 +183,8 @@ class Http:
 
         saved_refresh_token = self._token_manager.load_token()
         if saved_refresh_token and self._refresh_token(
-                refresh_token=saved_refresh_token, force_refresh=True):
+            refresh_token=saved_refresh_token, force_refresh=True
+        ):
             self._device_ready()
         else:
             self._device_activation_status = self._login_device_flow()
@@ -448,7 +449,8 @@ class Http:
                 raise TadoException(
                     f"Login failed. Status code: {
                         response.status_code} and reason: {
-                        response.reason}") from e
+                        response.reason}"
+                ) from e
 
             return self._set_device_auth_data(response.json())
 
@@ -489,8 +491,7 @@ class Http:
             raise TadoException("User took too long to enter key")
 
         _LOGGER.info(
-            "Waiting for %s seconds to check for device",
-            self._device_activation_check_interval
+            "Waiting for %s seconds to check for device", self._device_activation_check_interval
         )
 
         # Await the desired interval, before polling the API again
@@ -514,8 +515,10 @@ class Http:
             return True
 
         # The user has not yet authorized the device, let's continue
-        if token_response.status_code == 400 and token_response.json()[
-                "error"] == "authorization_pending":
+        if (
+            token_response.status_code == 400
+            and token_response.json()["error"] == "authorization_pending"
+        ):
             _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
 
             if self._token_manager.has_pending_device_data():
