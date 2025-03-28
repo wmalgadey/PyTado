@@ -5,7 +5,6 @@ from datetime import datetime
 from fcntl import LOCK_EX, LOCK_SH, LOCK_UN, flock  # For file locking on Unix systems
 from json import dump as json_dump
 from json import load as json_load
-from multiprocessing import current_process
 from pathlib import Path
 from typing import ContextManager
 
@@ -32,15 +31,12 @@ class FileLock:
 
     def __enter__(self):
         """Acquire the lock."""
-        print(f"[{current_process().pid}] {self.msg}: Try to lock file")
         flock(self.file, self.lock_type)
-        print(f"[{current_process().pid}] {self.msg}: Locked file")
         return self.file
 
     def __exit__(self, exc_type, exc_value, traceback):
         """Release the lock."""
         flock(self.file, LOCK_UN)
-        print(f"[{current_process().pid}] {self.msg}: Unlocked file")
 
 
 class DeviceTokenManager(TokenManagerInterface):

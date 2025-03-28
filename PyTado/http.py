@@ -8,7 +8,6 @@ import logging
 import pprint
 import time
 from datetime import datetime, timedelta
-from multiprocessing import current_process
 from typing import Any
 from urllib.parse import urlencode
 
@@ -414,7 +413,6 @@ class Http:
             raise TadoException("The device has been started already")
 
         while self._token_manager.is_locked():
-            print(f"[{current_process().pid}] waiting because locked")
             time.sleep(5)
 
         with self._token_manager.lock_device_activation("device_flow"):
