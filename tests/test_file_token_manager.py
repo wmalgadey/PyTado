@@ -26,10 +26,10 @@ class TestFileTokenManager(unittest.TestCase):
 
         with mock.patch("builtins.open", mock_open) as mock_file:
             token_manager = FileTokenManager(token_file_path="path/to/open")
-            token_manager.save_token("another_value")
+            token_manager.save_oauth_data({"refresh_token": "another_value"})
 
         mock_file.assert_called_with("path/to/open", 'w', encoding='utf-8')
-        assert mock_open.return_value.getvalue() == '{"refresh_token": "another_value"}'
+        assert mock_open.return_value.getvalue() == '{"oauth_data": {"refresh_token": "another_value"}}'
 
 
     @responses.activate
@@ -43,7 +43,7 @@ class TestFileTokenManager(unittest.TestCase):
                 return False
         mock_exists.side_effect = side_effect
 
-        with mock.patch("builtins.open", mock.mock_open(read_data='{"refresh_token": "saved_value"}')) as mock_file:
+        with mock.patch("builtins.open", mock.mock_open(read_data='{"oauth_data": {"refresh_token": "saved_value"}}')) as mock_file:
             token_manager = FileTokenManager(token_file_path="path/to/open")
             assert token_manager.load_token() == "saved_value"
 

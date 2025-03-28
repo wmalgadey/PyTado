@@ -1,4 +1,4 @@
-fail_fast: true
+fail_fast: false
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -7,17 +7,17 @@ repos:
     - id: no-commit-to-branch
       name: "Don't commit to master branch"
       args: [--branch, master]
+      fail_fast: true
+    - id: check-merge-conflict
+      fail_fast: true
     - id: check-ast
     - id: check-json
-    - id: check-merge-conflict
     - id: check-toml
     - id: check-yaml
     - id: check-json
     - id: end-of-file-fixer
-      exclude: custom_components/econnect_metronet/manifest.json
     - id: mixed-line-ending
     - id: trailing-whitespace
-
 
 - repo: https://github.com/PyCQA/isort
   rev: 5.13.2
@@ -66,6 +66,7 @@ repos:
     - id: mypy
       exclude: tests/
       additional_dependencies: [types-requests]
+      fail_fast: true
 
 - repo: local
   hooks:
