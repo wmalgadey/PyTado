@@ -1,3 +1,4 @@
+import enum
 import json
 import logging
 import os
@@ -10,7 +11,10 @@ from PyTado.token_manager.token_manager_interface import TokenManagerInterface
 
 _LOGGER = logging.getLogger(__name__)
 
-OAUTH_DATA_KEY = "oauth_data"
+
+class FileContent(enum.StrEnum):
+    OAUTH_DATA = "oauth_data"
+    REFRESH_TOKEN = "refresh_token"  # nosec, deprecated
 
 
 class FileTokenManager(TokenManagerInterface):
@@ -32,10 +36,12 @@ class FileTokenManager(TokenManagerInterface):
         if saved_refresh_token:
             self._set_oauth_data({"refresh_token": saved_refresh_token})
 
-    def save_oauth_data(self, oauth_data: dict) -> None:
-        """Save the refresh token to a file."""
-        super().save_oauth_data(oauth_data)
+    def set_oauth_data(self, oauth_data: dict) -> None:
+        """Try to save the oauth data to a file if a file is defined."""
+        self._save_oauth_data(oauth_data)
+        super().set_oauth_data(oauth_data)
 
+    def _save_oauth_data(self, oauth_data: dict) -> None:
         if not self._token_file_path or not oauth_data:
             return
 
@@ -45,25 +51,32 @@ class FileTokenManager(TokenManagerInterface):
                 Path(token_dir).mkdir(parents=True, exist_ok=True)
 
             with open(self._token_file_path, "w", encoding="utf-8") as f:
-                json_dump({OAUTH_DATA_KEY: oauth_data}, f)
+                json_dump({FileContent.OAUTH_DATA: oauth_data}, f)
 
             _LOGGER.debug("OAuth data saved to %s", self._token_file_path)
         except Exception as e:
             _LOGGER.error("Failed to save OAuth data: %s", e)
             raise TadoException(f"Failed to save OAuth data: {e}") from e
 
-    def load_token(self) -> str | None:
+    def get_token(self) -> str | None:
+        """Try to load the oauth data from a file if a file is defined."""
+        self._load_oauth_data()
+        return super().get_token()
+
+    def _load_oauth_data(self) -> None:
         """Load the refresh token from a file."""
         if self._token_file_path and os.path.exists(self._token_file_path):
             try:
                 with open(self._token_file_path, encoding="utf-8") as f:
                     data = json_load(f)
-                    self._set_oauth_data(data.get(OAUTH_DATA_KEY, {}))
+
+                    if FileContent.REFRESH_TOKEN in data:
+                        self._set_oauth_data(
+                            {"refresh_token": data[FileContent.REFRESH_TOKEN]})
+                    else:
+                        self._set_oauth_data(data.get(FileContent.OAUTH_DATA, {}))
 
                     _LOGGER.debug("Refresh token loaded from '%s'", self._token_file_path)
-                    return super().load_token()
             except (OSError, json.JSONDecodeError) as e:
                 _LOGGER.error("Failed to load OAuth data: %s", e)
                 raise TadoException(f"Failed to load OAuth data: {e}") from e
-
-        return super().load_token()

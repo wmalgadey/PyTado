@@ -18,10 +18,10 @@ from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
 from PyTado.token_manager import (
     CanManageDeviceActivation,
+    DummyDeviceManager,
     FileTokenManager,
     TokenManagerInterface,
 )
-from PyTado.token_manager.dummy_device_manager import DummyDeviceManager
 
 _LOGGER = Logger(__name__)
 
@@ -158,9 +158,12 @@ class Http:
         Initialize the HTTP client for interacting with the Tado API.
 
         Args:
-            token_manager (TokenManager): An instance of TokenManager to handle token persistence.
             http_session (requests.Session | None): An optional pre-configured HTTP session.
                 If None, a new session will be created.
+            token_manager (TokenManager):
+                An instance of TokenManager to handle token persistence. May also implement
+                CanManageDeviceActivation for device activation management.
+                Defaults to FileTokenManager.
             debug (bool): If True, enables debug logging. Defaults to False.
 
         Returns:
@@ -185,7 +188,7 @@ class Http:
         self._id: int | None = None
         self._x_api: bool | None = None
 
-        saved_refresh_token = self._token_manager.load_token()
+        saved_refresh_token = self._token_manager.get_token()
         if saved_refresh_token and self._refresh_token(
             refresh_token=saved_refresh_token, force_refresh=True
         ):
@@ -243,7 +246,7 @@ class Http:
         Returns:
             str | None: The current refresh token, or None if not available.
         """
-        return self._token_manager.load_token()
+        return self._token_manager.get_token()
 
     @property
     def _device_manager(self) -> CanManageDeviceActivation:
@@ -346,7 +349,7 @@ class Http:
     def _set_oauth_header(self, oauth_data: dict[str, Any]) -> None:
         """Set the OAuth header and return the refresh token"""
 
-        self._token_manager.save_oauth_data(oauth_data)
+        self._token_manager.set_oauth_data(oauth_data)
         access_token = oauth_data.get("access_token")
         self._headers["Authorization"] = f"Bearer {access_token}"
 
@@ -356,9 +359,9 @@ class Http:
 
         Args:
             refresh_token (str | None, optional): The refresh token to use for obtaining a new
-                                                  access token.
+                access token.
             force_refresh (bool, optional): If True, forces a token refresh regardless of
-                                            expiration. Defaults to False.
+                expiration. Defaults to False.
 
         Returns:
             bool: True if the token was successfully refreshed, False if the refresh failed due
@@ -367,7 +370,7 @@ class Http:
         Raises:
             TadoException: If a connection error occurs during the token refresh process.
             TadoWrongCredentialsException: If the token refresh fails due to invalid credentials
-                                           and force_refresh is False.
+                and force_refresh is False.
         """
 
         if self._token_manager.has_valid_refresh_token() and not force_refresh:
@@ -377,7 +380,7 @@ class Http:
         data = {
             "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "refresh_token": refresh_token or self._token_manager.load_token(),
+            "refresh_token": refresh_token or self._token_manager.get_token(),
         }
         self._session.close()
         self._session = self._create_session()
@@ -420,7 +423,7 @@ class Http:
         """Start the login to the API using the device flow"""
 
         if self._device_manager.has_pending_device_data():
-            return self._set_device_auth_data(self._device_manager.load_pending_device_data())
+            return self._set_device_auth_data(self._device_manager.get_pending_device_data())
 
         if self._device_activation_status != DeviceActivationStatus.NOT_STARTED:
             raise TadoException("The device activation has been started already")
@@ -456,7 +459,7 @@ class Http:
                 raise TadoException(e) from e
             except requests.exceptions.HTTPError as e:
                 raise TadoException(
-                    "Login failed. "
+                    "Device activation failed. "
                     f"Status code: {response.status_code} "
                     f"and reason: {response.reason}"
                 ) from e
@@ -470,7 +473,7 @@ class Http:
             expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
             device_flow_data["expires_at"] = expires_at.isoformat()
 
-        self._device_manager.save_pending_device_data(device_flow_data)
+        self._device_manager.set_pending_device_data(device_flow_data)
 
         self._user_code = device_flow_data.get("user_code")
         self._device_code = device_flow_data.get("device_code")
@@ -496,7 +499,7 @@ class Http:
             return True
 
         if not self._device_manager.has_pending_device_data():
-            self._device_manager.save_pending_device_data({})
+            self._device_manager.set_pending_device_data({})
             raise TadoException("User took too long to enter key")
 
         _LOGGER.info(
@@ -531,7 +534,7 @@ class Http:
             _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
 
             if self._device_manager.has_pending_device_data():
-                self._set_device_auth_data(self._device_manager.load_pending_device_data())
+                self._set_device_auth_data(self._device_manager.get_pending_device_data())
 
             return False
 
