@@ -42,6 +42,7 @@ pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pytest-socket = "*"
+platformdirs = "^4.3.7"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
