@@ -1,18 +1,5 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import ContextManager
-
-
-class DummyLock:
-    """Dummy lock class for no real locking."""
-
-    def __enter__(self):
-        """Acquire the lock."""
-        return
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        """Release the lock."""
-        return
 
 
 class TokenManagerInterface(ABC):
@@ -61,25 +48,6 @@ class TokenManagerInterface(ABC):
 
         return datetime.timestamp(datetime.now()) < datetime.timestamp(self._refresh_at)
 
-    def lock_device_activation(self, msg) -> ContextManager:
-        """
-        Lock the token.
-
-        This method should be implemented in a subclass.
-        """
-        return DummyLock()
-
-    def is_locked(self) -> bool:
-        """
-        Check if the token is locked.
-
-        This method should be implemented in a subclass.
-
-        Returns:
-            bool: True if the token is locked, False otherwise.
-        """
-        return False
-
     @abstractmethod
     def load_token(self) -> str | None:
         """
@@ -89,30 +57,3 @@ class TokenManagerInterface(ABC):
             str | None: The loaded refresh token, or None if not available.
         """
         return self._token_refresh
-
-    def has_pending_device_data(self) -> bool:
-        """
-        Check if there is pending device data.
-
-        Returns:
-            bool: True if there is pending device data, False otherwise.
-        """
-        return False
-
-    def save_pending_device_data(self, device_data: dict) -> None:
-        """
-        Save the device data for pending device activation.
-
-        Args:
-            device_data (dict): The device data to save after initial device activation.
-        """
-        pass
-
-    def load_pending_device_data(self) -> dict:
-        """
-        Load the device data for pending device activation.
-
-        Returns:
-            dict | None: The device data, or None if not available.
-        """
-        return {}
