@@ -8,7 +8,7 @@ import logging
 import os
 import pprint
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from json import dump as json_dump
 from json import load as json_load
 from pathlib import Path
@@ -174,7 +174,7 @@ class Http:
         else:
             _LOGGER.setLevel(logging.WARNING)
 
-        self._refresh_at = datetime.now() + timedelta(minutes=10)
+        self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
         self._headers = {"Referer": "https://app.tado.com/"}
@@ -346,7 +346,7 @@ class Http:
         refresh_token = data["refresh_token"]
 
         self._token_refresh = refresh_token
-        self._refresh_at = datetime.now()
+        self._refresh_at = datetime.now(timezone.utc)
         self._refresh_at = self._refresh_at + timedelta(seconds=expires_in)
         # We subtract 30 seconds from the correct refresh time.
         # Then we have a 30 seconds timespan to get a new refresh_token
@@ -396,7 +396,7 @@ class Http:
                 and force_refresh is False.
         """
 
-        if self._refresh_at >= datetime.now() and not force_refresh:
+        if self._refresh_at >= datetime.now(timezone.utc) and not force_refresh:
             return True
 
         url = "https://login.tado.com/oauth2/token"
@@ -506,7 +506,7 @@ class Http:
         _LOGGER.info("Please visit the following URL: %s", visit_url)
 
         expires_in_seconds = self._device_flow_data["expires_in"]
-        self._expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
+        self._expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in_seconds)
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
@@ -516,8 +516,10 @@ class Http:
         return DeviceActivationStatus.PENDING
 
     def _check_device_activation(self) -> bool:
-        if self._expires_at is not None and datetime.timestamp(datetime.now()) > datetime.timestamp(
-            self._expires_at
+        if (
+            self._expires_at is not None
+            and datetime.timestamp(datetime.now(timezone.utc))
+            > datetime.timestamp(self._expires_at)
         ):
             raise TadoException("User took too long to enter key")
 
