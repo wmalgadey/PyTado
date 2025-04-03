@@ -1,6 +1,6 @@
 """Test the Http class."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import io
 import json
 import unittest
@@ -151,7 +151,7 @@ class TestHttp(unittest.TestCase):
         )
 
         # Force token refresh
-        instance._refresh_at = datetime.now() - timedelta(seconds=1)
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
         instance._refresh_token()
 
         assert refresh_token.call_count == 1
@@ -174,7 +174,7 @@ class TestHttp(unittest.TestCase):
         )
 
         # Force token refresh
-        instance._refresh_at = datetime.now() - timedelta(seconds=1)
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
 
         with self.assertRaises(TadoException):
             instance._refresh_token()
@@ -221,7 +221,7 @@ class TestHttp(unittest.TestCase):
 
         http = Http()
         http._device_flow_data = {"interval": 5, "device_code": "mock_code"}
-        http._expires_at = datetime.now() + timedelta(minutes=5)
+        http._expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
 
         result = http._check_device_activation()
         self.assertTrue(result)
