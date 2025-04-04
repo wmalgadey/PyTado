@@ -32,7 +32,6 @@ repository = "https://github.com/wmalgadey/PyTado"
 [tool.poetry.dependencies]
 python = ">=3.11"
 requests = "*"
-black = ">=24.10"
 pylint = "*"
 pre-commit = "*"
 pytype = "*"
@@ -45,9 +44,9 @@ pytest-socket = "*"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
-lint = ["black", "pylint"]
+lint = ["pylint"]
 test = ["responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
-all = ["pre-commit", "pytype", "types-requests", "black", "pylint", "responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
+all = ["pre-commit", "pytype", "types-requests", "pylint", "responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
 
 [tool.poetry.scripts]
 pytado = "PyTado.__main__:main"
@@ -62,11 +61,6 @@ show_missing = true
 [tool.coverage.run]
 plugins = ["covdefaults"]
 source = ["PyTado"]
-
-[tool.black]
-line-length = 100
-target-version = ["py311"]
-required-version = "24.10.0"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
