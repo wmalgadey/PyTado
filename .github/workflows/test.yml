@@ -34,7 +34,7 @@ jobs:
         pytest --cov --junitxml=junit.xml -o junit_family=legacy --cov-branch --cov-report=xml
 
     - name: Upload test results to Codecov
-      if: ${{ !cancelled() }}
+      if: ${{ !cancelled() && matrix.python-version == '3.13' }}
       uses: codecov/test-results-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
