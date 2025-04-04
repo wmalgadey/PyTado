@@ -2,6 +2,7 @@
 PyTado interface implementation for hops.tado.com (Tado X).
 """
 
+import functools
 import logging
 from typing import Any
 
@@ -10,6 +11,18 @@ from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
 from ...zone import TadoXZone, TadoZone
 from .my_tado import Tado, Timetable
+
+
+def not_supported(reason):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            raise TadoNotSupportedException(f"{func.__name__} is not supported: {reason}")
+
+        return wrapper
+
+    return decorator
+
 
 _LOGGER = Logger(__name__)
 
@@ -60,9 +73,13 @@ class TadoX(Tado):
         devices = [device for room in rooms for device in room["devices"]]
 
         for device in devices:
+            serial_number = device.get("serialNo", device.get("serialNumber"))
+            if not serial_number:
+                continue
+
             request = TadoXRequest()
             request.domain = Domain.DEVICES
-            request.device = device["serialNumber"]
+            request.device = serial_number
             device.update(self._http.request(request))
 
         if "otherDevices" in rooms_and_devices:
@@ -108,12 +125,12 @@ class TadoX(Tado):
 
         return data
 
+    @not_supported("This method is not currently supported by the Tado X API")
     def get_capabilities(self, zone):
         """
         Gets current capabilities of zone.
         """
-
-        raise TadoNotSupportedException("This method is not currently supported by the Tado X API")
+        pass
 
     def get_climate(self, zone):
         """
@@ -126,6 +143,7 @@ class TadoX(Tado):
             "humidity": data["humidity"]["percentage"],
         }
 
+    @not_supported("Tado X API only support seven days timetable")
     def set_timetable(self, zone: int, timetable: Timetable) -> None:
         """
         Set the Timetable type currently active
@@ -133,8 +151,7 @@ class TadoX(Tado):
         id = 1 : THREE_DAY (MONDAY_TO_FRIDAY, SATURDAY, SUNDAY)
         id = 3 : SEVEN_DAY (MONDAY, TUESDAY, WEDNESDAY ...)
         """
-
-        raise TadoNotSupportedException("Tado X API only support seven days timetable")
+        pass
 
     def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
         """
@@ -249,12 +266,12 @@ class TadoX(Tado):
 
         return self._http.request(request)
 
+    @not_supported("Concept of zones is not available by Tado X API, they use rooms")
     def get_zone_overlay_default(self, zone: int):
         """
         Get current overlay default settings for zone.
         """
-
-        raise TadoNotSupportedException("Concept of zones is not available by Tado X API, they use rooms")
+        pass
 
     def get_open_window_detected(self, zone):
         """
@@ -273,15 +290,21 @@ class TadoX(Tado):
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
         """
+        request = TadoXRequest()
+        request.command = f"rooms/{zone}/openWindow"
+        request.action = Action.SET
 
-        raise TadoNotSupportedException("This method is not currently supported by the Tado X API")
+        return self._http.request(request)
 
     def reset_open_window(self, zone):
         """
         Sets the window in zone to closed
         """
+        request = TadoXRequest()
+        request.command = f"rooms/{zone}/openWindow"
+        request.action = Action.RESET
 
-        raise TadoNotSupportedException("This method is not currently supported by the Tado X API")
+        return self._http.request(request)
 
     def get_device_info(self, device_id, cmd=""):
         """
@@ -324,3 +347,30 @@ class TadoX(Tado):
         request.payload = {"childLockEnabled": child_lock}
 
         self._http.request(request)
+
+    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+        """
+        Set the flow temperature optimization.
+
+        max_flow_temperature: float, the maximum flow temperature in Celsius
+        """
+
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+        request.payload = {"maxFlowTemperature": max_flow_temperature}
+
+        return self._http.request(request)
+
+    def get_flow_temperature_optimization(self):
+        """
+        Get the current flow temperature optimization
+        """
+
+        request = TadoXRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME
+        request.command = "settings/flowTemperatureOptimization"
+
+        return self._http.request(request)
