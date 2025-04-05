@@ -1,0 +1,6 @@
+[MASTER]
+ignore-patterns=
+max-line-length=100
+
+[MESSAGES CONTROL]
+disable=protected-access

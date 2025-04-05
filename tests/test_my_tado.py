@@ -7,7 +7,7 @@ from unittest import mock
 
 from . import common
 
-from PyTado.http import Http, TadoRequest
+from PyTado.http import Http
 from PyTado.interface.api import Tado
 import responses
 
@@ -16,7 +16,7 @@ class TadoTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        login_patch = mock.patch("PyTado.http.Http._login", return_value=(1234, "foo"))
+        login_patch = mock.patch("PyTado.http.Http._login_device_flow")
         get_me_patch = mock.patch("PyTado.interface.api.Tado.get_me")
         login_patch.start()
         get_me_patch.start()
@@ -34,7 +34,13 @@ class TadoTestCase(unittest.TestCase):
             status=204,
         )
 
-        self.http = Http("my@username.com", "mypassword")
+        responses.add(
+            responses.DELETE,
+            "https://my.tado.com/api/v2/homes/1234/presenceLock",
+            status=204,
+        )
+
+        self.http = Http()
         self.tado_client = Tado(self.http)
 
     @responses.activate

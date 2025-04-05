@@ -9,37 +9,78 @@ import sys
 from PyTado.interface import Tado
 
 
-def log_in(email, password):
-    t = Tado(email, password)
+def log_in(args):
+    """
+    Log in to the Tado API by activating the current device.
+
+    Add --token_file_path to the command line arguments to store the
+    refresh token in a file.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+
+    Returns:
+        Tado: An instance of the Tado interface.
+    """
+    t = Tado(token_file_path=args.token_file_path)
+    t.device_activation()
     return t
 
 
 def get_me(args):
-    t = Tado(args.email, args.password)
+    """
+    Retrieve and print home information from the Tado API.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+    """
+    t = log_in(args)
     me = t.get_me()
     print(me)
 
 
 def get_state(args):
-    t = Tado(args.email, args.password)
+    """
+    Retrieve and print the state of a specific zone from the Tado API.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+    """
+    t = log_in(args)
     zone = t.get_state(int(args.zone))
     print(zone)
 
 
 def get_states(args):
-    t = Tado(args.email, args.password)
-    zone = t.get_zone_states()
-    print(zone)
+    """
+    Retrieve and print the states of all zones from the Tado API.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+    """
+    t = log_in(args)
+    zones = t.get_zone_states()
+    print(zones)
 
 
 def get_capabilities(args):
-    t = Tado(args.email, args.password)
+    """
+    Retrieve and print the capabilities of a specific zone from the Tado API.
+
+    Args:
+        args (argparse.Namespace): The parsed command-line arguments.
+    """
+    t = log_in(args)
     capabilities = t.get_capabilities(int(args.zone))
     print(capabilities)
 
 
 def main():
-    """Main method for the script."""
+    """
+    Main method for the script.
+
+    Sets up the argument parser, handles subcommands, and executes the appropriate function.
+    """
     parser = argparse.ArgumentParser(
         description="Pytado - Tado thermostat device control",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -49,11 +90,10 @@ def main():
 
     # Required flags go here.
     required_flags.add_argument(
-        "--email",
+        "--token_file_path",
         required=True,
-        help=("Tado username in the form of an email address."),
+        help="Path to the file where the refresh token should be stored.",
     )
-    required_flags.add_argument("--password", required=True, help="Tado password.")
 
     # Flags with default values go here.
     log_levels = {logging.getLevelName(level): level for level in [10, 20, 30, 40, 50]}
