@@ -1,20 +1,20 @@
 """Example client for PyTado"""
 
-import os
-import sys
-
 from PyTado.interface.interface import Tado
-
-tado_username = os.getenv("TADO_USERNAME", "")
-tado_password = os.getenv("TADO_PASSWORD", "")
-
-if len(tado_username) == 0 or len(tado_password) == 0:
-    sys.exit("TADO_USERNAME and TADO_PASSWORD must be set")
 
 
 def main() -> None:
     """Retrieve all zones, once successfully logged in"""
-    tado = Tado(username=tado_username, password=tado_password)  # nosec
+    tado = Tado()
+
+    print("Device activation status: ", tado.device_activation_status())
+    print("Device verification URL: ", tado.device_verification_url())
+
+    print("Starting device activation")
+    tado.device_activation()
+
+    print("Device activation status: ", tado.device_activation_status())
+
     zones = tado.get_zones()
     print(zones)
 

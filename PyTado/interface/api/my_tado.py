@@ -41,7 +41,8 @@ from PyTado.zone import TadoZone
 class Tado(TadoBase):
     """Interacts with a Tado thermostat via public my.tado.com API.
 
-    Example usage: http = Http('me@somewhere.com', 'mypasswd')
+    Example usage: http = Http()
+                   http.device_activation() # Activate the device
                    t = Tado(http)
                    t.get_climate(1) # Get climate, zone 1.
     """
