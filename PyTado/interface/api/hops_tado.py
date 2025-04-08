@@ -33,7 +33,8 @@ _LOGGER = Logger(__name__)
 class TadoX(TadoBase):
     """Interacts with a Tado thermostat via hops.tado.com (Tado X) API.
 
-    Example usage: http = Http('me@somewhere.com', 'mypasswd')
+    Example usage: http = Http()
+                   http.device_activation() # Activate the device
                    t = TadoX(http)
                    t.get_climate(1) # Get climate, room 1.
     """
@@ -255,7 +256,7 @@ class TadoX(TadoBase):
 
         data = self.get_state(zone)
 
-        if data["openWindow"] and "activated" in data["openWindow"]:
+        if data.open_window and data.open_window.activated:
             return {"openWindowDetected": True}
         else:
             return {"openWindowDetected": False}
