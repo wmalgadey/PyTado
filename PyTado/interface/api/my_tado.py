@@ -525,6 +525,18 @@ class Tado:
         request.endpoint = Endpoint.EIQ
 
         return self._http.request(request)
+        
+    def get_eiq_consuption_overview(self):
+        """
+        Get Energy IQ consuption overview
+        """
+        
+        request = TadoRequest()
+        request.command = "consumptionOverview"
+        request.action = Action.GET
+        request.endpoint = Endpoint.EIQ
+        
+        return self._http.request(request)
 
     def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
         """
