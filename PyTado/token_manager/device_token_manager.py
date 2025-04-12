@@ -82,7 +82,8 @@ class DeviceTokenManager(FileTokenManager, CanManageDeviceActivation):
         if (
             device_data
             and FileContent.PENDING_DEVICE in device_data
-            and datetime.now().timestamp() < datetime.fromisoformat(
+            and datetime.now().timestamp()
+            < datetime.fromisoformat(
                 device_data[FileContent.PENDING_DEVICE]["expires_at"]
             ).timestamp()
         ):
