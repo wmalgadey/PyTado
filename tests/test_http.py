@@ -1,7 +1,5 @@
 """Test the Http class."""
 
-from datetime import datetime, timedelta, timezone
-import io
 import json
 import unittest
 from unittest import mock
@@ -11,7 +9,7 @@ import responses
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException
 from PyTado.http import Domain, Endpoint, Http, TadoRequest
-from PyTado.token_manager.token_manager_interface import TokenManagerInterface
+from PyTado.token_manager import CanManageDeviceActivation, TokenManagerInterface
 
 from . import common
 
@@ -36,7 +34,7 @@ def token_manager_authenticated(request):
 @pytest.fixture(scope="class")
 def token_manager_pending(request):
     """Fixture to create a mock TokenManagerInterface."""
-    mockit = mock.MagicMock()
+    mockit = mock.MagicMock(spec=CanManageDeviceActivation)
 
     # Mock the methods of TokenManagerInterface
     mockit.save_oauth_data = mock.MagicMock()
