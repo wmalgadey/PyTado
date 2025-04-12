@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timezone
 from fcntl import LOCK_EX, LOCK_SH, LOCK_UN, flock  # For file locking on Unix systems
 from json import dump as json_dump
 from json import load as json_load
@@ -49,7 +49,9 @@ class DeviceTokenManager(FileTokenManager, CanManageDeviceActivation):
         # Use a secure, platform-specific directory for storing the sync file
         app_data_dir = user_data_dir(appname="PyTado", appauthor="PyTado")
 
-        super().__init__(token_file_path=os.path.join(app_data_dir, "device_token.json"))
+        super().__init__(
+            token_file_path=os.path.join(app_data_dir, "device_token.json")
+        )
 
         _LOGGER.debug("Sync file path: %s", self._token_file_path)
 
@@ -82,7 +84,7 @@ class DeviceTokenManager(FileTokenManager, CanManageDeviceActivation):
         if (
             device_data
             and FileContent.PENDING_DEVICE in device_data
-            and datetime.now().timestamp()
+            and datetime.now(timezone.utc).timestamp()
             < datetime.fromisoformat(
                 device_data[FileContent.PENDING_DEVICE]["expires_at"]
             ).timestamp()

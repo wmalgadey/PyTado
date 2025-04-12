@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 class TokenManagerInterface(ABC):
@@ -8,7 +8,7 @@ class TokenManagerInterface(ABC):
     def __init__(self):
         super().__init__()
 
-        self._refresh_at = datetime.now() - timedelta(minutes=10)
+        self._refresh_at = datetime.now(timezone.utc) - timedelta(minutes=10)
         self._token_refresh: str | None = None
 
     def _set_oauth_data(self, oauth_data: dict) -> None:
@@ -22,7 +22,7 @@ class TokenManagerInterface(ABC):
         self._token_refresh = oauth_data.get("refresh_token", None)
 
         expires_in = float(oauth_data.get("expires_in", 0))
-        self._refresh_at = datetime.now()
+        self._refresh_at = datetime.now(timezone.utc)
         self._refresh_at = self._refresh_at + timedelta(seconds=expires_in)
         # We subtract 30 seconds from the correct refresh time.
         # Then we have a 30 seconds timespan to get a new refresh_token
@@ -46,7 +46,9 @@ class TokenManagerInterface(ABC):
         """
         self.get_token()
 
-        return datetime.timestamp(datetime.now()) < datetime.timestamp(self._refresh_at)
+        return datetime.timestamp(datetime.now(timezone.utc)) < datetime.timestamp(
+            self._refresh_at
+        )
 
     @abstractmethod
     def get_token(self) -> str | None:
