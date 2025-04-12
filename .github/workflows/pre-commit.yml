@@ -41,8 +41,6 @@ jobs:
       with:
         path: ${{ env.pythonLocation }}
         key: ${{ runner.os }}-${{ needs.get-python-version.outputs.python-version }}-pip-${{ hashFiles('pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ needs.get-python-version.outputs.python-version }}-pip-
 
     - name: Install dependencies
       run: |

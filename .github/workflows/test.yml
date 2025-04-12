@@ -29,8 +29,6 @@ jobs:
       with:
         path: ${{ env.pythonLocation }}
         key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-${{ matrix.python-version }}-pip-
 
     - name: Install dependencies
       run: |
