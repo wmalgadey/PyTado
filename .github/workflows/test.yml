@@ -13,7 +13,7 @@ jobs:
   get-python-version:
     runs-on: ubuntu-latest
     outputs:
-      python-version: ${{ steps.python-version.outputs.python-version }}
+      python-version: ${{ steps.python-version.outputs.python_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,8 +22,8 @@ jobs:
         id: python-version
         run: |
           python_version=$(cat .python-version)
-          echo "python_version=python_version" >> "$GITHUB_OUTPUT"
-          echo "Python version found: python_version"
+          echo "python_version=$python_version" >> "$GITHUB_OUTPUT"
+          echo "Python version found: $python_version"
 
   test:
     runs-on: ubuntu-latest
