@@ -18,7 +18,8 @@ class Logger(logging.Logger):
     def __init__(self, name: str, level=logging.NOTSET):
         super().__init__(name)
         log_sh = logging.StreamHandler()
-        log_fmt = self.SimpleFormatter(fmt="%(name)s :: %(levelname)-8s :: %(message)s")
+        log_fmt = self.SimpleFormatter(
+            fmt="[%(process)d] %(asctime)s [%(levelname)s] %(name)s :: %(message)s")
         log_sh.setFormatter(log_fmt)
         self.addHandler(log_sh)
         self.setLevel(level)

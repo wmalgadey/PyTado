@@ -78,5 +78,5 @@ class TestTadoInterface(unittest.TestCase):
 
     def test_get_refresh_token(self):
         tado = Tado()
-        with mock.patch.object(tado._http._token_manager, "_refresh_token", new="mock_refresh_token"):
+        with mock.patch.object(tado._http._token_manager, "load_token", return_value="mock_refresh_token"):
             self.assertEqual(tado.get_refresh_token(), "mock_refresh_token")
