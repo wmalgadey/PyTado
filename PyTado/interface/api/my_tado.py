@@ -526,17 +526,24 @@ class Tado:
 
         return self._http.request(request)
         
-    def get_eiq_consuption_overview(self):
+    def get_eiq_consumption_overview(self, date=datetime.datetime.now().strftime("%Y-%m"):
         """
-        Get Energy IQ consuption overview
+        Get consumption overview data for a specific month
+
+        Args:
+            date (str): The year-month to get the consumption overview for.
+
+        Returns:
+            dict: Consumption overview data for the specified month
         """
-        
+
         request = TadoRequest()
         request.command = "consumptionOverview"
         request.action = Action.GET
         request.endpoint = Endpoint.EIQ
-        
-        return self._http.request(request)
+        request.params = {"month": f"{date}"}
+
+        return self._http.request(request)```
 
     def set_eiq_meter_readings(self, date=datetime.datetime.now().strftime("%Y-%m-%d"), reading=0):
         """
