@@ -7,7 +7,7 @@ import logging
 from typing import Any
 
 from ...exceptions import TadoNotSupportedException
-from ...http import Action, Domain, Http, Mode, TadoRequest, TadoXRequest
+from ...http import Action, Domain, Endpoint, Http, Mode, TadoRequest, TadoXRequest
 from ...logger import Logger
 from ...zone import TadoXZone, TadoZone
 from .my_tado import Tado, Timetable
@@ -17,7 +17,9 @@ def not_supported(reason):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            raise TadoNotSupportedException(f"{func.__name__} is not supported: {reason}")
+            raise TadoNotSupportedException(
+                f"{func.__name__} is not supported: {reason}"
+            )
 
         return wrapper
 
@@ -46,7 +48,9 @@ class TadoX(Tado):
         super().__init__(http=http, debug=debug)
 
         if not http.is_x_line:
-            raise TadoNotSupportedException("TadoX is only usable with LINE_X Generation")
+            raise TadoNotSupportedException(
+                "TadoX is only usable with LINE_X Generation"
+            )
 
         if debug:
             _LOGGER.setLevel(logging.DEBUG)
@@ -153,7 +157,9 @@ class TadoX(Tado):
         """
         pass
 
-    def get_schedule(self, zone: int, timetable: Timetable, day=None) -> dict[str, Any]:
+    def get_schedule(
+        self, zone: int, timetable: Timetable, day=None
+    ) -> dict[str, Any]:
         """
         Get the JSON representation of the schedule for a zone.
         Zone has 3 different schedules, one for each timetable (see setTimetable)
@@ -266,7 +272,9 @@ class TadoX(Tado):
 
         return self._http.request(request)
 
-    @not_supported("Concept of zones is not available by Tado X API, they use rooms")
+    @not_supported(
+        "Concept of zones is not available by Tado X API, they use rooms"
+    )
     def get_zone_overlay_default(self, zone: int):
         """
         Get current overlay default settings for zone.
@@ -374,3 +382,219 @@ class TadoX(Tado):
         request.command = "settings/flowTemperatureOptimization"
 
         return self._http.request(request)
+
+    def boost_all_heating(self):
+        """
+        Boost mode, expires after 30 minutes.
+        """
+        request = TadoXRequest()
+        request.action = Action.SET
+        request.domain = Domain.HOME
+        request.command = "quickActions/boost"
+
+        return self._http.request(request)
+
+    def disable_all_heating(self):
+        """
+        Sets all rooms off, frost protection.
+        """
+        request = TadoXRequest()
+        request.action = Action.SET
+        request.domain = Domain.HOME
+        request.command = "quickActions/allOff"
+
+        return self._http.request(request)
+
+    def resume_all_schedules(self):
+        """
+        Resumes regular schedule for all rooms, undo boost,
+        disable heating and manual settings.
+        """
+        request = TadoXRequest()
+        request.action = Action.SET
+        request.domain = Domain.HOME
+        request.command = "quickActions/resumeSchedule"
+
+        return self._http.request(request)
+
+    def delete_eiq_tariff(self, reader_id):
+        """
+        Delete an earlier provided reading-id,
+        like "8c46366f-f3a8-4aed-be08-ebe1de3ff260"
+        """
+        request = TadoXRequest()
+        request.action = Action.RESET
+        request.domain = Domain.HOME
+        request.endpoint = Endpoint.EIQ
+        request.command = f"meterReadings/{reader_id}"
+
+        return self._http.request(request)
+
+    def set_incident_detection(self, b_present: bool = True):
+        """Enable or disable incident detection setting for this home.
+        {'supported': True, 'enabled': True}
+        """
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.endpoint = Endpoint.MY_API
+        request.command = "incidentDetection"
+        request.payload = {"enabled": f"{b_present}"}
+
+        return self._http.request(request)
+
+    def set_boiler_presence(self, b_present: bool = True):
+        """Sets boiler present or not.
+
+        When setting the boiler presence to true with a boiler id, the
+        tado api does not seem to generate any errors when you supply
+        an unknown boiler id.
+
+        The call assists the user in finding the boiler by brand and
+        model. This is supported by tado's graphql API, and NOT VIA
+        THE API described in this definition.
+        """
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.endpoint = Endpoint.MY_API
+        request.command = "heatingSystem/boiler"
+        request.payload = {"present": f"{b_present}"}
+
+        return self._http.request(request)
+
+    def set_underfloor_heating_presence(self, b_present: bool = True):
+        """Sets boiler present or not.
+        Inform about the presence of underfloor heating in this home
+        """
+        request = TadoXRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.endpoint = Endpoint.MY_API
+        request.command = "heatingSystem/underfloorHeating"
+        request.payload = {"present": f"{b_present}"}
+
+        return self._http.request(request)
+
+    def set_away_radius_in_meters(self, meters: int):
+        """
+        When the distance between home location and the location of a
+        mobile device which can control this home is greater than
+        this distance, tado considers the mobile device to be outside
+        of home. Can be checked by calling get_installation().
+
+        Included is check to ignore request to less than 100 meters
+        """
+        if meters < 100:
+            return
+
+        request = TadoRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.endpoint = Endpoint.MY_API
+        request.command = "awayRadiusInMeters"
+        request.payload = {"awayRadiusInMeters": f"{meters}"}
+
+        return self._http.request(request)
+
+    def set_manual_control(
+        self,
+        room_id: int = 0,
+        power="ON",
+        termination_type="MANUAL",
+        m_temp: int = 18,
+        m_sec: int = 600,
+        m_boost=False,
+    ):
+        """
+        Sets manual control for a specific room.
+
+        room_id : obtain from get_rooms()
+        power   : ON, OFF
+        Terminationtype: TIMER, NEXT_TIME_BLOCK, MANUAL
+        m_boost : True or False
+
+        Remarks :
+        m_temp    : can NOT be zero when power = ON
+        m_sec     : can not be zero when setting termination type TIMER
+        m_sec     : do not include to Tado X if not TIMER
+        power OFF : will enable frost protection,
+                    do NOT include BOOST and TEMPERATURE to Tado X
+
+        return :
+         0 all good
+        -1 missing temperature
+        -2 missing seconds for timer
+        """
+
+        data1: dict[str, Any] = {}
+
+        if power == "OFF":
+
+            if termination_type == "TIMER":
+
+                if m_sec == 0:
+                    return -2
+
+                data1 = {
+                    "setting": {"power": "OFF"},
+                    "termination": {
+                        "type": "TIMER",
+                        "durationInSeconds": f"{m_sec}",
+                    },
+                }
+
+            else:
+                data1 = {
+                    "setting": {"power": "OFF"},
+                    "termination": {"type": f"{termination_type}"},
+                }
+
+        else:
+
+            if m_temp == 0:
+                return -1
+
+            if termination_type == "TIMER":
+
+                if m_sec == 0:
+                    return -2
+
+                data1 = {
+                    "setting": {
+                        "power": "ON",
+                        "isBoost": f"{m_boost}",
+                        "temperature": {"value": f"{m_temp}"},
+                    },
+                    "termination": {
+                        "type": "TIMER",
+                        "durationInSeconds": f"{m_sec}",
+                    },
+                }
+
+            else:
+                data1 = {
+                    "setting": {
+                        "power": "ON",
+                        "isBoost": f"{m_boost}",
+                        "temperature": {"value": f"{m_temp}"},
+                    },
+                    "termination": {"type": f"{termination_type}"},
+                }
+
+        request = TadoXRequest()
+        request.action = Action.SET
+        request.domain = Domain.HOME
+        request.command = f"rooms/{room_id}/manualControl"
+        request.payload = data1
+
+        return self._http.request(request)
+
+    def get_installation(self):
+        """
+        Gets home installation details.
+        """
+
+        request = TadoXRequest()
+        request.action = Action.GET
+        request.domain = Domain.HOME
