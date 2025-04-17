@@ -1,0 +1,893 @@
+{
+    "isInPreferredUnit": true,
+    "summary": {
+        "costInCents": 1024.18,
+        "costForecastInCents": 5133.97,
+        "averageDailyCostInCents": 102.418,
+        "consumption": 10.575,
+        "consumptionForecast": 53.010000000000005,
+        "averageDailyConsumption": 1.0574999999999999,
+        "unit": "m3",
+        "tariff": {
+            "unit": "kWh",
+            "unitPriceInCents": 9.18
+        }
+    },
+    "graphConsumption": {
+        "unit": "m3",
+        "monthlyAggregation": {
+            "endOfMonthForecast": {
+                "startDate": "2025-04-10",
+                "endDate": "2025-04-30",
+                "totalConsumption": 42.435,
+                "totalCostInCents": 4109.79,
+                "hasDomesticHotWater": false,
+                "consumptionPerDate": [
+                    {
+                        "date": "2025-04-11",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-12",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-13",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-14",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-15",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-16",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-17",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-18",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-19",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-20",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-21",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-22",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-23",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-24",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-25",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-26",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-27",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-28",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-29",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-30",
+                        "consumption": 2.12175,
+                        "costInCents": 205.49,
+                        "hasData": true
+                    }
+                ]
+            },
+            "requestedMonth": {
+                "startDate": "2025-04-01",
+                "endDate": "2025-04-10",
+                "hasDomesticHotWater": false,
+                "totalConsumption": 10.575,
+                "totalCostInCents": 1024.18,
+                "consumptionPerDate": [
+                    {
+                        "date": "2025-04-01",
+                        "consumption": 1.534,
+                        "costInCents": 148.57,
+                        "hotWater": null,
+                        "heating": 1.534,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-02",
+                        "consumption": 1.328,
+                        "costInCents": 128.62,
+                        "hotWater": null,
+                        "heating": 1.328,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-03",
+                        "consumption": 0.747,
+                        "costInCents": 72.35,
+                        "hotWater": null,
+                        "heating": 0.747,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-04",
+                        "consumption": 0.849,
+                        "costInCents": 82.22,
+                        "hotWater": null,
+                        "heating": 0.849,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-05",
+                        "consumption": 0.613,
+                        "costInCents": 59.37,
+                        "hotWater": null,
+                        "heating": 0.613,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-06",
+                        "consumption": 0.942,
+                        "costInCents": 91.23,
+                        "hotWater": null,
+                        "heating": 0.942,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-07",
+                        "consumption": 1.815,
+                        "costInCents": 175.78,
+                        "hotWater": null,
+                        "heating": 1.815,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-08",
+                        "consumption": 1.255,
+                        "costInCents": 121.55,
+                        "hotWater": null,
+                        "heating": 1.255,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-09",
+                        "consumption": 1.095,
+                        "costInCents": 106.05,
+                        "hotWater": null,
+                        "heating": 1.095,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-04-10",
+                        "consumption": 0.397,
+                        "costInCents": 38.45,
+                        "hotWater": null,
+                        "heating": 0.397,
+                        "hasData": true
+                    }
+                ]
+            },
+            "monthBefore": {
+                "startDate": "2025-03-01",
+                "endDate": "2025-03-31",
+                "hasDomesticHotWater": false,
+                "totalConsumption": 92.999,
+                "totalCostInCents": 9006.86,
+                "consumptionPerDate": [
+                    {
+                        "date": "2025-03-01",
+                        "consumption": 4.361,
+                        "costInCents": 422.36,
+                        "hotWater": null,
+                        "heating": 4.361,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-02",
+                        "consumption": 2.525,
+                        "costInCents": 244.54,
+                        "hotWater": null,
+                        "heating": 2.525,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-03",
+                        "consumption": 3.264,
+                        "costInCents": 316.12,
+                        "hotWater": null,
+                        "heating": 3.264,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-04",
+                        "consumption": 4.333,
+                        "costInCents": 419.65,
+                        "hotWater": null,
+                        "heating": 4.333,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-05",
+                        "consumption": 2.932,
+                        "costInCents": 283.96,
+                        "hotWater": null,
+                        "heating": 2.932,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-06",
+                        "consumption": 2.24,
+                        "costInCents": 216.94,
+                        "hotWater": null,
+                        "heating": 2.24,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-07",
+                        "consumption": 2.558,
+                        "costInCents": 247.74,
+                        "hotWater": null,
+                        "heating": 2.558,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-08",
+                        "consumption": 3.205,
+                        "costInCents": 310.4,
+                        "hotWater": null,
+                        "heating": 3.205,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-09",
+                        "consumption": 2.69,
+                        "costInCents": 260.52,
+                        "hotWater": null,
+                        "heating": 2.69,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-10",
+                        "consumption": 2.266,
+                        "costInCents": 219.46,
+                        "hotWater": null,
+                        "heating": 2.266,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-11",
+                        "consumption": 2.666,
+                        "costInCents": 258.2,
+                        "hotWater": null,
+                        "heating": 2.666,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-12",
+                        "consumption": 2.564,
+                        "costInCents": 248.32,
+                        "hotWater": null,
+                        "heating": 2.564,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-13",
+                        "consumption": 3.663,
+                        "costInCents": 354.76,
+                        "hotWater": null,
+                        "heating": 3.663,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-14",
+                        "consumption": 3.224,
+                        "costInCents": 312.24,
+                        "hotWater": null,
+                        "heating": 3.224,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-15",
+                        "consumption": 3.591,
+                        "costInCents": 347.78,
+                        "hotWater": null,
+                        "heating": 3.591,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-16",
+                        "consumption": 3.555,
+                        "costInCents": 344.3,
+                        "hotWater": null,
+                        "heating": 3.555,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-17",
+                        "consumption": 1.789,
+                        "costInCents": 173.26,
+                        "hotWater": null,
+                        "heating": 1.789,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-18",
+                        "consumption": 2.757,
+                        "costInCents": 267.01,
+                        "hotWater": null,
+                        "heating": 2.757,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-19",
+                        "consumption": 4.1,
+                        "costInCents": 397.08,
+                        "hotWater": null,
+                        "heating": 4.1,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-20",
+                        "consumption": 2.455,
+                        "costInCents": 237.76,
+                        "hotWater": null,
+                        "heating": 2.455,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-21",
+                        "consumption": 0.989,
+                        "costInCents": 95.78,
+                        "hotWater": null,
+                        "heating": 0.989,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-22",
+                        "consumption": 1.258,
+                        "costInCents": 121.84,
+                        "hotWater": null,
+                        "heating": 1.258,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-23",
+                        "consumption": 1.912,
+                        "costInCents": 185.18,
+                        "hotWater": null,
+                        "heating": 1.912,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-24",
+                        "consumption": 4.09,
+                        "costInCents": 396.11,
+                        "hotWater": null,
+                        "heating": 4.09,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-25",
+                        "consumption": 4.71,
+                        "costInCents": 456.16,
+                        "hotWater": null,
+                        "heating": 4.71,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-26",
+                        "consumption": 6.364,
+                        "costInCents": 616.35,
+                        "hotWater": null,
+                        "heating": 6.364,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-27",
+                        "consumption": 7.917,
+                        "costInCents": 766.75,
+                        "hotWater": null,
+                        "heating": 7.917,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-28",
+                        "consumption": 2.038,
+                        "costInCents": 197.38,
+                        "hotWater": null,
+                        "heating": 2.038,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-29",
+                        "consumption": 0.653,
+                        "costInCents": 63.24,
+                        "hotWater": null,
+                        "heating": 0.653,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-30",
+                        "consumption": 1.032,
+                        "costInCents": 99.95,
+                        "hotWater": null,
+                        "heating": 1.032,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2025-03-31",
+                        "consumption": 1.298,
+                        "costInCents": 125.71,
+                        "hotWater": null,
+                        "heating": 1.298,
+                        "hasData": true
+                    }
+                ]
+            },
+            "yearBefore": {
+                "startDate": "2024-04-01",
+                "endDate": "2024-04-30",
+                "hasDomesticHotWater": false,
+                "totalConsumption": 37.987,
+                "totalCostInCents": 3679,
+                "consumptionPerDate": [
+                    {
+                        "date": "2024-04-01",
+                        "consumption": 1.641,
+                        "costInCents": 158.93,
+                        "hotWater": null,
+                        "heating": 1.641,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-02",
+                        "consumption": 0.626,
+                        "costInCents": 60.63,
+                        "hotWater": null,
+                        "heating": 0.626,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-03",
+                        "consumption": 0.691,
+                        "costInCents": 66.92,
+                        "hotWater": null,
+                        "heating": 0.691,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-04",
+                        "consumption": 0.917,
+                        "costInCents": 88.81,
+                        "hotWater": null,
+                        "heating": 0.917,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-05",
+                        "consumption": 1.934,
+                        "costInCents": 187.31,
+                        "hotWater": null,
+                        "heating": 1.934,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-06",
+                        "consumption": 0.105,
+                        "costInCents": 10.17,
+                        "hotWater": null,
+                        "heating": 0.105,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-07",
+                        "consumption": 0,
+                        "costInCents": 0,
+                        "hotWater": null,
+                        "heating": 0,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-08",
+                        "consumption": 0.054,
+                        "costInCents": 5.23,
+                        "hotWater": null,
+                        "heating": 0.054,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-09",
+                        "consumption": 0,
+                        "costInCents": 0,
+                        "hotWater": null,
+                        "heating": 0,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-10",
+                        "consumption": 0.232,
+                        "costInCents": 22.47,
+                        "hotWater": null,
+                        "heating": 0.232,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-11",
+                        "consumption": 0.52,
+                        "costInCents": 50.36,
+                        "hotWater": null,
+                        "heating": 0.52,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-12",
+                        "consumption": 0.621,
+                        "costInCents": 60.14,
+                        "hotWater": null,
+                        "heating": 0.621,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-13",
+                        "consumption": 0.312,
+                        "costInCents": 30.22,
+                        "hotWater": null,
+                        "heating": 0.312,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-14",
+                        "consumption": 0.144,
+                        "costInCents": 13.95,
+                        "hotWater": null,
+                        "heating": 0.144,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-15",
+                        "consumption": 0.679,
+                        "costInCents": 65.76,
+                        "hotWater": null,
+                        "heating": 0.679,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-16",
+                        "consumption": 4.722,
+                        "costInCents": 457.32,
+                        "hotWater": null,
+                        "heating": 4.722,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-17",
+                        "consumption": 4.398,
+                        "costInCents": 425.94,
+                        "hotWater": null,
+                        "heating": 4.398,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-18",
+                        "consumption": 2.21,
+                        "costInCents": 214.04,
+                        "hotWater": null,
+                        "heating": 2.21,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-19",
+                        "consumption": 1.012,
+                        "costInCents": 98.01,
+                        "hotWater": null,
+                        "heating": 1.012,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-20",
+                        "consumption": 2.975,
+                        "costInCents": 288.13,
+                        "hotWater": null,
+                        "heating": 2.975,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-21",
+                        "consumption": 0.837,
+                        "costInCents": 81.06,
+                        "hotWater": null,
+                        "heating": 0.837,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-22",
+                        "consumption": 1.741,
+                        "costInCents": 168.61,
+                        "hotWater": null,
+                        "heating": 1.741,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-23",
+                        "consumption": 1.191,
+                        "costInCents": 115.35,
+                        "hotWater": null,
+                        "heating": 1.191,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-24",
+                        "consumption": 2.905,
+                        "costInCents": 281.35,
+                        "hotWater": null,
+                        "heating": 2.905,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-25",
+                        "consumption": 3.409,
+                        "costInCents": 330.16,
+                        "hotWater": null,
+                        "heating": 3.409,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-26",
+                        "consumption": 2.113,
+                        "costInCents": 204.64,
+                        "hotWater": null,
+                        "heating": 2.113,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-27",
+                        "consumption": 0.324,
+                        "costInCents": 31.38,
+                        "hotWater": null,
+                        "heating": 0.324,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-28",
+                        "consumption": 1.471,
+                        "costInCents": 142.46,
+                        "hotWater": null,
+                        "heating": 1.471,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-29",
+                        "consumption": 0.163,
+                        "costInCents": 15.79,
+                        "hotWater": null,
+                        "heating": 0.163,
+                        "hasData": true
+                    },
+                    {
+                        "date": "2024-04-30",
+                        "consumption": 0.04,
+                        "costInCents": 3.87,
+                        "hotWater": null,
+                        "heating": 0.04,
+                        "hasData": true
+                    }
+                ]
+            }
+        }
+    },
+    "consumptionComparison": {
+        "consumption": {
+            "comparedToMonthBefore": {
+                "percentage": 65,
+                "trend": "DECREASE",
+                "requestedMonth": "2025-04",
+                "comparedToMonth": "2025-03"
+            },
+            "comparedToYearBefore": {
+                "percentage": 71,
+                "trend": "INCREASE",
+                "requestedMonth": "2025-04",
+                "comparedToMonth": "2024-04"
+            }
+        },
+        "cost": {
+            "comparedToMonthBefore": {
+                "percentage": 65,
+                "trend": "DECREASE",
+                "requestedMonth": "2025-04",
+                "comparedToMonth": "2025-03"
+            },
+            "comparedToYearBefore": {
+                "percentage": 71,
+                "trend": "INCREASE",
+                "requestedMonth": "2025-04",
+                "comparedToMonth": "2024-04"
+            }
+        }
+    },
+    "heatingHotWaterSplit": null,
+    "roomBreakdown": {
+        "unit": "m3",
+        "requestedMonth": {
+            "perRoom": [
+                {
+                    "id": 1,
+                    "name": "Schlafzimmer",
+                    "consumption": 4.102,
+                    "costInCents": 397.27
+                },
+                {
+                    "id": 4,
+                    "name": "Kinderzimmer",
+                    "consumption": 0.21900000000000003,
+                    "costInCents": 21.21
+                },
+                {
+                    "id": 6,
+                    "name": "Badezimmer",
+                    "consumption": 1.089,
+                    "costInCents": 105.47
+                },
+                {
+                    "id": 11,
+                    "name": "Büro",
+                    "consumption": 0.815,
+                    "costInCents": 78.93
+                },
+                {
+                    "id": 13,
+                    "name": "Gästezimmer",
+                    "consumption": 1.857,
+                    "costInCents": 179.85
+                },
+                {
+                    "id": 20,
+                    "name": "Wohnzimmer",
+                    "consumption": 2.492,
+                    "costInCents": 241.35
+                },
+                {
+                    "id": 22,
+                    "name": "GästeWC",
+                    "consumption": 0,
+                    "costInCents": 0
+                }
+            ],
+            "startDate": "2025-04-01",
+            "endDate": "2025-04-10"
+        },
+        "yearBefore": {
+            "perRoom": [
+                {
+                    "id": 1,
+                    "name": "Schlafzimmer",
+                    "consumption": 0.439,
+                    "costInCents": 42.52
+                },
+                {
+                    "id": 4,
+                    "name": "Kinderzimmer",
+                    "consumption": 0.17300000000000001,
+                    "costInCents": 16.75
+                },
+                {
+                    "id": 6,
+                    "name": "Badezimmer",
+                    "consumption": 0.219,
+                    "costInCents": 21.21
+                },
+                {
+                    "id": 11,
+                    "name": "Büro",
+                    "consumption": 0.41800000000000004,
+                    "costInCents": 40.48
+                },
+                {
+                    "id": 13,
+                    "name": "Gästezimmer",
+                    "consumption": 1.921,
+                    "costInCents": 186.05
+                },
+                {
+                    "id": 20,
+                    "name": "Wohnzimmer",
+                    "consumption": 2.367,
+                    "costInCents": 229.24
+                },
+                {
+                    "id": 22,
+                    "name": "GästeWC",
+                    "consumption": 0.6659999999999999,
+                    "costInCents": 64.5
+                }
+            ],
+            "startDate": "2024-04-01",
+            "endDate": "2024-04-10"
+        }
+    },
+    "heatingInsights": {
+        "heatingHours": {
+            "diff": 181,
+            "trend": "DECREASE",
+            "comparedTo": "2024-04"
+        },
+        "outsideTemperature": {
+            "diff": 1,
+            "trend": "DECREASE",
+            "comparedTo": "2024-04"
+        },
+        "awayHours": {
+            "diff": 37,
+            "trend": "DECREASE",
+            "comparedTo": "2024-04"
+        }
+    },
+    "showAddData": true
+}
