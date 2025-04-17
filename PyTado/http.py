@@ -314,8 +314,6 @@ class Http:
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{request.endpoint}{request.command}"
-        elif request.command == "consumptionOverview":
-            url = f"https://energy-insights.tado.com/api/homes/{self._id:d}/consumptionDetails?month={datetime.now().strftime('%Y')}-{datetime.now().strftime('%m')}&ngsw-bypass=true"
         elif request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE:
             url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
         elif request.domain == Domain.ME:
