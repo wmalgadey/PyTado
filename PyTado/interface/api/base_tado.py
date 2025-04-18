@@ -6,10 +6,19 @@ import logging
 from abc import ABCMeta, abstractmethod
 from datetime import date
 from functools import cached_property
-from typing import Any, overload
+from typing import Any, Self, overload
+
+import requests
 
 from PyTado.exceptions import TadoException, TadoNotSupportedException
-from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
+from PyTado.http import (
+    Action,
+    DeviceActivationStatus,
+    Domain,
+    Endpoint,
+    Http,
+    TadoRequest,
+)
 from PyTado.logger import Logger
 from PyTado.models import Capabilities, Climate, Historic
 from PyTado.models.home import (
@@ -53,13 +62,89 @@ class TadoBase(metaclass=ABCMeta):
 
     _http: Http
 
-    def __init__(self, http: Http, debug: bool = False):
+    def __init__(
+        self,
+        token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
+        http_session: requests.Session | None = None,
+        debug: bool = False,
+    ):
+        """
+        Initializes the interface class.
+
+        Args:
+            token_file_path (str | None, optional): Path to a file which will be used to persist
+                the refresh_token token. Defaults to None.
+            saved_refresh_token (str | None, optional): A previously saved refresh token.
+                Defaults to None.
+            http_session (requests.Session | None, optional): An optional HTTP session to use for
+                requests (can be used in unit tests). Defaults to None.
+            debug (bool, optional): Flag to enable or disable debug mode. Defaults to False.
+        """
+
+        self._http = Http(
+            token_file_path=token_file_path,
+            saved_refresh_token=saved_refresh_token,
+            http_session=http_session,
+            debug=debug,
+        )
+
         if debug:
             _LOGGER.setLevel(logging.DEBUG)
         else:
             _LOGGER.setLevel(logging.WARNING)
 
-        self._http = http
+    @classmethod
+    def from_http(
+        cls,
+        http: Http,
+        debug: bool = False,
+    ) -> Self:
+        """Creates an instance of Tado/TadoX from an existing Http object."""
+        instance = cls.__new__(cls)
+        instance._http = http
+
+        if debug:
+            _LOGGER.setLevel(logging.DEBUG)
+        else:
+            _LOGGER.setLevel(logging.WARNING)
+
+        return instance
+
+    def __getattribute__(self, name: str) -> Any:
+        """Override __getattribute__ to ensure device activation status is checked
+        before accessing any attribute or method that is not private.
+        """
+
+        exclude_list = [
+            "device_activation",
+            "device_activation_status",
+            "device_verification_url",
+            "from_http",
+        ]
+
+        if not name.startswith("_") and name not in exclude_list:
+            self._ensure_device_activation()
+        return super().__getattribute__(str(name))
+
+    def _ensure_device_activation(self) -> None:
+        if not self._http.device_activation_status == DeviceActivationStatus.COMPLETED:
+            raise TadoException(
+                "Device activation is not completed. Please activate the device first."
+            )
+
+    def device_verification_url(self) -> str | None:
+        """Returns the URL for device verification."""
+        return self._http.device_verification_url
+
+    def device_activation_status(self) -> DeviceActivationStatus:
+        """Returns the status of the device activation."""
+        return self._http.device_activation_status
+
+    def device_activation(self) -> None:
+        """Activates the device."""
+        self._http.device_activation()
+        self._ensure_api_initialized()
 
     ##################### Home methods #####################
 
