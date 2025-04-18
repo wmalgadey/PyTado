@@ -47,8 +47,19 @@ class Tado(TadoBase):
                    t.get_climate(1) # Get climate, zone 1.
     """
 
-    ##################### Home methods #####################
+    def __init__(
+        self,
+        token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
+        http_session: Any = None,
+        debug: bool = False,
+    ):
+        super().__init__(token_file_path, saved_refresh_token, http_session, debug)
 
+        if not self._http.is_x_line:
+            raise TadoException("Tado is only usable with V3/V2 Generation")
+
+    # ----------------- Home methods -----------------
     def get_devices(self) -> list[Device]:
         """
         Gets device information.

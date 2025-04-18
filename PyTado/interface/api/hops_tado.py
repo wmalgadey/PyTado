@@ -30,6 +30,7 @@ from PyTado.types import (
 _LOGGER = Logger(__name__)
 
 
+@final
 class TadoX(TadoBase):
     """Interacts with a Tado thermostat via hops.tado.com (Tado X) API.
 
@@ -41,18 +42,19 @@ class TadoX(TadoBase):
 
     def __init__(
         self,
-        http: Http,
+        token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
+        http_session: requests.Session | None = None,
         debug: bool = False,
     ):
-        """Class Constructor"""
-        if not http.is_x_line:
+        super().__init__(token_file_path, saved_refresh_token, http_session, debug)
+
+        if not self._http.is_x_line:
             raise TadoNotSupportedException(
                 "TadoX is only usable with LINE_X Generation"
             )
 
-        super().__init__(http=http, debug=debug)
-
-    ##################### Home methods #####################
+    # ------------------- Home methods -------------------
 
     def get_devices(self) -> list[Device]:
         """
