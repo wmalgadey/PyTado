@@ -1,5 +1,5 @@
 """Zone data structures for all API interfaces."""
 
-from .hops_zone import Room
+from .hops_zone import TadoRoom
 
-__all__ = ["Room"]
+__all__ = ["TadoRoom"]

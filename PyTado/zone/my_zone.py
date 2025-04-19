@@ -35,7 +35,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @final
-class Zone(BaseZone):
+class TadoZone(BaseZone):
     @cached_property
     def _raw_state(self) -> pre_line_x.ZoneState:
         request = TadoRequest()
@@ -62,22 +62,30 @@ class Zone(BaseZone):
         return self._raw_room.devices
 
     @property
-    def current_temp(self) -> float:
-        return self._raw_state.sensor_data_points.inside_temperature.celsius
+    def current_temp(self) -> float | None:
+        if self._raw_state.sensor_data_points.inside_temperature:
+            return self._raw_state.sensor_data_points.inside_temperature.celsius
+        return None
 
     @property
     def current_temp_timestamp(self) -> datetime | None:
         """Return current temperature timestamp."""
-        return self._raw_state.sensor_data_points.inside_temperature.timestamp
+        if self._raw_state.sensor_data_points.inside_temperature:
+            return self._raw_state.sensor_data_points.inside_temperature.timestamp
+        return None
 
     @property
-    def current_humidity(self) -> float:
-        return self._raw_state.sensor_data_points.humidity.percentage
+    def current_humidity(self) -> float | None:
+        if self._raw_state.sensor_data_points.humidity:
+            return self._raw_state.sensor_data_points.humidity.percentage
+        return None
 
     @property
     def current_humidity_timestamp(self) -> datetime | None:
         """Return current humidity timestamp."""
-        return self._raw_state.sensor_data_points.humidity.timestamp
+        if self._raw_state.sensor_data_points.humidity:
+            return self._raw_state.sensor_data_points.humidity.timestamp
+        return None
 
     @property
     def target_temp(self) -> float | None:

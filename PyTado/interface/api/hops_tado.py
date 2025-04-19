@@ -16,7 +16,7 @@ from PyTado.models.line_x.room import RoomState
 from PyTado.models.pre_line_x.flow_temperature_optimization import (
     FlowTemperatureOptimization,
 )
-from PyTado.zone.hops_zone import Room
+from PyTado.zone.hops_zone import TadoRoom
 
 _LOGGER = Logger(__name__)
 
@@ -64,7 +64,7 @@ class TadoX(TadoBase):
 
         return devices
 
-    def get_zones(self) -> list[Room]:
+    def get_zones(self) -> list[TadoRoom]:
         """
         Gets zones (or rooms in Tado X API) information.
         """
@@ -73,7 +73,7 @@ class TadoX(TadoBase):
         request.command = "roomsAndDevices"
         rooms_and_devices = DevicesResponse.model_validate(self._http.request(request))
 
-        return [Room(self, room.room_id) for room in rooms_and_devices.rooms]
+        return [TadoRoom(self, room.room_id) for room in rooms_and_devices.rooms]
 
     def get_zone_states(self) -> dict[str, RoomState]:
         """
@@ -102,11 +102,11 @@ class TadoX(TadoBase):
 
     # ------------------- Zone methods -------------------
 
-    def get_zone(self, zone: int) -> Room:
+    def get_zone(self, zone: int) -> TadoRoom:
         """
         Gets zone/room.
         """
-        return Room(self, zone)
+        return TadoRoom(self, zone)
 
     def get_state(self, zone: int) -> RoomState:
         """
@@ -124,7 +124,7 @@ class TadoX(TadoBase):
         Returns whether an open window is detected.
         """
 
-        if Room(self, zone).open_window:
+        if TadoRoom(self, zone).open_window:
             return {"openWindowDetected": True}
         else:
             return {"openWindowDetected": False}
