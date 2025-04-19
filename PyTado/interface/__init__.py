@@ -1,5 +1,6 @@
 """Abstraction layer for API implementation."""
 
-from .interface import Tado
+from .api.hops_tado import TadoX
+from .api.my_tado import Tado
 
-__all__ = ["Tado"]
+__all__ = ["Tado", "TadoX"]

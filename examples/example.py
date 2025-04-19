@@ -1,13 +1,14 @@
 """Example client for PyTado"""
 
-from PyTado.interface.interface import authenticate_and_get_client
+from PyTado.interface.interface import TadoClientInitializer
 
 
 def main() -> None:
     """Retrieve all zones, once successfully logged in"""
-    tado = authenticate_and_get_client()
+    tado = TadoClientInitializer().authenticate_and_get_client()
 
     zones = tado.get_zones()
+
     print(zones)
 
 
