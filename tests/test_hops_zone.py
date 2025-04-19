@@ -39,6 +39,13 @@ class TadoZoneTestCase(unittest.TestCase):
             status=200,
         )
 
+        responses.add(
+            responses.GET,
+            "https://hops.tado.com/homes/1234/roomsAndDevices",
+            json=json.loads(common.load_fixture("tadox/rooms_and_devices.json")),
+            status=200,
+        )
+
         self.http = Http()
         self.http.device_activation()
         self.http._x_api = True

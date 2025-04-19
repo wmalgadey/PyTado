@@ -34,6 +34,12 @@ class TadoTestCase(unittest.TestCase):
             status=204,
         )
 
+        responses.add(
+            responses.DELETE,
+            "https://my.tado.com/api/v2/homes/1234/presenceLock",
+            status=204,
+        )
+
         self.http = Http()
         self.tado_client = Tado(self.http)
 
