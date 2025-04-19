@@ -1,5 +1,4 @@
 from PyTado.models.util import Base
-from PyTado.types import ZoneType
 
 
 class Climate(Base):
@@ -10,10 +9,6 @@ class Climate(Base):
 
     temperature: float
     humidity: float
-
-
-class Capabilities(Base):
-    type: ZoneType
 
 
 class TemperatureOffset(Base):

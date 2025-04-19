@@ -1,22 +1,25 @@
 from datetime import datetime
 
+from PyTado.models.line_x.device import Connection
 from PyTado.models.util import Base
-from PyTado.types import ConnectionState, OverlayMode
+from PyTado.types import OverlayMode, Power
 
 
-class OpenWindow(Base):
-    """OpenWindow model represents the open window state of a romm."""
+class XOpenWindow(Base):
+    """OpenWindow model represents the open window state of a room."""
 
     activated: bool
     expiry_in_seconds: int
 
 
 class ManualControlTermination(Base):
-    """ManualControlTermination model represents the manual control termination settings of a room."""
+    """ManualControlTermination model represents the manual control termination settings of a room.
+
+    used in: RoomState"""
 
     type: OverlayMode
-    remaining_time_in_seconds: int | None
-    projected_expiry: datetime | None
+    remaining_time_in_seconds: int | None = None
+    projected_expiry: datetime | None = None
 
 
 class NextTimeBlock(Base):
@@ -40,7 +43,7 @@ class InsideTemperature(Base):
 class Setting(Base):
     """Setting model represents the setting of a room."""
 
-    power: str
+    power: Power
     temperature: InsideTemperature | None = None
 
 
@@ -63,12 +66,6 @@ class HeatingPower(Base):
     percentage: int
 
 
-class Connection(Base):
-    """Connection model represents the connection state of a room."""
-
-    state: ConnectionState
-
-
 class NextScheduleChange(Base):
     """NextScheduleChange model represents the next schedule change."""
 
@@ -85,8 +82,8 @@ class RoomState(Base):
     setting: Setting
     heating_power: HeatingPower
     connection: Connection
-    open_window: OpenWindow | None
-    next_schedule_change: NextScheduleChange
+    open_window: XOpenWindow | None
+    next_schedule_change: NextScheduleChange | None
     next_time_block: NextTimeBlock
     balance_control: str | None = None
     manual_control_termination: ManualControlTermination | None = None

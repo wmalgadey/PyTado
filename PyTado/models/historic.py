@@ -10,7 +10,7 @@ T = TypeVar("T")
 
 
 class Interval(Base):
-    # form is a reserved keyword in Python so we need to use alias
+    # from is a reserved keyword in Python so we need to use alias
     from_date: datetime = Field(validation_alias="from", serialization_alias="from")
     to_date: datetime = Field(validation_alias="to", serialization_alias="to")
 
@@ -133,5 +133,5 @@ class Historic(Base):
     measured_data: MeasuredData
     stripes: DataIntervalBase[StripeValue]
     settings: DataIntervalBase[Setting]
-    callForHeat: DataIntervalBase[str]
+    call_for_heat: DataIntervalBase[str]
     weather: Weather

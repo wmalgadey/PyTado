@@ -10,10 +10,43 @@ from typing import Any, Callable
 import requests
 
 import PyTado.interface.api as API
-from PyTado.exceptions import TadoException
 from PyTado.const import DEFAULT_DATE_FORMAT, Unit
+from PyTado.exceptions import TadoException
 from PyTado.http import DeviceActivationStatus, Http
 from PyTado.models.util import Base
+
+
+def authenticate_and_get_client(
+    token_file_path: str | None = None,
+    saved_refresh_token: str | None = None,
+    http_session: requests.Session | None = None,
+    debug: bool = False,
+) -> API.TadoX | API.Tado:
+    """Returns the client instance.
+
+    Returns:
+        API.TadoX | API.Tado: The client instance.
+    """
+    http = Http(
+        token_file_path=token_file_path,
+        saved_refresh_token=saved_refresh_token,
+        http_session=http_session,
+        debug=debug,
+    )
+    print("Device activation status: ", http.device_activation_status)
+
+    if http.device_activation_status != DeviceActivationStatus.COMPLETED:
+        if http.device_activation_status != DeviceActivationStatus.PENDING:
+            http._device_activation_status = http._login_device_flow()
+        print("Device verification URL: ", http.device_verification_url)
+        http.device_activation()
+    if http.device_activation_status == DeviceActivationStatus.COMPLETED:
+        if http.is_x_line:
+            return API.TadoX.from_http(http=http, debug=debug)
+        return API.Tado.from_http(http=http, debug=debug)
+    raise TadoException(
+        "API is not initialized. Please complete device authentication first."
+    )
 
 
 def deprecated(new_func_name: str) -> Callable:

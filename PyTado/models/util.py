@@ -26,6 +26,7 @@ class Base(BaseModel):
     """
 
     model_config = ConfigDict(
+        extra="allow",
         alias_generator=AliasGenerator(
             validation_alias=lambda field_name: AliasChoices(
                 field_name, to_camel(field_name)
@@ -37,7 +38,7 @@ class Base(BaseModel):
     def to_json(self) -> str:
         return self.model_dump_json(by_alias=True)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return self.model_dump(by_alias=True)
 
     @model_validator(mode="wrap")
@@ -55,28 +56,15 @@ class Base(BaseModel):
         try:
             model: Self = handler(data)
 
-            if isinstance(data, dict):
-                _model_keys = []
-                for _, val in cls.model_fields.items():
-                    if isinstance(val.validation_alias, str):
-                        _model_keys.append(val.validation_alias)
-                    elif isinstance(val.validation_alias, AliasChoices):
-                        _model_keys.extend(
-                            [str(c) for c in val.validation_alias.choices]
-                        )
-                model_keys = set(_model_keys)
-                extra_keys = set(data.keys()) - model_keys
-                if extra_keys:
-                    for k in extra_keys:
-                        LOGGER.debug(
-                            f"Data for Model {cls} has extra key: {k} with value {data[k]}"
-                        )
+            extra = model.model_extra
 
-            unused_keys = [
-                key
-                for key in cls.__annotations__.keys()
-                if (getattr(model, key) is None or getattr(model, key) == "")
-            ]
+            if extra:
+                for key, value in extra.items():
+                    LOGGER.warning(
+                        f"Model {cls} has extra key: {key} with value {value}"
+                    ) if value is not None else None
+
+            unused_keys = model.model_fields.keys() - model.model_fields_set
             LOGGER.debug(
                 f"Model {cls} has unused keys: {unused_keys}"
             ) if unused_keys else None
