@@ -1,0 +1,174 @@
+{
+  "room": { "id": 1, "name": "Room 1" },
+  "otherRooms": [{ "id": 2, "name": "Room 2" }],
+  "schedule": [
+    {
+      "dayType": "WEDNESDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "WEDNESDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "WEDNESDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "WEDNESDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "MONDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "MONDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "MONDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "MONDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "THURSDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "THURSDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "THURSDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "THURSDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "SUNDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "SUNDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "SUNDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "SUNDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "TUESDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "TUESDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "TUESDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "TUESDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "FRIDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "FRIDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "FRIDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "FRIDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "SATURDAY",
+      "start": "00:00",
+      "end": "05:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "SATURDAY",
+      "start": "05:00",
+      "end": "07:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    },
+    {
+      "dayType": "SATURDAY",
+      "start": "07:00",
+      "end": "22:00",
+      "setting": { "power": "ON", "temperature": { "value": 21.0 } }
+    },
+    {
+      "dayType": "SATURDAY",
+      "start": "22:00",
+      "end": "24:00",
+      "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+    }
+  ]
+}

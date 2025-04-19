@@ -1,12 +1,8 @@
-import json
 import unittest
 from unittest import mock
 
-from . import common
-
-from PyTado.http import DeviceActivationStatus, Http
+from PyTado.http import DeviceActivationStatus
 from PyTado.interface import Tado
-import PyTado.interface.api as API
 
 
 class TestTadoInterface(unittest.TestCase):
