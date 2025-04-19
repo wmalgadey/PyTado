@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "name": "Room 1",
+  "sensorDataPoints": {
+    "insideTemperature": { "value": 19.92 },
+    "humidity": { "percentage": 45 }
+  },
+  "setting": { "power": "ON", "temperature": null },
+  "manualControlTermination": null,
+  "boostMode": { "projectedExpiry": "2025-04-08T19:22:40Z", "type": "TIMER" },
+  "heatingPower": { "percentage": 100 },
+  "connection": { "state": "CONNECTED" },
+  "openWindow": null,
+  "nextScheduleChange": {
+    "start": "2025-04-08T20:00:00Z",
+    "setting": { "power": "ON", "temperature": { "value": 18.0 } }
+  },
+  "nextTimeBlock": { "start": "2025-04-08T20:00:00Z" },
+  "balanceControl": null
+}

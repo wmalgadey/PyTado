@@ -1,0 +1,2165 @@
+{
+  "zoneType": "HEATING",
+  "interval": {
+    "from": "2025-04-06T21:45:00.000Z",
+    "to": "2025-04-07T22:15:00.000Z"
+  },
+  "hoursInDay": 24,
+  "measuredData": {
+    "measuringDeviceConnected": {
+      "timeSeriesType": "dataIntervals",
+      "valueType": "boolean",
+      "dataIntervals": [
+        {
+          "from": "2025-04-06T21:45:00.000Z",
+          "to": "2025-04-07T22:15:00.000Z",
+          "value": true
+        }
+      ]
+    },
+    "insideTemperature": {
+      "timeSeriesType": "dataPoints",
+      "valueType": "temperature",
+      "min": { "celsius": 19.58, "fahrenheit": 67.24 },
+      "max": { "celsius": 20.97, "fahrenheit": 69.75 },
+      "dataPoints": [
+        {
+          "timestamp": "2025-04-06T21:45:00.000Z",
+          "value": { "celsius": 20.05, "fahrenheit": 68.09 }
+        },
+        {
+          "timestamp": "2025-04-06T22:00:00.000Z",
+          "value": { "celsius": 20.02, "fahrenheit": 68.04 }
+        },
+        {
+          "timestamp": "2025-04-06T22:15:00.000Z",
+          "value": { "celsius": 20.0, "fahrenheit": 68.0 }
+        },
+        {
+          "timestamp": "2025-04-06T22:30:00.000Z",
+          "value": { "celsius": 19.98, "fahrenheit": 67.96 }
+        },
+        {
+          "timestamp": "2025-04-06T22:45:00.000Z",
+          "value": { "celsius": 19.96, "fahrenheit": 67.93 }
+        },
+        {
+          "timestamp": "2025-04-06T23:00:00.000Z",
+          "value": { "celsius": 19.95, "fahrenheit": 67.91 }
+        },
+        {
+          "timestamp": "2025-04-06T23:15:00.000Z",
+          "value": { "celsius": 19.93, "fahrenheit": 67.87 }
+        },
+        {
+          "timestamp": "2025-04-06T23:30:00.000Z",
+          "value": { "celsius": 19.92, "fahrenheit": 67.86 }
+        },
+        {
+          "timestamp": "2025-04-06T23:45:00.000Z",
+          "value": { "celsius": 19.91, "fahrenheit": 67.84 }
+        },
+        {
+          "timestamp": "2025-04-07T00:00:00.000Z",
+          "value": { "celsius": 19.9, "fahrenheit": 67.82 }
+        },
+        {
+          "timestamp": "2025-04-07T00:15:00.000Z",
+          "value": { "celsius": 19.9, "fahrenheit": 67.82 }
+        },
+        {
+          "timestamp": "2025-04-07T00:30:00.000Z",
+          "value": { "celsius": 19.88, "fahrenheit": 67.78 }
+        },
+        {
+          "timestamp": "2025-04-07T00:45:00.000Z",
+          "value": { "celsius": 19.87, "fahrenheit": 67.77 }
+        },
+        {
+          "timestamp": "2025-04-07T01:00:00.000Z",
+          "value": { "celsius": 19.85, "fahrenheit": 67.73 }
+        },
+        {
+          "timestamp": "2025-04-07T01:15:00.000Z",
+          "value": { "celsius": 19.84, "fahrenheit": 67.71 }
+        },
+        {
+          "timestamp": "2025-04-07T01:30:00.000Z",
+          "value": { "celsius": 19.81, "fahrenheit": 67.66 }
+        },
+        {
+          "timestamp": "2025-04-07T01:45:00.000Z",
+          "value": { "celsius": 19.8, "fahrenheit": 67.64 }
+        },
+        {
+          "timestamp": "2025-04-07T02:00:00.000Z",
+          "value": { "celsius": 19.78, "fahrenheit": 67.6 }
+        },
+        {
+          "timestamp": "2025-04-07T02:15:00.000Z",
+          "value": { "celsius": 19.75, "fahrenheit": 67.55 }
+        },
+        {
+          "timestamp": "2025-04-07T02:30:00.000Z",
+          "value": { "celsius": 19.73, "fahrenheit": 67.51 }
+        },
+        {
+          "timestamp": "2025-04-07T02:45:00.000Z",
+          "value": { "celsius": 19.71, "fahrenheit": 67.48 }
+        },
+        {
+          "timestamp": "2025-04-07T03:00:00.000Z",
+          "value": { "celsius": 19.69, "fahrenheit": 67.44 }
+        },
+        {
+          "timestamp": "2025-04-07T03:15:00.000Z",
+          "value": { "celsius": 19.67, "fahrenheit": 67.41 }
+        },
+        {
+          "timestamp": "2025-04-07T03:30:00.000Z",
+          "value": { "celsius": 19.66, "fahrenheit": 67.39 }
+        },
+        {
+          "timestamp": "2025-04-07T03:45:00.000Z",
+          "value": { "celsius": 19.65, "fahrenheit": 67.37 }
+        },
+        {
+          "timestamp": "2025-04-07T04:00:00.000Z",
+          "value": { "celsius": 19.64, "fahrenheit": 67.35 }
+        },
+        {
+          "timestamp": "2025-04-07T04:15:00.000Z",
+          "value": { "celsius": 19.63, "fahrenheit": 67.33 }
+        },
+        {
+          "timestamp": "2025-04-07T04:30:00.000Z",
+          "value": { "celsius": 19.61, "fahrenheit": 67.3 }
+        },
+        {
+          "timestamp": "2025-04-07T04:45:00.000Z",
+          "value": { "celsius": 19.6, "fahrenheit": 67.28 }
+        },
+        {
+          "timestamp": "2025-04-07T05:00:00.000Z",
+          "value": { "celsius": 19.59, "fahrenheit": 67.26 }
+        },
+        {
+          "timestamp": "2025-04-07T05:15:00.000Z",
+          "value": { "celsius": 19.59, "fahrenheit": 67.26 }
+        },
+        {
+          "timestamp": "2025-04-07T05:30:00.000Z",
+          "value": { "celsius": 19.58, "fahrenheit": 67.24 }
+        },
+        {
+          "timestamp": "2025-04-07T05:45:00.000Z",
+          "value": { "celsius": 19.58, "fahrenheit": 67.24 }
+        },
+        {
+          "timestamp": "2025-04-07T06:00:00.000Z",
+          "value": { "celsius": 19.59, "fahrenheit": 67.26 }
+        },
+        {
+          "timestamp": "2025-04-07T06:15:00.000Z",
+          "value": { "celsius": 19.59, "fahrenheit": 67.26 }
+        },
+        {
+          "timestamp": "2025-04-07T06:30:00.000Z",
+          "value": { "celsius": 19.6, "fahrenheit": 67.28 }
+        },
+        {
+          "timestamp": "2025-04-07T06:45:00.000Z",
+          "value": { "celsius": 19.71, "fahrenheit": 67.48 }
+        },
+        {
+          "timestamp": "2025-04-07T07:00:00.000Z",
+          "value": { "celsius": 19.97, "fahrenheit": 67.95 }
+        },
+        {
+          "timestamp": "2025-04-07T07:15:00.000Z",
+          "value": { "celsius": 20.24, "fahrenheit": 68.43 }
+        },
+        {
+          "timestamp": "2025-04-07T07:30:00.000Z",
+          "value": { "celsius": 20.4, "fahrenheit": 68.72 }
+        },
+        {
+          "timestamp": "2025-04-07T07:45:00.000Z",
+          "value": { "celsius": 20.58, "fahrenheit": 69.04 }
+        },
+        {
+          "timestamp": "2025-04-07T08:00:00.000Z",
+          "value": { "celsius": 20.73, "fahrenheit": 69.31 }
+        },
+        {
+          "timestamp": "2025-04-07T08:15:00.000Z",
+          "value": { "celsius": 20.86, "fahrenheit": 69.55 }
+        },
+        {
+          "timestamp": "2025-04-07T08:30:00.000Z",
+          "value": { "celsius": 20.91, "fahrenheit": 69.64 }
+        },
+        {
+          "timestamp": "2025-04-07T08:45:00.000Z",
+          "value": { "celsius": 20.97, "fahrenheit": 69.75 }
+        },
+        {
+          "timestamp": "2025-04-07T09:00:00.000Z",
+          "value": { "celsius": 20.96, "fahrenheit": 69.73 }
+        },
+        {
+          "timestamp": "2025-04-07T09:15:00.000Z",
+          "value": { "celsius": 20.91, "fahrenheit": 69.64 }
+        },
+        {
+          "timestamp": "2025-04-07T09:30:00.000Z",
+          "value": { "celsius": 20.9, "fahrenheit": 69.62 }
+        },
+        {
+          "timestamp": "2025-04-07T09:45:00.000Z",
+          "value": { "celsius": 20.94, "fahrenheit": 69.69 }
+        },
+        {
+          "timestamp": "2025-04-07T10:00:00.000Z",
+          "value": { "celsius": 20.9, "fahrenheit": 69.62 }
+        },
+        {
+          "timestamp": "2025-04-07T10:15:00.000Z",
+          "value": { "celsius": 20.87, "fahrenheit": 69.57 }
+        },
+        {
+          "timestamp": "2025-04-07T10:30:00.000Z",
+          "value": { "celsius": 20.89, "fahrenheit": 69.6 }
+        },
+        {
+          "timestamp": "2025-04-07T10:45:00.000Z",
+          "value": { "celsius": 20.88, "fahrenheit": 69.58 }
+        },
+        {
+          "timestamp": "2025-04-07T11:00:00.000Z",
+          "value": { "celsius": 20.91, "fahrenheit": 69.64 }
+        },
+        {
+          "timestamp": "2025-04-07T11:15:00.000Z",
+          "value": { "celsius": 20.9, "fahrenheit": 69.62 }
+        },
+        {
+          "timestamp": "2025-04-07T11:30:00.000Z",
+          "value": { "celsius": 20.87, "fahrenheit": 69.57 }
+        },
+        {
+          "timestamp": "2025-04-07T11:45:00.000Z",
+          "value": { "celsius": 20.87, "fahrenheit": 69.57 }
+        },
+        {
+          "timestamp": "2025-04-07T12:00:00.000Z",
+          "value": { "celsius": 20.86, "fahrenheit": 69.55 }
+        },
+        {
+          "timestamp": "2025-04-07T12:15:00.000Z",
+          "value": { "celsius": 20.83, "fahrenheit": 69.49 }
+        },
+        {
+          "timestamp": "2025-04-07T12:30:00.000Z",
+          "value": { "celsius": 20.77, "fahrenheit": 69.39 }
+        },
+        {
+          "timestamp": "2025-04-07T12:45:00.000Z",
+          "value": { "celsius": 20.73, "fahrenheit": 69.31 }
+        },
+        {
+          "timestamp": "2025-04-07T13:00:00.000Z",
+          "value": { "celsius": 20.72, "fahrenheit": 69.3 }
+        },
+        {
+          "timestamp": "2025-04-07T13:15:00.000Z",
+          "value": { "celsius": 20.71, "fahrenheit": 69.28 }
+        },
+        {
+          "timestamp": "2025-04-07T13:30:00.000Z",
+          "value": { "celsius": 20.7, "fahrenheit": 69.26 }
+        },
+        {
+          "timestamp": "2025-04-07T13:45:00.000Z",
+          "value": { "celsius": 20.68, "fahrenheit": 69.22 }
+        },
+        {
+          "timestamp": "2025-04-07T14:00:00.000Z",
+          "value": { "celsius": 20.66, "fahrenheit": 69.19 }
+        },
+        {
+          "timestamp": "2025-04-07T14:15:00.000Z",
+          "value": { "celsius": 20.63, "fahrenheit": 69.13 }
+        },
+        {
+          "timestamp": "2025-04-07T14:30:00.000Z",
+          "value": { "celsius": 20.6, "fahrenheit": 69.08 }
+        },
+        {
+          "timestamp": "2025-04-07T14:45:00.000Z",
+          "value": { "celsius": 20.54, "fahrenheit": 68.97 }
+        },
+        {
+          "timestamp": "2025-04-07T15:00:00.000Z",
+          "value": { "celsius": 20.51, "fahrenheit": 68.92 }
+        },
+        {
+          "timestamp": "2025-04-07T15:15:00.000Z",
+          "value": { "celsius": 20.47, "fahrenheit": 68.85 }
+        },
+        {
+          "timestamp": "2025-04-07T15:30:00.000Z",
+          "value": { "celsius": 20.45, "fahrenheit": 68.81 }
+        },
+        {
+          "timestamp": "2025-04-07T15:45:00.000Z",
+          "value": { "celsius": 20.43, "fahrenheit": 68.77 }
+        },
+        {
+          "timestamp": "2025-04-07T16:00:00.000Z",
+          "value": { "celsius": 20.41, "fahrenheit": 68.74 }
+        },
+        {
+          "timestamp": "2025-04-07T16:15:00.000Z",
+          "value": { "celsius": 20.39, "fahrenheit": 68.7 }
+        },
+        {
+          "timestamp": "2025-04-07T16:30:00.000Z",
+          "value": { "celsius": 20.38, "fahrenheit": 68.68 }
+        },
+        {
+          "timestamp": "2025-04-07T16:45:00.000Z",
+          "value": { "celsius": 20.36, "fahrenheit": 68.65 }
+        },
+        {
+          "timestamp": "2025-04-07T17:00:00.000Z",
+          "value": { "celsius": 20.34, "fahrenheit": 68.61 }
+        },
+        {
+          "timestamp": "2025-04-07T17:15:00.000Z",
+          "value": { "celsius": 20.31, "fahrenheit": 68.56 }
+        },
+        {
+          "timestamp": "2025-04-07T17:30:00.000Z",
+          "value": { "celsius": 20.28, "fahrenheit": 68.5 }
+        },
+        {
+          "timestamp": "2025-04-07T17:45:00.000Z",
+          "value": { "celsius": 20.25, "fahrenheit": 68.45 }
+        },
+        {
+          "timestamp": "2025-04-07T18:00:00.000Z",
+          "value": { "celsius": 20.22, "fahrenheit": 68.4 }
+        },
+        {
+          "timestamp": "2025-04-07T18:15:00.000Z",
+          "value": { "celsius": 20.19, "fahrenheit": 68.34 }
+        },
+        {
+          "timestamp": "2025-04-07T18:30:00.000Z",
+          "value": { "celsius": 20.17, "fahrenheit": 68.31 }
+        },
+        {
+          "timestamp": "2025-04-07T18:45:00.000Z",
+          "value": { "celsius": 20.14, "fahrenheit": 68.25 }
+        },
+        {
+          "timestamp": "2025-04-07T19:00:00.000Z",
+          "value": { "celsius": 20.13, "fahrenheit": 68.23 }
+        },
+        {
+          "timestamp": "2025-04-07T19:15:00.000Z",
+          "value": { "celsius": 20.11, "fahrenheit": 68.2 }
+        },
+        {
+          "timestamp": "2025-04-07T19:30:00.000Z",
+          "value": { "celsius": 20.09, "fahrenheit": 68.16 }
+        },
+        {
+          "timestamp": "2025-04-07T19:45:00.000Z",
+          "value": { "celsius": 20.07, "fahrenheit": 68.13 }
+        },
+        {
+          "timestamp": "2025-04-07T20:00:00.000Z",
+          "value": { "celsius": 20.04, "fahrenheit": 68.07 }
+        },
+        {
+          "timestamp": "2025-04-07T20:15:00.000Z",
+          "value": { "celsius": 20.03, "fahrenheit": 68.05 }
+        },
+        {
+          "timestamp": "2025-04-07T20:30:00.000Z",
+          "value": { "celsius": 20.0, "fahrenheit": 68.0 }
+        },
+        {
+          "timestamp": "2025-04-07T20:45:00.000Z",
+          "value": { "celsius": 19.98, "fahrenheit": 67.96 }
+        },
+        {
+          "timestamp": "2025-04-07T21:00:00.000Z",
+          "value": { "celsius": 19.98, "fahrenheit": 67.96 }
+        },
+        {
+          "timestamp": "2025-04-07T21:15:00.000Z",
+          "value": { "celsius": 19.96, "fahrenheit": 67.93 }
+        },
+        {
+          "timestamp": "2025-04-07T21:30:00.000Z",
+          "value": { "celsius": 19.94, "fahrenheit": 67.89 }
+        },
+        {
+          "timestamp": "2025-04-07T21:45:00.000Z",
+          "value": { "celsius": 19.93, "fahrenheit": 67.87 }
+        },
+        {
+          "timestamp": "2025-04-07T22:00:00.000Z",
+          "value": { "celsius": 19.92, "fahrenheit": 67.86 }
+        },
+        {
+          "timestamp": "2025-04-07T22:15:00.000Z",
+          "value": { "celsius": 19.91, "fahrenheit": 67.84 }
+        }
+      ]
+    },
+    "humidity": {
+      "timeSeriesType": "dataPoints",
+      "valueType": "percentage",
+      "percentageUnit": "UNIT_INTERVAL",
+      "min": 0.438,
+      "max": 0.451,
+      "dataPoints": [
+        { "timestamp": "2025-04-06T21:45:00.000Z", "value": 0.451 },
+        { "timestamp": "2025-04-06T22:00:00.000Z", "value": 0.451 },
+        { "timestamp": "2025-04-06T22:15:00.000Z", "value": 0.451 },
+        { "timestamp": "2025-04-06T22:30:00.000Z", "value": 0.451 },
+        { "timestamp": "2025-04-06T22:45:00.000Z", "value": 0.451 },
+        { "timestamp": "2025-04-06T23:00:00.000Z", "value": 0.451 },
+        { "timestamp": "2025-04-06T23:15:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-06T23:30:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-06T23:45:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T00:00:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T00:15:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T00:30:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T00:45:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T01:00:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T01:15:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T01:30:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T01:45:00.000Z", "value": 0.45 },
+        { "timestamp": "2025-04-07T02:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T02:15:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T02:30:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T02:45:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T03:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T03:15:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T03:30:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T03:45:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T04:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T04:15:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T04:30:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T04:45:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T05:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T05:15:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T05:30:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T05:45:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T06:00:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T06:15:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T06:30:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T06:45:00.000Z", "value": 0.447 },
+        { "timestamp": "2025-04-07T07:00:00.000Z", "value": 0.445 },
+        { "timestamp": "2025-04-07T07:15:00.000Z", "value": 0.443 },
+        { "timestamp": "2025-04-07T07:30:00.000Z", "value": 0.442 },
+        { "timestamp": "2025-04-07T07:45:00.000Z", "value": 0.44 },
+        { "timestamp": "2025-04-07T08:00:00.000Z", "value": 0.439 },
+        { "timestamp": "2025-04-07T08:15:00.000Z", "value": 0.438 },
+        { "timestamp": "2025-04-07T08:30:00.000Z", "value": 0.438 },
+        { "timestamp": "2025-04-07T08:45:00.000Z", "value": 0.438 },
+        { "timestamp": "2025-04-07T09:00:00.000Z", "value": 0.438 },
+        { "timestamp": "2025-04-07T09:15:00.000Z", "value": 0.439 },
+        { "timestamp": "2025-04-07T09:30:00.000Z", "value": 0.44 },
+        { "timestamp": "2025-04-07T09:45:00.000Z", "value": 0.439 },
+        { "timestamp": "2025-04-07T10:00:00.000Z", "value": 0.44 },
+        { "timestamp": "2025-04-07T10:15:00.000Z", "value": 0.441 },
+        { "timestamp": "2025-04-07T10:30:00.000Z", "value": 0.441 },
+        { "timestamp": "2025-04-07T10:45:00.000Z", "value": 0.441 },
+        { "timestamp": "2025-04-07T11:00:00.000Z", "value": 0.441 },
+        { "timestamp": "2025-04-07T11:15:00.000Z", "value": 0.441 },
+        { "timestamp": "2025-04-07T11:30:00.000Z", "value": 0.442 },
+        { "timestamp": "2025-04-07T11:45:00.000Z", "value": 0.442 },
+        { "timestamp": "2025-04-07T12:00:00.000Z", "value": 0.443 },
+        { "timestamp": "2025-04-07T12:15:00.000Z", "value": 0.443 },
+        { "timestamp": "2025-04-07T12:30:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T12:45:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T13:00:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T13:15:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T13:30:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T13:45:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T14:00:00.000Z", "value": 0.444 },
+        { "timestamp": "2025-04-07T14:15:00.000Z", "value": 0.445 },
+        { "timestamp": "2025-04-07T14:30:00.000Z", "value": 0.445 },
+        { "timestamp": "2025-04-07T14:45:00.000Z", "value": 0.446 },
+        { "timestamp": "2025-04-07T15:00:00.000Z", "value": 0.446 },
+        { "timestamp": "2025-04-07T15:15:00.000Z", "value": 0.446 },
+        { "timestamp": "2025-04-07T15:30:00.000Z", "value": 0.447 },
+        { "timestamp": "2025-04-07T15:45:00.000Z", "value": 0.447 },
+        { "timestamp": "2025-04-07T16:00:00.000Z", "value": 0.447 },
+        { "timestamp": "2025-04-07T16:15:00.000Z", "value": 0.447 },
+        { "timestamp": "2025-04-07T16:30:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T16:45:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T17:00:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T17:15:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T17:30:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T17:45:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T18:00:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T18:15:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T18:30:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T18:45:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T19:00:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T19:15:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T19:30:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T19:45:00.000Z", "value": 0.448 },
+        { "timestamp": "2025-04-07T20:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T20:15:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T20:30:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T20:45:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T21:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T21:15:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T21:30:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T21:45:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T22:00:00.000Z", "value": 0.449 },
+        { "timestamp": "2025-04-07T22:15:00.000Z", "value": 0.45 }
+      ]
+    }
+  },
+  "stripes": {
+    "timeSeriesType": "dataIntervals",
+    "valueType": "stripes",
+    "dataIntervals": [
+      {
+        "from": "2025-04-06T21:45:00.000Z",
+        "to": "2025-04-06T22:00:10.000Z",
+        "value": { "stripeType": "AWAY" }
+      },
+      {
+        "from": "2025-04-06T22:00:10.000Z",
+        "to": "2025-04-06T22:00:21.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 19.0, "fahrenheit": 66.2 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-06T22:00:21.000Z",
+        "to": "2025-04-07T03:00:05.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 16.0, "fahrenheit": 60.8 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T03:00:05.000Z",
+        "to": "2025-04-07T06:00:06.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T06:00:06.000Z",
+        "to": "2025-04-07T06:00:08.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 16.0, "fahrenheit": 60.8 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T06:00:08.000Z",
+        "to": "2025-04-07T20:00:03.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 19.0, "fahrenheit": 66.2 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:00:03.000Z",
+        "to": "2025-04-07T20:38:51.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:38:51.000Z",
+        "to": "2025-04-07T20:39:50.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:39:50.000Z",
+        "to": "2025-04-07T20:41:55.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:41:55.000Z",
+        "to": "2025-04-07T20:42:55.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:42:55.000Z",
+        "to": "2025-04-07T20:43:52.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:43:52.000Z",
+        "to": "2025-04-07T20:44:52.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:44:52.000Z",
+        "to": "2025-04-07T20:45:15.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:45:15.000Z",
+        "to": "2025-04-07T20:46:04.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:46:04.000Z",
+        "to": "2025-04-07T20:47:08.000Z",
+        "value": { "stripeType": "AWAY" }
+      },
+      {
+        "from": "2025-04-07T20:47:08.000Z",
+        "to": "2025-04-07T20:48:13.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:48:13.000Z",
+        "to": "2025-04-07T20:48:35.000Z",
+        "value": { "stripeType": "AWAY" }
+      },
+      {
+        "from": "2025-04-07T20:48:35.000Z",
+        "to": "2025-04-07T20:49:35.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:49:35.000Z",
+        "to": "2025-04-07T20:49:47.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:49:47.000Z",
+        "to": "2025-04-07T20:51:32.000Z",
+        "value": { "stripeType": "AWAY" }
+      },
+      {
+        "from": "2025-04-07T20:51:32.000Z",
+        "to": "2025-04-07T20:51:33.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:51:33.000Z",
+        "to": "2025-04-07T20:52:44.000Z",
+        "value": { "stripeType": "AWAY" }
+      },
+      {
+        "from": "2025-04-07T20:52:44.000Z",
+        "to": "2025-04-07T20:54:17.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:54:17.000Z",
+        "to": "2025-04-07T20:56:11.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:56:11.000Z",
+        "to": "2025-04-07T20:57:10.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T20:57:10.000Z",
+        "to": "2025-04-07T21:25:46.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T21:25:46.000Z",
+        "to": "2025-04-07T21:27:07.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T21:27:07.000Z",
+        "to": "2025-04-07T21:27:44.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T21:27:44.000Z",
+        "to": "2025-04-07T21:29:34.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T21:29:34.000Z",
+        "to": "2025-04-07T21:30:45.000Z",
+        "value": {
+          "stripeType": "HOME",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T21:30:45.000Z",
+        "to": "2025-04-07T21:32:45.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+          }
+        }
+      },
+      {
+        "from": "2025-04-07T21:32:45.000Z",
+        "to": "2025-04-07T22:00:16.000Z",
+        "value": { "stripeType": "AWAY" }
+      },
+      {
+        "from": "2025-04-07T22:00:16.000Z",
+        "to": "2025-04-07T22:15:00.000Z",
+        "value": {
+          "stripeType": "OVERLAY_ACTIVE",
+          "setting": {
+            "type": "HEATING",
+            "power": "ON",
+            "temperature": { "celsius": 16.0, "fahrenheit": 60.8 }
+          }
+        }
+      }
+    ]
+  },
+  "settings": {
+    "timeSeriesType": "dataIntervals",
+    "valueType": "heatingSetting",
+    "dataIntervals": [
+      {
+        "from": "2025-04-06T21:45:00.000Z",
+        "to": "2025-04-06T22:00:10.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-06T22:00:10.000Z",
+        "to": "2025-04-06T22:00:21.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 19.0, "fahrenheit": 66.2 }
+        }
+      },
+      {
+        "from": "2025-04-06T22:00:21.000Z",
+        "to": "2025-04-07T03:00:05.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 16.0, "fahrenheit": 60.8 }
+        }
+      },
+      {
+        "from": "2025-04-07T03:00:05.000Z",
+        "to": "2025-04-07T06:00:06.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T06:00:06.000Z",
+        "to": "2025-04-07T06:00:08.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 16.0, "fahrenheit": 60.8 }
+        }
+      },
+      {
+        "from": "2025-04-07T06:00:08.000Z",
+        "to": "2025-04-07T20:00:03.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 19.0, "fahrenheit": 66.2 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:00:03.000Z",
+        "to": "2025-04-07T20:38:51.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:38:51.000Z",
+        "to": "2025-04-07T20:39:50.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:39:50.000Z",
+        "to": "2025-04-07T20:41:55.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:41:55.000Z",
+        "to": "2025-04-07T20:42:55.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:42:55.000Z",
+        "to": "2025-04-07T20:43:52.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:43:52.000Z",
+        "to": "2025-04-07T20:44:52.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:44:52.000Z",
+        "to": "2025-04-07T20:45:15.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:45:15.000Z",
+        "to": "2025-04-07T20:46:04.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:46:04.000Z",
+        "to": "2025-04-07T20:47:08.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:47:08.000Z",
+        "to": "2025-04-07T20:48:13.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:48:13.000Z",
+        "to": "2025-04-07T20:48:35.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:48:35.000Z",
+        "to": "2025-04-07T20:49:35.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:49:35.000Z",
+        "to": "2025-04-07T20:51:32.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:51:32.000Z",
+        "to": "2025-04-07T20:51:33.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:51:33.000Z",
+        "to": "2025-04-07T20:52:44.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:52:44.000Z",
+        "to": "2025-04-07T20:54:17.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:54:17.000Z",
+        "to": "2025-04-07T20:56:11.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:56:11.000Z",
+        "to": "2025-04-07T20:57:10.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T20:57:10.000Z",
+        "to": "2025-04-07T21:25:46.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T21:25:46.000Z",
+        "to": "2025-04-07T21:27:07.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T21:27:07.000Z",
+        "to": "2025-04-07T21:27:44.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T21:27:44.000Z",
+        "to": "2025-04-07T21:29:34.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T21:29:34.000Z",
+        "to": "2025-04-07T21:30:45.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T21:30:45.000Z",
+        "to": "2025-04-07T21:32:45.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 22.0, "fahrenheit": 71.6 }
+        }
+      },
+      {
+        "from": "2025-04-07T21:32:45.000Z",
+        "to": "2025-04-07T22:00:16.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 18.0, "fahrenheit": 64.4 }
+        }
+      },
+      {
+        "from": "2025-04-07T22:00:16.000Z",
+        "to": "2025-04-07T22:15:00.000Z",
+        "value": {
+          "type": "HEATING",
+          "power": "ON",
+          "temperature": { "celsius": 16.0, "fahrenheit": 60.8 }
+        }
+      }
+    ]
+  },
+  "callForHeat": {
+    "timeSeriesType": "dataIntervals",
+    "valueType": "callForHeat",
+    "dataIntervals": [
+      {
+        "from": "2025-04-06T21:45:00.000Z",
+        "to": "2025-04-07T20:38:51.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:38:51.000Z",
+        "to": "2025-04-07T20:39:55.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:39:55.000Z",
+        "to": "2025-04-07T20:42:03.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:42:03.000Z",
+        "to": "2025-04-07T20:43:00.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:43:00.000Z",
+        "to": "2025-04-07T20:43:52.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:43:52.000Z",
+        "to": "2025-04-07T20:44:56.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:44:56.000Z",
+        "to": "2025-04-07T20:45:16.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:45:16.000Z",
+        "to": "2025-04-07T20:46:06.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:46:06.000Z",
+        "to": "2025-04-07T20:47:09.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:47:09.000Z",
+        "to": "2025-04-07T20:48:14.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:48:14.000Z",
+        "to": "2025-04-07T20:48:36.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:48:36.000Z",
+        "to": "2025-04-07T20:49:41.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:49:41.000Z",
+        "to": "2025-04-07T20:49:58.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:49:58.000Z",
+        "to": "2025-04-07T20:50:24.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:50:24.000Z",
+        "to": "2025-04-07T20:51:32.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:51:32.000Z",
+        "to": "2025-04-07T20:51:33.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:51:33.000Z",
+        "to": "2025-04-07T20:52:49.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:52:49.000Z",
+        "to": "2025-04-07T20:54:23.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:54:23.000Z",
+        "to": "2025-04-07T20:56:11.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T20:56:11.000Z",
+        "to": "2025-04-07T20:57:35.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T20:57:35.000Z",
+        "to": "2025-04-07T21:26:00.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T21:26:00.000Z",
+        "to": "2025-04-07T21:27:12.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T21:27:12.000Z",
+        "to": "2025-04-07T21:27:49.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T21:27:49.000Z",
+        "to": "2025-04-07T21:29:37.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T21:29:37.000Z",
+        "to": "2025-04-07T21:30:48.000Z",
+        "value": "NONE"
+      },
+      {
+        "from": "2025-04-07T21:30:48.000Z",
+        "to": "2025-04-07T21:32:48.000Z",
+        "value": "HIGH"
+      },
+      {
+        "from": "2025-04-07T21:32:48.000Z",
+        "to": "2025-04-07T22:15:00.000Z",
+        "value": "NONE"
+      }
+    ]
+  },
+  "weather": {
+    "condition": {
+      "timeSeriesType": "dataIntervals",
+      "valueType": "weatherCondition",
+      "dataIntervals": [
+        {
+          "from": "2025-04-06T21:45:00.000Z",
+          "to": "2025-04-06T21:52:34.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.64, "fahrenheit": 38.55 }
+          }
+        },
+        {
+          "from": "2025-04-06T21:52:34.000Z",
+          "to": "2025-04-06T22:06:27.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.64, "fahrenheit": 38.55 }
+          }
+        },
+        {
+          "from": "2025-04-06T22:06:27.000Z",
+          "to": "2025-04-06T22:19:40.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.64, "fahrenheit": 38.55 }
+          }
+        },
+        {
+          "from": "2025-04-06T22:19:40.000Z",
+          "to": "2025-04-06T22:31:08.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.68, "fahrenheit": 38.62 }
+          }
+        },
+        {
+          "from": "2025-04-06T22:31:08.000Z",
+          "to": "2025-04-06T22:44:28.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.68, "fahrenheit": 38.62 }
+          }
+        },
+        {
+          "from": "2025-04-06T22:44:28.000Z",
+          "to": "2025-04-06T23:05:03.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.68, "fahrenheit": 38.62 }
+          }
+        },
+        {
+          "from": "2025-04-06T23:05:03.000Z",
+          "to": "2025-04-06T23:20:58.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.68, "fahrenheit": 38.62 }
+          }
+        },
+        {
+          "from": "2025-04-06T23:20:58.000Z",
+          "to": "2025-04-06T23:37:35.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.99, "fahrenheit": 39.18 }
+          }
+        },
+        {
+          "from": "2025-04-06T23:37:35.000Z",
+          "to": "2025-04-06T23:52:21.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.99, "fahrenheit": 39.18 }
+          }
+        },
+        {
+          "from": "2025-04-06T23:52:21.000Z",
+          "to": "2025-04-07T00:01:46.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.99, "fahrenheit": 39.18 }
+          }
+        },
+        {
+          "from": "2025-04-07T00:01:46.000Z",
+          "to": "2025-04-07T00:19:14.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 3.99, "fahrenheit": 39.18 }
+          }
+        },
+        {
+          "from": "2025-04-07T00:19:14.000Z",
+          "to": "2025-04-07T00:29:10.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.04, "fahrenheit": 39.27 }
+          }
+        },
+        {
+          "from": "2025-04-07T00:29:10.000Z",
+          "to": "2025-04-07T00:49:40.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.04, "fahrenheit": 39.27 }
+          }
+        },
+        {
+          "from": "2025-04-07T00:49:40.000Z",
+          "to": "2025-04-07T01:07:00.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.04, "fahrenheit": 39.27 }
+          }
+        },
+        {
+          "from": "2025-04-07T01:07:00.000Z",
+          "to": "2025-04-07T01:17:02.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.04, "fahrenheit": 39.27 }
+          }
+        },
+        {
+          "from": "2025-04-07T01:17:02.000Z",
+          "to": "2025-04-07T01:29:12.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T01:29:12.000Z",
+          "to": "2025-04-07T01:49:30.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T01:49:30.000Z",
+          "to": "2025-04-07T02:07:40.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T02:07:40.000Z",
+          "to": "2025-04-07T02:16:42.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T02:16:42.000Z",
+          "to": "2025-04-07T02:37:40.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 1.7, "fahrenheit": 35.06 }
+          }
+        },
+        {
+          "from": "2025-04-07T02:37:40.000Z",
+          "to": "2025-04-07T02:49:41.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 1.7, "fahrenheit": 35.06 }
+          }
+        },
+        {
+          "from": "2025-04-07T02:49:41.000Z",
+          "to": "2025-04-07T03:02:10.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 1.7, "fahrenheit": 35.06 }
+          }
+        },
+        {
+          "from": "2025-04-07T03:02:10.000Z",
+          "to": "2025-04-07T03:16:57.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 1.7, "fahrenheit": 35.06 }
+          }
+        },
+        {
+          "from": "2025-04-07T03:16:57.000Z",
+          "to": "2025-04-07T03:31:33.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.12, "fahrenheit": 39.42 }
+          }
+        },
+        {
+          "from": "2025-04-07T03:31:33.000Z",
+          "to": "2025-04-07T03:49:51.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 1.7, "fahrenheit": 35.06 }
+          }
+        },
+        {
+          "from": "2025-04-07T03:49:51.000Z",
+          "to": "2025-04-07T04:03:09.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.12, "fahrenheit": 39.42 }
+          }
+        },
+        {
+          "from": "2025-04-07T04:03:09.000Z",
+          "to": "2025-04-07T04:15:21.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.12, "fahrenheit": 39.42 }
+          }
+        },
+        {
+          "from": "2025-04-07T04:15:21.000Z",
+          "to": "2025-04-07T04:29:00.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T04:29:00.000Z",
+          "to": "2025-04-07T04:47:16.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T04:47:16.000Z",
+          "to": "2025-04-07T04:58:44.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T04:58:44.000Z",
+          "to": "2025-04-07T05:18:49.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+          }
+        },
+        {
+          "from": "2025-04-07T05:18:49.000Z",
+          "to": "2025-04-07T05:37:14.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.94, "fahrenheit": 40.89 }
+          }
+        },
+        {
+          "from": "2025-04-07T05:37:14.000Z",
+          "to": "2025-04-07T05:51:35.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.94, "fahrenheit": 40.89 }
+          }
+        },
+        {
+          "from": "2025-04-07T05:51:35.000Z",
+          "to": "2025-04-07T06:07:57.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.94, "fahrenheit": 40.89 }
+          }
+        },
+        {
+          "from": "2025-04-07T06:07:57.000Z",
+          "to": "2025-04-07T06:23:22.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 4.94, "fahrenheit": 40.89 }
+          }
+        },
+        {
+          "from": "2025-04-07T06:23:22.000Z",
+          "to": "2025-04-07T06:34:11.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 5.42, "fahrenheit": 41.76 }
+          }
+        },
+        {
+          "from": "2025-04-07T06:34:11.000Z",
+          "to": "2025-04-07T06:52:34.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 5.42, "fahrenheit": 41.76 }
+          }
+        },
+        {
+          "from": "2025-04-07T06:52:34.000Z",
+          "to": "2025-04-07T07:06:17.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 5.42, "fahrenheit": 41.76 }
+          }
+        },
+        {
+          "from": "2025-04-07T07:06:17.000Z",
+          "to": "2025-04-07T07:19:55.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 5.42, "fahrenheit": 41.76 }
+          }
+        },
+        {
+          "from": "2025-04-07T07:19:55.000Z",
+          "to": "2025-04-07T07:38:35.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 6.39, "fahrenheit": 43.5 }
+          }
+        },
+        {
+          "from": "2025-04-07T07:38:35.000Z",
+          "to": "2025-04-07T07:48:57.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 6.39, "fahrenheit": 43.5 }
+          }
+        },
+        {
+          "from": "2025-04-07T07:48:57.000Z",
+          "to": "2025-04-07T08:03:39.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 6.39, "fahrenheit": 43.5 }
+          }
+        },
+        {
+          "from": "2025-04-07T08:03:39.000Z",
+          "to": "2025-04-07T08:23:17.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 6.39, "fahrenheit": 43.5 }
+          }
+        },
+        {
+          "from": "2025-04-07T08:23:17.000Z",
+          "to": "2025-04-07T08:34:49.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 9.05, "fahrenheit": 48.29 }
+          }
+        },
+        {
+          "from": "2025-04-07T08:34:49.000Z",
+          "to": "2025-04-07T08:50:48.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 9.05, "fahrenheit": 48.29 }
+          }
+        },
+        {
+          "from": "2025-04-07T08:50:48.000Z",
+          "to": "2025-04-07T08:59:23.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 9.05, "fahrenheit": 48.29 }
+          }
+        },
+        {
+          "from": "2025-04-07T08:59:23.000Z",
+          "to": "2025-04-07T09:22:55.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 9.05, "fahrenheit": 48.29 }
+          }
+        },
+        {
+          "from": "2025-04-07T09:22:55.000Z",
+          "to": "2025-04-07T09:32:33.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 11.11, "fahrenheit": 52.0 }
+          }
+        },
+        {
+          "from": "2025-04-07T09:32:33.000Z",
+          "to": "2025-04-07T09:49:32.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 11.11, "fahrenheit": 52.0 }
+          }
+        },
+        {
+          "from": "2025-04-07T09:49:32.000Z",
+          "to": "2025-04-07T10:00:59.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 11.11, "fahrenheit": 52.0 }
+          }
+        },
+        {
+          "from": "2025-04-07T10:00:59.000Z",
+          "to": "2025-04-07T10:18:03.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 11.11, "fahrenheit": 52.0 }
+          }
+        },
+        {
+          "from": "2025-04-07T10:18:03.000Z",
+          "to": "2025-04-07T10:36:51.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 12.99, "fahrenheit": 55.38 }
+          }
+        },
+        {
+          "from": "2025-04-07T10:36:51.000Z",
+          "to": "2025-04-07T10:47:34.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 12.99, "fahrenheit": 55.38 }
+          }
+        },
+        {
+          "from": "2025-04-07T10:47:34.000Z",
+          "to": "2025-04-07T11:03:25.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 12.99, "fahrenheit": 55.38 }
+          }
+        },
+        {
+          "from": "2025-04-07T11:03:25.000Z",
+          "to": "2025-04-07T11:22:10.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 12.99, "fahrenheit": 55.38 }
+          }
+        },
+        {
+          "from": "2025-04-07T11:22:10.000Z",
+          "to": "2025-04-07T11:32:59.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 13.36, "fahrenheit": 56.05 }
+          }
+        },
+        {
+          "from": "2025-04-07T11:32:59.000Z",
+          "to": "2025-04-07T11:43:42.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 13.36, "fahrenheit": 56.05 }
+          }
+        },
+        {
+          "from": "2025-04-07T11:43:42.000Z",
+          "to": "2025-04-07T12:06:56.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 13.36, "fahrenheit": 56.05 }
+          }
+        },
+        {
+          "from": "2025-04-07T12:06:56.000Z",
+          "to": "2025-04-07T12:22:15.000Z",
+          "value": {
+            "state": "CLOUDY_MOSTLY",
+            "temperature": { "celsius": 13.36, "fahrenheit": 56.05 }
+          }
+        },
+        {
+          "from": "2025-04-07T12:22:15.000Z",
+          "to": "2025-04-07T12:32:35.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.73, "fahrenheit": 56.71 }
+          }
+        },
+        {
+          "from": "2025-04-07T12:32:35.000Z",
+          "to": "2025-04-07T12:45:09.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.73, "fahrenheit": 56.71 }
+          }
+        },
+        {
+          "from": "2025-04-07T12:45:09.000Z",
+          "to": "2025-04-07T13:01:20.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.73, "fahrenheit": 56.71 }
+          }
+        },
+        {
+          "from": "2025-04-07T13:01:20.000Z",
+          "to": "2025-04-07T13:20:36.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.73, "fahrenheit": 56.71 }
+          }
+        },
+        {
+          "from": "2025-04-07T13:20:36.000Z",
+          "to": "2025-04-07T13:35:12.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.56, "fahrenheit": 56.41 }
+          }
+        },
+        {
+          "from": "2025-04-07T13:35:12.000Z",
+          "to": "2025-04-07T13:53:11.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.56, "fahrenheit": 56.41 }
+          }
+        },
+        {
+          "from": "2025-04-07T13:53:11.000Z",
+          "to": "2025-04-07T14:02:09.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.56, "fahrenheit": 56.41 }
+          }
+        },
+        {
+          "from": "2025-04-07T14:02:09.000Z",
+          "to": "2025-04-07T14:19:08.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.56, "fahrenheit": 56.41 }
+          }
+        },
+        {
+          "from": "2025-04-07T14:19:08.000Z",
+          "to": "2025-04-07T14:33:43.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.71, "fahrenheit": 56.68 }
+          }
+        },
+        {
+          "from": "2025-04-07T14:33:43.000Z",
+          "to": "2025-04-07T14:44:28.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.71, "fahrenheit": 56.68 }
+          }
+        },
+        {
+          "from": "2025-04-07T14:44:28.000Z",
+          "to": "2025-04-07T15:02:32.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.71, "fahrenheit": 56.68 }
+          }
+        },
+        {
+          "from": "2025-04-07T15:02:32.000Z",
+          "to": "2025-04-07T15:16:50.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.71, "fahrenheit": 56.68 }
+          }
+        },
+        {
+          "from": "2025-04-07T15:16:50.000Z",
+          "to": "2025-04-07T15:35:56.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.15, "fahrenheit": 55.67 }
+          }
+        },
+        {
+          "from": "2025-04-07T15:35:56.000Z",
+          "to": "2025-04-07T15:53:03.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.15, "fahrenheit": 55.67 }
+          }
+        },
+        {
+          "from": "2025-04-07T15:53:03.000Z",
+          "to": "2025-04-07T16:06:48.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.15, "fahrenheit": 55.67 }
+          }
+        },
+        {
+          "from": "2025-04-07T16:06:48.000Z",
+          "to": "2025-04-07T16:21:12.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 13.15, "fahrenheit": 55.67 }
+          }
+        },
+        {
+          "from": "2025-04-07T16:21:12.000Z",
+          "to": "2025-04-07T16:34:08.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.84, "fahrenheit": 55.11 }
+          }
+        },
+        {
+          "from": "2025-04-07T16:34:08.000Z",
+          "to": "2025-04-07T16:51:15.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.84, "fahrenheit": 55.11 }
+          }
+        },
+        {
+          "from": "2025-04-07T16:51:15.000Z",
+          "to": "2025-04-07T16:58:59.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.84, "fahrenheit": 55.11 }
+          }
+        },
+        {
+          "from": "2025-04-07T16:58:59.000Z",
+          "to": "2025-04-07T17:22:54.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.84, "fahrenheit": 55.11 }
+          }
+        },
+        {
+          "from": "2025-04-07T17:22:54.000Z",
+          "to": "2025-04-07T17:31:50.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.18, "fahrenheit": 53.92 }
+          }
+        },
+        {
+          "from": "2025-04-07T17:31:50.000Z",
+          "to": "2025-04-07T17:46:31.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.18, "fahrenheit": 53.92 }
+          }
+        },
+        {
+          "from": "2025-04-07T17:46:31.000Z",
+          "to": "2025-04-07T18:06:54.000Z",
+          "value": {
+            "state": "CLOUDY",
+            "temperature": { "celsius": 12.18, "fahrenheit": 53.92 }
+          }
+        },
+        {
+          "from": "2025-04-07T18:06:54.000Z",
+          "to": "2025-04-07T18:15:06.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 12.18, "fahrenheit": 53.92 }
+          }
+        },
+        {
+          "from": "2025-04-07T18:15:06.000Z",
+          "to": "2025-04-07T18:36:10.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 11.18, "fahrenheit": 52.12 }
+          }
+        },
+        {
+          "from": "2025-04-07T18:36:10.000Z",
+          "to": "2025-04-07T18:47:49.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 11.18, "fahrenheit": 52.12 }
+          }
+        },
+        {
+          "from": "2025-04-07T18:47:49.000Z",
+          "to": "2025-04-07T19:08:07.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 11.18, "fahrenheit": 52.12 }
+          }
+        },
+        {
+          "from": "2025-04-07T19:08:07.000Z",
+          "to": "2025-04-07T19:16:24.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 11.18, "fahrenheit": 52.12 }
+          }
+        },
+        {
+          "from": "2025-04-07T19:16:24.000Z",
+          "to": "2025-04-07T19:29:15.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 10.08, "fahrenheit": 50.14 }
+          }
+        },
+        {
+          "from": "2025-04-07T19:29:15.000Z",
+          "to": "2025-04-07T19:47:27.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 10.08, "fahrenheit": 50.14 }
+          }
+        },
+        {
+          "from": "2025-04-07T19:47:27.000Z",
+          "to": "2025-04-07T20:06:31.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 10.08, "fahrenheit": 50.14 }
+          }
+        },
+        {
+          "from": "2025-04-07T20:06:31.000Z",
+          "to": "2025-04-07T20:13:42.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 10.08, "fahrenheit": 50.14 }
+          }
+        },
+        {
+          "from": "2025-04-07T20:13:42.000Z",
+          "to": "2025-04-07T20:37:53.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 7.92, "fahrenheit": 46.26 }
+          }
+        },
+        {
+          "from": "2025-04-07T20:37:53.000Z",
+          "to": "2025-04-07T20:52:50.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 7.92, "fahrenheit": 46.26 }
+          }
+        },
+        {
+          "from": "2025-04-07T20:52:50.000Z",
+          "to": "2025-04-07T21:00:54.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 7.92, "fahrenheit": 46.26 }
+          }
+        },
+        {
+          "from": "2025-04-07T21:00:54.000Z",
+          "to": "2025-04-07T21:15:37.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 7.92, "fahrenheit": 46.26 }
+          }
+        },
+        {
+          "from": "2025-04-07T21:15:37.000Z",
+          "to": "2025-04-07T21:30:51.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 6.03, "fahrenheit": 42.85 }
+          }
+        },
+        {
+          "from": "2025-04-07T21:30:51.000Z",
+          "to": "2025-04-07T21:45:08.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 6.03, "fahrenheit": 42.85 }
+          }
+        },
+        {
+          "from": "2025-04-07T21:45:08.000Z",
+          "to": "2025-04-07T22:05:16.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 6.03, "fahrenheit": 42.85 }
+          }
+        },
+        {
+          "from": "2025-04-07T22:05:16.000Z",
+          "to": "2025-04-07T22:15:00.000Z",
+          "value": {
+            "state": "NIGHT_CLOUDY",
+            "temperature": { "celsius": 6.03, "fahrenheit": 42.85 }
+          }
+        }
+      ]
+    },
+    "sunny": {
+      "timeSeriesType": "dataIntervals",
+      "valueType": "boolean",
+      "dataIntervals": [
+        {
+          "from": "2025-04-06T21:45:00.000Z",
+          "to": "2025-04-07T22:15:00.000Z",
+          "value": false
+        }
+      ]
+    },
+    "slots": {
+      "timeSeriesType": "slots",
+      "valueType": "weatherCondition",
+      "slots": {
+        "04:00": {
+          "state": "NIGHT_CLOUDY",
+          "temperature": { "celsius": 4.39, "fahrenheit": 39.9 }
+        },
+        "08:00": {
+          "state": "CLOUDY_MOSTLY",
+          "temperature": { "celsius": 4.94, "fahrenheit": 40.89 }
+        },
+        "12:00": {
+          "state": "CLOUDY",
+          "temperature": { "celsius": 11.11, "fahrenheit": 52.0 }
+        },
+        "16:00": {
+          "state": "CLOUDY",
+          "temperature": { "celsius": 13.56, "fahrenheit": 56.41 }
+        },
+        "20:00": {
+          "state": "NIGHT_CLOUDY",
+          "temperature": { "celsius": 12.18, "fahrenheit": 53.92 }
+        }
+      }
+    }
+  }
+}

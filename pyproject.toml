@@ -56,6 +56,10 @@ pytado = "PyTado.__main__:main"
 include = "PyTado"
 from = "."
 
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+
 [tool.coverage.report]
 show_missing = true
 
@@ -67,3 +71,6 @@ source = ["PyTado"]
 exclude_dirs = ["tests"]
 tests = []
 skips = []
+
+[tool.mypy]
+strict = true
