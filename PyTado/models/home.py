@@ -91,7 +91,6 @@ class HomeState(Base):
         return self.presence
 
 
-
 class DeviceMetadata(Base):
     """DeviceMetadata model represents the metadata of a device."""
 
@@ -198,6 +197,7 @@ class RunningTimes(Base):
     running_times: list[RunningTime]
     summary: RunningTimeSummary
     last_updated: datetime
+
 
 class ActionableDevice:
     serial_number: str

@@ -3,11 +3,11 @@ from typing import Any, Self
 from pydantic import model_validator
 
 from PyTado.models.util import Base
-from PyTado.types import BatteryState, OverlayMode
+from PyTado.types import BatteryState, ConnectionState, OverlayMode
 
 
-class ConnectionState(Base):
-    state: str  # TODO: Use Enum or something similar
+class Connection(Base):
+    state: ConnectionState
 
 
 class Device(Base):
@@ -16,9 +16,9 @@ class Device(Base):
     serial_number: str
     type: str
     firmware_version: str
-    connection: ConnectionState
+    connection: Connection
     mounting_state: str | None = None  # TODO: Use Enum or something similar
-    battery_state: BatteryState | None = None  # TODO: Use Enum or something similar
+    battery_state: BatteryState | None = None
     child_lock_enabled: bool | None = None
     temperature_as_measured: float | None = None
     temperature_offset: float | None = None
@@ -52,6 +52,7 @@ class DevicesResponse(Base):
 
     rooms: list[DevicesRooms]
     other_devices: list[Device]
+
 
 class ActionableDevice:
     serial_number: str
