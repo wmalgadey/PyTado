@@ -50,8 +50,8 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
-from PyTado.zone.hops_zone import Room
-from PyTado.zone.my_zone import Zone
+from PyTado.zone.hops_zone import TadoRoom
+from PyTado.zone.my_zone import TadoZone
 
 _LOGGER = Logger(__name__)
 
@@ -163,7 +163,7 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_zones(self) -> list[Zone] | list[Room]:
+    def get_zones(self) -> list[TadoZone] | list[TadoRoom]:
         pass
 
     @abstractmethod
@@ -310,7 +310,7 @@ class TadoBase(metaclass=ABCMeta):
     # ------------- Zone methods -------------
 
     @abstractmethod
-    def get_zone(self, zone: int) -> Zone | Room:
+    def get_zone(self, zone: int) -> TadoZone | TadoRoom:
         pass
 
     @abstractmethod

@@ -44,7 +44,7 @@ _LOGGER.setLevel(logging.DEBUG)
 
 
 @final
-class Room(BaseZone):
+class TadoRoom(BaseZone):
     _home: "TadoX"
 
     def update(self) -> None:
@@ -83,6 +83,13 @@ class Room(BaseZone):
     def _home_state(self) -> HomeState:
         print("Getting home state")
         return self._home.get_home_state()
+
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the room
+        """
+        return self._raw_room.room_name
 
     @property
     def devices(self) -> list[Device]:
@@ -191,13 +198,6 @@ class Room(BaseZone):
         if self._raw_state.next_time_block:
             return self._raw_state.next_time_block.start
         return None
-
-    @property
-    def name(self) -> str:
-        """
-        Get the name of the room
-        """
-        return self._raw_room.room_name
 
     @property
     def overlay_active(self) -> bool:

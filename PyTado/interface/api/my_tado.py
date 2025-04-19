@@ -21,7 +21,7 @@ from PyTado.models.pre_line_x.zone import (
     ZoneState,
 )
 from PyTado.models.return_models import TemperatureOffset
-from PyTado.zone.my_zone import Zone
+from PyTado.zone.my_zone import TadoZone
 
 
 @final
@@ -56,7 +56,7 @@ class Tado(TadoBase):
         request.command = "devices"
         return [Device.model_validate(device) for device in self._http.request(request)]
 
-    def get_zones(self) -> list[Zone]:
+    def get_zones(self) -> list[TadoZone]:
         """
         Gets zones information.
         """
@@ -65,7 +65,7 @@ class Tado(TadoBase):
         request.command = "zones"
 
         return [
-            Zone(self, pre_line_x.Zone.model_validate(zone).id)
+            TadoZone(self, pre_line_x.Zone.model_validate(zone).id)
             for zone in self._http.request(request)
         ]
 
@@ -82,7 +82,10 @@ class Tado(TadoBase):
         if not isinstance(response, dict):
             raise TadoException("Invalid response from Tado API")
 
-        return {key: ZoneState.model_validate(value) for key, value in response.items()}
+        return {
+            key: ZoneState.model_validate(value)
+            for key, value in response["zoneStates"].items()
+        }
 
     def get_air_comfort(self) -> AirComfort:
         request = TadoRequest()
@@ -102,8 +105,8 @@ class Tado(TadoBase):
 
     # ----------------- Zone methods -----------------
 
-    def get_zone(self, zone: int) -> Zone:
-        return Zone(self, zone)
+    def get_zone(self, zone: int) -> TadoZone:
+        return TadoZone(self, zone)
 
     def get_zone_state(self, zone: int) -> ZoneState:
         """

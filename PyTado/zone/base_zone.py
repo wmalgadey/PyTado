@@ -67,6 +67,14 @@ class BaseZone:
 
     @property
     @abstractmethod
+    def name(self) -> str:
+        """
+        Name of the zone/room.
+        """
+        pass
+
+    @property
+    @abstractmethod
     def devices(self) -> list[pre_line_x.Device] | list[line_x.Device]:
         """
         List of devices (e.g. Thermostats) in the zone/room.
@@ -75,7 +83,7 @@ class BaseZone:
 
     @property
     @abstractmethod
-    def current_temp(self) -> float:
+    def current_temp(self) -> float | None:
         """
         Current temperature in the zone/room.
         """
@@ -123,7 +131,7 @@ class BaseZone:
 
     @property
     @abstractmethod
-    def current_humidity(self) -> float:
+    def current_humidity(self) -> float | None:
         """
         Current humidity in the zone/room.
         """
@@ -239,14 +247,6 @@ class BaseZone:
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        """
-        Name of the zone/room.
-        """
-        pass
-
-    @property
-    @abstractmethod
     def overlay_active(self) -> bool:
         """
         Overlay active status.
@@ -259,8 +259,8 @@ class BaseZone:
         """
 
         return Climate(
-            temperature=self.current_temp,
-            humidity=self.current_humidity,
+            temperature=self.current_temp or 0,
+            humidity=self.current_humidity or 0,
         )
 
     @abstractmethod
