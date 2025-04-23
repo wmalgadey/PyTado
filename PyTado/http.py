@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import pprint
+import threading
 import time
 from datetime import datetime, timedelta, timezone
 from json import dump as json_dump
@@ -145,6 +146,8 @@ _DEFAULT_RETRIES = 5
 
 class Http:
     """API Request Class"""
+
+    _lock: threading.Lock = threading.Lock()
 
     def __init__(
         self,
@@ -395,52 +398,52 @@ class Http:
             TadoWrongCredentialsException: If the token refresh fails due to invalid credentials
                 and force_refresh is False.
         """
+        with self._lock:
+            if self._refresh_at >= datetime.now(timezone.utc) and not force_refresh:
+                return True
 
-        if self._refresh_at >= datetime.now(timezone.utc) and not force_refresh:
-            return True
+            url = "https://login.tado.com/oauth2/token"
+            data = {
+                "client_id": CLIENT_ID_DEVICE,
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token or self._token_refresh,
+            }
+            self._session.close()
+            self._session = self._create_session()
 
-        url = "https://login.tado.com/oauth2/token"
-        data = {
-            "client_id": CLIENT_ID_DEVICE,
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token or self._token_refresh,
-        }
-        self._session.close()
-        self._session = self._create_session()
-
-        try:
-            response = self._session.request(
-                "post",
-                url,
-                params=data,
-                timeout=_DEFAULT_TIMEOUT,
-                data=json.dumps({}).encode("utf8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Referer": "https://app.tado.com/",
-                },
-            )
-
-        except requests.exceptions.ConnectionError as e:
-            _LOGGER.error("Connection error: %s", e)
-            raise TadoException(e) from e
-
-        if response.status_code != 200:
-            if force_refresh:
-                _LOGGER.error(
-                    "Failed to refresh token, probably wrong credentials. Status code: %s",
-                    response.status_code,
+            try:
+                response = self._session.request(
+                    "post",
+                    url,
+                    params=data,
+                    timeout=_DEFAULT_TIMEOUT,
+                    data=json.dumps({}).encode("utf8"),
+                    headers={
+                        "Content-Type": "application/json",
+                        "Referer": "https://app.tado.com/",
+                    },
                 )
-                return False
 
-            raise TadoWrongCredentialsException(
-                "Failed to refresh token, probably wrong credentials. "
-                f"Status code: {response.status_code}"
-            )
+            except requests.exceptions.ConnectionError as e:
+                _LOGGER.error("Connection error: %s", e)
+                raise TadoException(e) from e
 
-        self._set_oauth_header(response.json())
+            if response.status_code != 200:
+                if force_refresh:
+                    _LOGGER.error(
+                        "Failed to refresh token, probably wrong credentials. Status code: %s",
+                        response.status_code,
+                    )
+                    return False
 
-        return True
+                raise TadoWrongCredentialsException(
+                    "Failed to refresh token, probably wrong credentials. "
+                    f"Status code: {response.status_code}"
+                )
+
+            self._set_oauth_header(response.json())
+
+            return True
 
     def _save_token(self):
         """Save the refresh token to a file."""
