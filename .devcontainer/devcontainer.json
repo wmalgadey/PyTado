@@ -57,7 +57,7 @@
             "installTools": false
         }
     },
-    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.12",
+    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.13",
     "name": "PyTado",
     "postStartCommand": "bash scripts/bootstrap",
     "updateContentCommand": "bash scripts/bootstrap",
