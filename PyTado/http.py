@@ -131,7 +131,9 @@ class Http:
     _x_api: bool
     _user_code: str | None = None
     _device_verification_url: str | None = None
-    _device_activation_status: DeviceActivationStatus = DeviceActivationStatus.NOT_STARTED
+    _device_activation_status: DeviceActivationStatus = (
+        DeviceActivationStatus.NOT_STARTED
+    )
     _expires_at: datetime | None = None
 
     def __init__(
@@ -170,7 +172,9 @@ class Http:
         self._token_file_path = token_file_path
 
         if saved_refresh_token or self._load_token():
-            if self._refresh_token(refresh_token=saved_refresh_token, force_refresh=True):
+            if self._refresh_token(
+                refresh_token=saved_refresh_token, force_refresh=True
+            ):
                 self._device_ready()
         else:
             self._device_activation_status = self._login_device_flow()
@@ -381,7 +385,9 @@ class Http:
             _LOGGER.error("Failed to load refresh token: %s", e)
             raise TadoException(e) from e
 
-    def _refresh_token(self, refresh_token: str | None = None, force_refresh: bool = False) -> bool:
+    def _refresh_token(
+        self, refresh_token: str | None = None, force_refresh: bool = False
+    ) -> bool:
         """
         Refresh the OAuth token if it is about to expire or if forced.
 
@@ -447,7 +453,7 @@ class Http:
 
         return True
 
-    def _save_token(self):
+    def _save_token(self) -> None:
         """Save the refresh token to a file."""
         if not self._token_file_path or not self._token_refresh:
             return
@@ -511,7 +517,9 @@ class Http:
         _LOGGER.info("Please visit the following URL: %s", visit_url)
 
         expires_in_seconds = self._device_flow_data["expires_in"]
-        self._expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in_seconds)
+        self._expires_at = datetime.now(timezone.utc) + timedelta(
+            seconds=expires_in_seconds
+        )
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
@@ -521,15 +529,13 @@ class Http:
         return DeviceActivationStatus.PENDING
 
     def _check_device_activation(self) -> bool:
-        if (
-            self._expires_at is not None
-            and datetime.timestamp(datetime.now(timezone.utc))
-            > datetime.timestamp(self._expires_at)
-        ):
+        if self._expires_at is not None and datetime.timestamp(
+            datetime.now(timezone.utc)
+        ) > datetime.timestamp(self._expires_at):
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
-        time.sleep(self._device_flow_data["interval"])
+        time.sleep(self._device_flow_data.get("interval", 0))
 
         try:
             token_response = self._session.request(
@@ -553,7 +559,9 @@ class Http:
             token_response.status_code == 400
             and token_response.json()["error"] == "authorization_pending"
         ):
-            _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
+            _LOGGER.info(
+                "Authorization pending, waiting for user to authorize. Continue polling."
+            )
             return False
 
         raise TadoException(f"Login failed. Reason: {token_response.reason}")
@@ -570,7 +578,7 @@ class Http:
 
         self._device_ready()
 
-    def _device_ready(self):
+    def _device_ready(self) -> None:
         """after device refresh code has been obtained"""
         self._id = self._get_id()
         self._x_api = self._check_x_line_generation()

@@ -4,14 +4,23 @@ Base class for Tado API classes.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from datetime import date
+from datetime import date, timedelta
 from functools import cached_property
-from typing import Any, overload
+from typing import Any, Self, overload
+
+import requests
 
 from PyTado.exceptions import TadoException, TadoNotSupportedException
-from PyTado.http import Action, Domain, Endpoint, Http, TadoRequest
+from PyTado.http import (
+    Action,
+    DeviceActivationStatus,
+    Domain,
+    Endpoint,
+    Http,
+    TadoRequest,
+)
 from PyTado.logger import Logger
-from PyTado.models import Capabilities, Climate, Historic
+from PyTado.models import Climate, Historic, line_x, pre_line_x
 from PyTado.models.home import (
     AirComfort,
     EIQMeterReading,
@@ -23,14 +32,14 @@ from PyTado.models.home import (
     Weather,
 )
 from PyTado.models.line_x import Device as DeviceX
-from PyTado.models.line_x import DevicesRooms, RoomState
-from PyTado.models.line_x import Schedule as ScheduleX
+from PyTado.models.line_x import RoomState
 from PyTado.models.line_x.schedule import SetSchedule
-from PyTado.models.pre_line_x import Device, Schedule, Zone, ZoneState
+from PyTado.models.pre_line_x import Device, Schedule, ZoneState
+from PyTado.models.pre_line_x.zone import Capabilities
 from PyTado.models.return_models import TemperatureOffset
 from PyTado.types import (
     DayType,
-    FanMode,
+    FanLevel,
     FanSpeed,
     HorizontalSwing,
     HvacMode,
@@ -41,7 +50,7 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
-from PyTado.zone.hops_zone import TadoXZone
+from PyTado.zone.hops_zone import TadoRoom
 from PyTado.zone.my_zone import TadoZone
 
 _LOGGER = Logger(__name__)
@@ -53,15 +62,91 @@ class TadoBase(metaclass=ABCMeta):
 
     _http: Http
 
-    def __init__(self, http: Http, debug: bool = False):
+    def __init__(
+        self,
+        token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
+        http_session: requests.Session | None = None,
+        debug: bool = False,
+    ):
+        """
+        Initializes the interface class.
+
+        Args:
+            token_file_path (str | None, optional): Path to a file which will be used to persist
+                the refresh_token token. Defaults to None.
+            saved_refresh_token (str | None, optional): A previously saved refresh token.
+                Defaults to None.
+            http_session (requests.Session | None, optional): An optional HTTP session to use for
+                requests (can be used in unit tests). Defaults to None.
+            debug (bool, optional): Flag to enable or disable debug mode. Defaults to False.
+        """
+
+        self._http = Http(
+            token_file_path=token_file_path,
+            saved_refresh_token=saved_refresh_token,
+            http_session=http_session,
+            debug=debug,
+        )
+
         if debug:
             _LOGGER.setLevel(logging.DEBUG)
         else:
             _LOGGER.setLevel(logging.WARNING)
 
-        self._http = http
+    @classmethod
+    def from_http(
+        cls,
+        http: Http,
+        debug: bool = False,
+    ) -> Self:
+        """Creates an instance of Tado/TadoX from an existing Http object."""
+        instance = cls.__new__(cls)
+        instance._http = http
 
-    ##################### Home methods #####################
+        if debug:
+            _LOGGER.setLevel(logging.DEBUG)
+        else:
+            _LOGGER.setLevel(logging.WARNING)
+
+        return instance
+
+    def __getattribute__(self, name: str) -> Any:
+        """Override __getattribute__ to ensure device activation status is checked
+        before accessing any attribute or method that is not private.
+        """
+
+        exclude_list = [
+            "device_activation",
+            "device_activation_status",
+            "device_verification_url",
+            "from_http",
+        ]
+
+        if not name.startswith("_") and name not in exclude_list:
+            self._ensure_device_activation()
+        return super().__getattribute__(str(name))
+
+    def _ensure_device_activation(self) -> None:
+        if not self._http.device_activation_status == DeviceActivationStatus.COMPLETED:
+            raise TadoException(
+                "Device activation is not completed. Please activate the device first."
+            )
+
+    def device_verification_url(self) -> str | None:
+        """Returns the URL for device verification."""
+        return self._http.device_verification_url
+
+    def device_activation_status(self) -> DeviceActivationStatus:
+        """Returns the status of the device activation."""
+        return self._http.device_activation_status
+
+    def device_activation(self) -> None:
+        """Activates the device."""
+        self._http.device_activation()
+        self._ensure_api_initialized()
+
+    # -------------- Home methods --------------
 
     def get_me(self) -> User:
         """Gets home information."""
@@ -78,7 +163,7 @@ class TadoBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_zones(self) -> list[Zone] | list[DevicesRooms]:
+    def get_zones(self) -> list[TadoZone] | list[TadoRoom]:
         pass
 
     @abstractmethod
@@ -222,50 +307,56 @@ class TadoBase(metaclass=ABCMeta):
 
         return RunningTimes.model_validate(self._http.request(request))
 
-    ##################### Zone methods #####################
+    # ------------- Zone methods -------------
 
     @abstractmethod
-    def get_zone_state(self, zone: int) -> TadoZone | TadoXZone:
-        """Gets current state of Zone as a TadoZone object."""
+    def get_zone(self, zone: int) -> TadoZone | TadoRoom:
+        pass
+
+    @abstractmethod
+    def get_zone_state(self, zone: int) -> ZoneState | RoomState:
+        """Gets current state of Zone as a ZoneState or RoomState object."""
         pass
 
     @abstractmethod
     def get_state(self, zone: int) -> ZoneState | RoomState:
         pass
 
-    @abstractmethod
     def get_capabilities(self, zone: int) -> Capabilities:
-        pass
+        return self.get_zone(zone).get_capabilities()
 
-    @abstractmethod
     def get_climate(self, zone: int) -> Climate:
-        pass
+        return self.get_zone(zone).get_climate()
 
     def get_historic(self, zone: int, date: date) -> Historic:
         """
         Gets historic information on given date for zone
         """
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/dayReport?date={date.strftime('%Y-%m-%d')}"
-        return Historic.model_validate(self._http.request(request))
+        return self.get_zone(zone).get_historic(date)
 
     @overload
     def get_schedule(
         self, zone: int, timetable: Timetable, day: DayType
-    ) -> list[Schedule]: ...
+    ) -> list[pre_line_x.Schedule]: ...
 
     @overload
-    def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
+    def get_schedule(
+        self, zone: int, timetable: Timetable
+    ) -> list[pre_line_x.Schedule]: ...
 
     @overload
-    def get_schedule(self, zone: int) -> ScheduleX: ...
+    def get_schedule(self, zone: int) -> line_x.Schedule: ...
 
-    @abstractmethod
     def get_schedule(
         self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
-    ) -> ScheduleX | list[Schedule]:
-        pass
+    ) -> line_x.Schedule | list[pre_line_x.Schedule]:
+        if timetable is None and day is None:
+            return self.get_zone(zone).get_schedule()
+        elif timetable is None or day is None:
+            raise TadoException(
+                "For Tado V3/V2 API, timetable and day must be provided together."
+            )
+        return self.get_zone(zone).get_schedule(timetable, day)
 
     @overload
     def set_schedule(
@@ -275,7 +366,6 @@ class TadoBase(metaclass=ABCMeta):
     @overload
     def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
 
-    @abstractmethod
     def set_schedule(
         self,
         zone: int,
@@ -283,29 +373,78 @@ class TadoBase(metaclass=ABCMeta):
         timetable: Timetable | None = None,
         day: DayType | None = None,
     ) -> None | list[Schedule]:
-        pass
+        if isinstance(data, SetSchedule):
+            # For Tado X API, data is a SetSchedule object
+            return self.get_zone(zone).set_schedule(data)
+        elif timetable is None or day is None:
+            # For Tado V3/V2 API, timetable and day must be provided together
+            raise TadoException(
+                "For Tado V3/V2 API, timetable and day must be provided together."
+            )
+        return self.get_zone(zone).set_schedule(data, timetable, day)
 
-    @abstractmethod
     def reset_zone_overlay(self, zone: int) -> None:
-        pass
+        self.get_zone(zone).reset_zone_overlay()
 
-    @abstractmethod
+    @overload
     def set_zone_overlay(
         self,
         zone: int,
         overlay_mode: OverlayMode,
         set_temp: float | None = None,
-        duration: int | None = None,
-        device_type: ZoneType = ZoneType.HEATING,
+        duration: timedelta | None = None,
         power: Power = Power.ON,
+        is_boost: bool = False,
+    ) -> None: ...
+
+    @overload
+    def set_zone_overlay(
+        self,
+        zone: int,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: timedelta | None = None,
+        power: Power = Power.ON,
+        is_boost: None = None,
+        device_type: ZoneType = ZoneType.HEATING,
         mode: HvacMode | None = None,
         fan_speed: FanSpeed | None = None,
         swing: Any = None,
-        fan_level: FanMode | None = None,
+        fan_level: FanLevel | None = None,
+        vertical_swing: VerticalSwing | None = None,
+        horizontal_swing: HorizontalSwing | None = None,
+    ) -> dict[str, Any]: ...
+
+    def set_zone_overlay(
+        self,
+        zone: int,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: timedelta | None = None,
+        power: Power = Power.ON,
+        is_boost: bool | None = None,
+        device_type: ZoneType | None = None,
+        mode: HvacMode | None = None,
+        fan_speed: FanSpeed | None = None,
+        swing: Any = None,
+        fan_level: FanLevel | None = None,
         vertical_swing: VerticalSwing | None = None,
         horizontal_swing: HorizontalSwing | None = None,
     ) -> None | dict[str, Any]:
-        pass
+        return self.get_zone(zone).set_zone_overlay(
+            overlay_mode,
+            set_temp,
+            duration,
+            power,
+            is_boost,
+            device_type,
+            mode,
+            fan_speed,
+            swing,
+            fan_level,
+            vertical_swing,
+            horizontal_swing,
+        )
 
     def get_window_state(self, zone):
         """
@@ -318,7 +457,7 @@ class TadoBase(metaclass=ABCMeta):
     def get_open_window_detected(self, zone: int) -> dict[str, Any]:
         pass
 
-    ##################### Device methods #####################
+    # --------------- Device methods ---------------
 
     @abstractmethod
     def set_child_lock(self, device_id: str, child_lock: bool) -> None:
@@ -334,7 +473,7 @@ class TadoBase(metaclass=ABCMeta):
     ) -> TemperatureOffset | None:
         pass
 
-    ##################### Energy IQ methods #####################
+    # --------------- Energy IQ methods ---------------
 
     def get_eiq_tariffs(self) -> list[EIQTariff]:
         """
@@ -372,7 +511,7 @@ class TadoBase(metaclass=ABCMeta):
 
     def set_eiq_meter_readings(self, date: date = date.today(), reading: int = 0):
         """
-        Send Meter Readings to Tado, date format is YYYY-MM-DD, reading is without decimals
+        Send Meter Readings to Tado, reading is without decimals
         """
 
         request = TadoRequest()
@@ -392,7 +531,7 @@ class TadoBase(metaclass=ABCMeta):
         is_period: bool = False,
     ):
         """
-        Send Tariffs to Tado, date format is YYYY-MM-DD,
+        Send Tariffs to Tado,
         tariff is with decimals, unit is either m3 or kWh,
         set is_period to true to set a period of price
         """

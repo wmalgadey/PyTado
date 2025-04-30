@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from PyTado.models.util import Base
+from PyTado.types import BatteryState
 
 
 class ConnectionState(Base):
@@ -35,7 +36,7 @@ class Device(Base):
     in_pairing_mode: bool | None = None
     mounting_state: MountingState | None = None
     mounting_state_with_error: str | None = None
-    battery_state: str | None = None
+    battery_state: BatteryState | None = None
     child_lock_enabled: bool | None = None
     orientation: str | None = None
     duties: list[str] | None = None

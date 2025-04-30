@@ -1,7 +1,16 @@
 import unittest
-import pytest
 from unittest import mock
-from PyTado.__main__ import main, log_in, get_me, get_state, get_states, get_capabilities
+
+import pytest
+
+from PyTado.__main__ import (
+    get_capabilities,
+    get_me,
+    get_state,
+    get_states,
+    log_in,
+    main,
+)
 
 
 class TestMain(unittest.TestCase):

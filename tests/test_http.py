@@ -1,10 +1,11 @@
 """Test the Http class."""
 
-from datetime import datetime, timedelta, timezone
 import io
 import json
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest import mock
+
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE

@@ -2,42 +2,29 @@
 PyTado interface implementation for app.tado.com.
 """
 
-from typing import Any, overload
+from typing import Any, final
 
 from PyTado.exceptions import TadoException
 from PyTado.http import Action, Domain, Mode, TadoRequest
 from PyTado.interface.api.base_tado import TadoBase, Timetable
+from PyTado.models import pre_line_x
 from PyTado.models.home import AirComfort
-from PyTado.models.line_x import Schedule as ScheduleX
-from PyTado.models.line_x.schedule import SetSchedule
 from PyTado.models.pre_line_x.boiler import MaxOutputTemp, WiringInstallationState
 from PyTado.models.pre_line_x.device import Device
 from PyTado.models.pre_line_x.flow_temperature_optimization import (
     FlowTemperatureOptimization,
 )
 from PyTado.models.pre_line_x.home import HeatingCircuit
-from PyTado.models.pre_line_x.schedule import Schedule, Schedules
 from PyTado.models.pre_line_x.zone import (
-    Zone,
     ZoneControl,
     ZoneOverlayDefault,
     ZoneState,
 )
-from PyTado.models.return_models import Capabilities, Climate, TemperatureOffset
-from PyTado.types import (
-    DayType,
-    FanMode,
-    FanSpeed,
-    HorizontalSwing,
-    HvacMode,
-    OverlayMode,
-    Power,
-    VerticalSwing,
-    ZoneType,
-)
-from PyTado.zone import TadoZone
+from PyTado.models.return_models import TemperatureOffset
+from PyTado.zone.my_zone import TadoZone
 
 
+@final
 class Tado(TadoBase):
     """Interacts with a Tado thermostat via public my.tado.com API.
 
@@ -47,8 +34,19 @@ class Tado(TadoBase):
                    t.get_climate(1) # Get climate, zone 1.
     """
 
-    ##################### Home methods #####################
+    def __init__(
+        self,
+        token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
+        http_session: Any = None,
+        debug: bool = False,
+    ):
+        super().__init__(token_file_path, saved_refresh_token, http_session, debug)
 
+        if not self._http.is_x_line:
+            raise TadoException("Tado is only usable with V3/V2 Generation")
+
+    # ----------------- Home methods -----------------
     def get_devices(self) -> list[Device]:
         """
         Gets device information.
@@ -58,7 +56,7 @@ class Tado(TadoBase):
         request.command = "devices"
         return [Device.model_validate(device) for device in self._http.request(request)]
 
-    def get_zones(self) -> list[Zone]:
+    def get_zones(self) -> list[TadoZone]:
         """
         Gets zones information.
         """
@@ -66,7 +64,10 @@ class Tado(TadoBase):
         request = TadoRequest()
         request.command = "zones"
 
-        return [Zone.model_validate(zone) for zone in self._http.request(request)]
+        return [
+            TadoZone(self, pre_line_x.Zone.model_validate(zone).id)
+            for zone in self._http.request(request)
+        ]
 
     def get_zone_states(self) -> dict[str, ZoneState]:
         """
@@ -81,7 +82,10 @@ class Tado(TadoBase):
         if not isinstance(response, dict):
             raise TadoException("Invalid response from Tado API")
 
-        return {key: ZoneState.model_validate(value) for key, value in response.items()}
+        return {
+            key: ZoneState.model_validate(value)
+            for key, value in response["zoneStates"].items()
+        }
 
     def get_air_comfort(self) -> AirComfort:
         request = TadoRequest()
@@ -99,14 +103,17 @@ class Tado(TadoBase):
 
         return [HeatingCircuit.model_validate(d) for d in self._http.request(request)]
 
-    ##################### Zone methods #####################
+    # ----------------- Zone methods -----------------
 
-    def get_zone_state(self, zone: int) -> TadoZone:
+    def get_zone(self, zone: int) -> TadoZone:
+        return TadoZone(self, zone)
+
+    def get_zone_state(self, zone: int) -> ZoneState:
         """
         Gets current state of Zone as a TadoZone object.
         """
 
-        return self.get_state(zone)  # type: ignore # TODO: proper zone model
+        return self.get_state(zone)
 
     def get_state(self, zone: int) -> ZoneState:
         """
@@ -117,27 +124,6 @@ class Tado(TadoBase):
         request.command = f"zones/{zone}/state"
 
         return ZoneState.model_validate(self._http.request(request))
-
-    def get_capabilities(self, zone: int) -> Capabilities:
-        """
-        Gets current capabilities of zone.
-        """
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/capabilities"
-
-        return Capabilities.model_validate(self._http.request(request))
-
-    def get_climate(self, zone: int) -> Climate:
-        """
-        Gets temp (centigrade) and humidity (% RH) for zone.
-        """
-
-        data = self.get_state(zone)
-        return Climate(
-            temperature=data.sensor_data_points.inside_temperature.celsius,
-            humidity=data.sensor_data_points.humidity.percentage,
-        )
 
     def get_timetable(self, zone: int) -> Timetable:
         """
@@ -177,128 +163,6 @@ class Tado(TadoBase):
             raise TadoException("Invalid response from Tado API")
 
         return Timetable(int(response.get("id", -1)))
-
-    @overload
-    def get_schedule(
-        self, zone: int, timetable: Timetable, day: DayType
-    ) -> list[Schedule]: ...
-
-    @overload
-    def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
-
-    @overload
-    def get_schedule(self, zone: int) -> ScheduleX: ...
-
-    def get_schedule(
-        self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
-    ) -> list[Schedule] | ScheduleX:
-        """
-        Get the JSON representation of the schedule for a zone.
-        Zone has 3 different schedules, one for each timetable (see setTimetable)
-        """
-        request = TadoRequest()
-        if day:
-            request.command = (
-                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
-            )
-        else:
-            request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks"
-        request.mode = Mode.PLAIN
-
-        return Schedules.validate_python(self._http.request(request))
-
-    @overload
-    def set_schedule(
-        self, zone: int, data: list[Schedule], timetable: Timetable, day: DayType
-    ) -> list[Schedule]: ...
-
-    @overload
-    def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
-
-    def set_schedule(
-        self,
-        zone: int,
-        data: list[Schedule] | SetSchedule,
-        timetable: Timetable | None = None,
-        day: DayType | None = None,
-    ) -> None | list[Schedule]:
-        """
-        Set the schedule for a zone, day is required
-        """
-
-        if isinstance(data, list):
-            request = TadoRequest()
-            request.command = (
-                f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
-            )
-            request.action = Action.CHANGE
-            request.payload = [schedule.model_dump(by_alias=True) for schedule in data]
-            # request.mode = Mode.PLAIN
-            return [Schedule.model_validate(s) for s in self._http.request(request)]
-        raise TadoException("Invalid data type for set_schedule for pre line x")
-
-    def reset_zone_overlay(self, zone: int) -> None:
-        """
-        Delete current overlay
-        """
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/overlay"
-        request.action = Action.RESET
-        request.mode = Mode.PLAIN
-
-        self._http.request(request)
-
-    def set_zone_overlay(
-        self,
-        zone: int,
-        overlay_mode: OverlayMode,
-        set_temp: float | None = None,
-        duration: int | None = None,
-        device_type: ZoneType = ZoneType.HEATING,
-        power: Power = Power.ON,
-        mode: HvacMode | None = None,
-        fan_speed: FanSpeed | None = None,
-        swing: Any = None,
-        fan_level: FanMode | None = None,
-        vertical_swing: VerticalSwing | None = None,
-        horizontal_swing: HorizontalSwing | None = None,
-    ) -> dict[str, Any]:
-        """
-        Set current overlay for a zone
-        """
-
-        post_data: dict[str, Any] = {
-            "setting": {"type": device_type, "power": power},
-            "termination": {"typeSkillBasedApp": overlay_mode},
-        }
-
-        if set_temp is not None:
-            post_data["setting"]["temperature"] = {"celsius": set_temp}
-            if fan_speed is not None:
-                post_data["setting"]["fanSpeed"] = fan_speed
-            elif fan_level is not None:
-                post_data["setting"]["fanLevel"] = fan_level
-            if swing is not None:
-                post_data["setting"]["swing"] = swing
-            else:
-                if vertical_swing is not None:
-                    post_data["setting"]["verticalSwing"] = vertical_swing
-                if horizontal_swing is not None:
-                    post_data["setting"]["horizontalSwing"] = horizontal_swing
-
-        if mode is not None:
-            post_data["setting"]["mode"] = mode
-
-        if duration is not None:
-            post_data["termination"]["durationInSeconds"] = duration
-
-        request = TadoRequest()
-        request.command = f"zones/{zone:d}/overlay"
-        request.action = Action.CHANGE
-        request.payload = post_data
-
-        return self._http.request(request)
 
     def get_zone_overlay_default(self, zone: int) -> ZoneOverlayDefault:
         """
@@ -372,7 +236,7 @@ class Tado(TadoBase):
 
         return ZoneControl.model_validate(self._http.request(request))
 
-    ##################### Device methods #####################
+    # ----------------- Device methods -----------------
 
     def set_child_lock(self, device_id: str, child_lock: bool) -> None:
         """
@@ -429,7 +293,7 @@ class Tado(TadoBase):
 
         return TemperatureOffset.model_validate(self._http.request(request))
 
-    ##################### Boiler methods #####################
+    # ----------------- Boiler methods -----------------
 
     def get_boiler_install_state(
         self, bridge_id: str, auth_key: str

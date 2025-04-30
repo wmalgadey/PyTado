@@ -1,0 +1,43 @@
+{
+  "type": "HEAT_PUMP",
+  "connection": { "state": "CONNECTED" },
+  "heating": {
+    "available": true,
+    "capabilities": {
+      "temperatureRangeInCelsius": { "min": 10.0, "max": 30.0, "step": 1.0 }
+    },
+    "currentBlockSetpoint": {
+      "setpointType": "CUSTOM",
+      "setpointValue": { "valueType": "TEMPERATURE_C", "value": "21.0" }
+    },
+    "nextBlockSetpoint": {
+      "setpointType": "CUSTOM",
+      "setpointValue": { "valueType": "TEMPERATURE_C", "value": "20.0" }
+    },
+    "nextBlockStartTime": "2024-10-17T18:00:00Z",
+    "roomGuidedModeActive": true,
+    "standbyActive": true,
+    "overlayActive": false,
+    "overlaySetpoint": null,
+    "setting": { "power": "OFF", "temperature": null },
+    "manualControlTermination": null,
+    "loadShiftingActive": false,
+    "loadShiftingTermination": null,
+    "heatingActivityInPercent": 0,
+    "showRoomGuidedModeNotification": false
+  },
+  "domesticHotWater": {
+    "available": true,
+    "currentBlockSetpoint": {
+      "setpointType": "FALLBACK",
+      "setpointValue": { "valueType": "TEMPERATURE_C", "value": "40.0" }
+    },
+    "nextBlockSetpoint": null,
+    "nextBlockStartTime": null,
+    "currentTemperatureInCelsius": 62.0,
+    "heatingActivityInPercent": 0,
+    "manualOffActive": false,
+    "tankIsFullyLoaded": true,
+    "boostActive": false
+  }
+}

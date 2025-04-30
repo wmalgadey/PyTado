@@ -4,6 +4,7 @@ from typing import Any, Dict
 from pydantic import model_validator
 
 from PyTado.models.util import Base
+from PyTado.types import BatteryState, Presence
 
 
 class User(Base):
@@ -78,10 +79,16 @@ class Weather(Base):
 class HomeState(Base):
     """HomeState model represents the state of a home."""
 
-    presence: str  # TODO: use Enum or similar
+    presence: Presence
     presence_locked: bool | None
     show_home_presence_switch_button: bool | None = None
     show_switch_to_auto_geofencing_button: bool | None = None
+
+    @property
+    def presence_setting(self) -> Presence:
+        if not self.presence_locked:
+            return Presence.AUTO
+        return self.presence
 
 
 class DeviceMetadata(Base):
@@ -190,3 +197,10 @@ class RunningTimes(Base):
     running_times: list[RunningTime]
     summary: RunningTimeSummary
     last_updated: datetime
+
+
+class ActionableDevice:
+    serial_number: str
+    needs_mounting: bool
+    isOffline: bool
+    batteryState: BatteryState

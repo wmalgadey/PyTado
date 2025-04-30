@@ -2,34 +2,26 @@
 PyTado interface implementation for hops.tado.com (Tado X).
 """
 
-from typing import Any, overload
+from typing import final
 
-from PyTado.exceptions import TadoException, TadoNotSupportedException
-from PyTado.http import Action, Domain, Http, Mode, TadoXRequest
-from PyTado.interface.api.base_tado import TadoBase, Timetable
+import requests
+
+from PyTado.exceptions import TadoNotSupportedException
+from PyTado.http import Action, Domain, TadoXRequest
+from PyTado.interface.api.base_tado import TadoBase
 from PyTado.logger import Logger
 from PyTado.models.home import AirComfort
-from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
+from PyTado.models.line_x.device import Device, DevicesResponse
 from PyTado.models.line_x.room import RoomState
-from PyTado.models.line_x.schedule import Schedule as ScheduleX
-from PyTado.models.line_x.schedule import SetSchedule
-from PyTado.models.pre_line_x import Schedule
-from PyTado.models.return_models import Capabilities, Climate
-from PyTado.types import (
-    DayType,
-    FanMode,
-    FanSpeed,
-    HorizontalSwing,
-    HvacMode,
-    OverlayMode,
-    Power,
-    VerticalSwing,
-    ZoneType,
+from PyTado.models.pre_line_x.flow_temperature_optimization import (
+    FlowTemperatureOptimization,
 )
+from PyTado.zone.hops_zone import TadoRoom
 
 _LOGGER = Logger(__name__)
 
 
+@final
 class TadoX(TadoBase):
     """Interacts with a Tado thermostat via hops.tado.com (Tado X) API.
 
@@ -41,18 +33,19 @@ class TadoX(TadoBase):
 
     def __init__(
         self,
-        http: Http,
+        token_file_path: str | None = None,
+        saved_refresh_token: str | None = None,
+        http_session: requests.Session | None = None,
         debug: bool = False,
     ):
-        """Class Constructor"""
-        if not http.is_x_line:
+        super().__init__(token_file_path, saved_refresh_token, http_session, debug)
+
+        if not self._http.is_x_line:
             raise TadoNotSupportedException(
                 "TadoX is only usable with LINE_X Generation"
             )
 
-        super().__init__(http=http, debug=debug)
-
-    ##################### Home methods #####################
+    # ------------------- Home methods -------------------
 
     def get_devices(self) -> list[Device]:
         """
@@ -71,19 +64,19 @@ class TadoX(TadoBase):
 
         return devices
 
-    def get_zones(self) -> list[DevicesRooms]:
+    def get_zones(self) -> list[TadoRoom]:
         """
         Gets zones (or rooms in Tado X API) information.
         """
 
         request = TadoXRequest()
         request.command = "roomsAndDevices"
+        rooms_and_devices = DevicesResponse.model_validate(self._http.request(request))
 
-        return DevicesResponse.model_validate(self._http.request(request)).rooms
+        return [TadoRoom(self, room.room_id) for room in rooms_and_devices.rooms]
 
     def get_zone_states(self) -> dict[str, RoomState]:
         """
-        Gets current states of all zones/rooms.
         Gets current states of all zones/rooms.
         """
 
@@ -99,7 +92,7 @@ class TadoX(TadoBase):
         Gets current state of zone/room as a TadoXZone object.
         """
 
-        return self.get_state(zone)  # type: ignore # TODO: proper Zone model
+        return self.get_state(zone)
 
     def get_air_comfort(self) -> AirComfort:
         request = TadoXRequest()
@@ -107,7 +100,13 @@ class TadoX(TadoBase):
 
         return AirComfort.model_validate(self._http.request(request))
 
-    ##################### Zone methods #####################
+    # ------------------- Zone methods -------------------
+
+    def get_zone(self, zone: int) -> TadoRoom:
+        """
+        Gets zone/room.
+        """
+        return TadoRoom(self, zone)
 
     def get_state(self, zone: int) -> RoomState:
         """
@@ -120,148 +119,17 @@ class TadoX(TadoBase):
 
         return RoomState.model_validate(data)
 
-    def get_capabilities(self, zone: int) -> Capabilities:
-        """
-        Gets current capabilities of zone/room.
-        Gets current capabilities of zone/room.
-        """
-
-        _LOGGER.warning(
-            "get_capabilities is not supported by Tado X API. "
-            "We currently always return type heating."
-        )
-
-        return Capabilities(type=ZoneType.HEATING)
-
-    def get_climate(self, zone: int) -> Climate:
-        """
-        Gets temp (centigrade) and humidity (% RH) for zone/room.
-        Gets temp (centigrade) and humidity (% RH) for zone/room.
-        """
-
-        data = self.get_state(zone)
-        return Climate(
-            temperature=data.sensor_data_points.inside_temperature.value,
-            humidity=data.sensor_data_points.humidity.percentage,
-        )
-
-    @overload
-    def get_schedule(
-        self, zone: int, timetable: Timetable, day: DayType
-    ) -> list[Schedule]: ...
-
-    @overload
-    def get_schedule(self, zone: int, timetable: Timetable) -> list[Schedule]: ...
-
-    @overload
-    def get_schedule(self, zone: int) -> ScheduleX: ...
-
-    def get_schedule(
-        self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
-    ) -> ScheduleX | list[Schedule]:
-        """
-        Get the JSON representation of the schedule for a zone.
-        Zone has 3 different schedules, one for each timetable (see setTimetable)
-        """
-
-        request = TadoXRequest()
-        request.command = f"rooms/{zone:d}/schedule"
-
-        return ScheduleX.model_validate(self._http.request(request))
-
-    @overload
-    def set_schedule(
-        self, zone: int, data: list[Schedule], timetable: Timetable, day: DayType
-    ) -> list[Schedule]: ...
-
-    @overload
-    def set_schedule(self, zone: int, data: SetSchedule) -> None: ...
-
-    def set_schedule(
-        self,
-        zone: int,
-        data: list[Schedule] | SetSchedule,
-        timetable: Timetable | None = None,
-        day: DayType | None = None,
-    ) -> None | list[Schedule]:
-        """
-        Set the schedule for a zone, day is not required for Tado X API.
-        """
-        if isinstance(data, SetSchedule):
-            request = TadoXRequest()
-            request.command = f"rooms/{zone:d}/schedule"
-            request.action = Action.SET
-            request.payload = data.model_dump(by_alias=True)
-            request.mode = Mode.OBJECT
-            self._http.request(request)
-            return None
-        raise TadoException("Invalid data type for set_schedule for Tado X API")
-
-    def reset_zone_overlay(self, zone: int) -> None:
-        """
-        Delete current overlay
-        """
-
-        request = TadoXRequest()
-        request.command = f"rooms/{zone:d}/resumeSchedule"
-        request.action = Action.SET
-
-        self._http.request(request)
-
-    def set_zone_overlay(
-        self,
-        zone: int,
-        overlay_mode: OverlayMode,
-        set_temp: float | None = None,
-        duration: int | None = None,
-        device_type: ZoneType = ZoneType.HEATING,
-        power: Power = Power.ON,
-        mode: HvacMode | None = None,
-        fan_speed: FanSpeed | None = None,
-        swing: Any = None,
-        fan_level: FanMode | None = None,
-        vertical_swing: VerticalSwing | None = None,
-        horizontal_swing: HorizontalSwing | None = None,
-    ) -> None:
-        """
-        Set current overlay for a zone, a room in Tado X API.
-        """
-
-        post_data: dict[str, Any] = {
-            "setting": {"type": device_type, "power": power},
-            "termination": {"type": overlay_mode},
-        }
-
-        if set_temp is not None:
-            post_data["setting"]["temperature"] = {
-                "value": set_temp,
-                "valueRaw": set_temp,
-                "precision": 0.1,
-            }
-
-        if duration is not None:
-            post_data["termination"]["durationInSeconds"] = duration
-
-        request = TadoXRequest()
-        request.command = f"rooms/{zone:d}/manualControl"
-        request.action = Action.SET
-        request.payload = post_data
-
-        self._http.request(request)
-
-    def get_open_window_detected(self, zone):
+    def get_open_window_detected(self, zone: int) -> dict[str, bool]:
         """
         Returns whether an open window is detected.
         """
 
-        data = self.get_state(zone)
-
-        if data.open_window and data.open_window.activated:
+        if TadoRoom(self, zone).open_window:
             return {"openWindowDetected": True}
         else:
             return {"openWindowDetected": False}
 
-    ##################### Device methods #####################
+    # ------------------- Device methods -------------------
 
     def get_device_info(self, device_id: str) -> Device:
         """
@@ -298,7 +166,7 @@ class TadoX(TadoBase):
 
         self._http.request(request)
 
-    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+    def set_flow_temperature_optimization(self, max_flow_temperature: float) -> None:
         """
         Set the flow temperature optimization.
 
@@ -311,9 +179,9 @@ class TadoX(TadoBase):
         request.command = "settings/flowTemperatureOptimization"
         request.payload = {"maxFlowTemperature": max_flow_temperature}
 
-        return self._http.request(request)
+        self._http.request(request)
 
-    def get_flow_temperature_optimization(self):
+    def get_flow_temperature_optimization(self) -> FlowTemperatureOptimization:
         """
         Get the current flow temperature optimization
         """
@@ -323,4 +191,4 @@ class TadoX(TadoBase):
         request.domain = Domain.HOME
         request.command = "settings/flowTemperatureOptimization"
 
-        return self._http.request(request)
+        return FlowTemperatureOptimization.model_validate(self._http.request(request))
