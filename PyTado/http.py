@@ -128,7 +128,7 @@ class Http:
     _password: str
     _id: int
     _token_refresh: str
-    _x_api: bool
+    _x_api: bool | None = None
     _user_code: str | None = None
     _device_verification_url: str | None = None
     _device_activation_status: DeviceActivationStatus = (

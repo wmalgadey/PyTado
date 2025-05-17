@@ -144,7 +144,7 @@ class TadoBase(metaclass=ABCMeta):
     def device_activation(self) -> None:
         """Activates the device."""
         self._http.device_activation()
-        self._ensure_api_initialized()
+        self._ensure_device_activation()
 
     # -------------- Home methods --------------
 
