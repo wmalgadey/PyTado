@@ -55,6 +55,7 @@ class Tado:
         saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
+        user_agent: str | None = None,
     ):
         """
         Initializes the interface class.
@@ -67,6 +68,8 @@ class Tado:
             http_session (requests.Session | None, optional): An optional HTTP session to use for
                 requests (can be used in unit tests). Defaults to None.
             debug (bool, optional): Flag to enable or disable debug mode. Defaults to False.
+            user_agent (str | None): Optional user-agent header to use for the HTTP requests.
+                If None, a default user-agent PyTado/<PyTado-version> will be used.
         """
 
         self._http = Http(
@@ -74,6 +77,7 @@ class Tado:
             saved_refresh_token=saved_refresh_token,
             http_session=http_session,
             debug=debug,
+            user_agent=user_agent,
         )
         self._api: API.Tado | API.TadoX | None = None
         self._debug = debug

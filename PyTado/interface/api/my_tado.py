@@ -525,7 +525,7 @@ class Tado:
         request.endpoint = Endpoint.EIQ
 
         return self._http.request(request)
-        
+
     def get_eiq_consumption_overview(self, date=datetime.datetime.now().strftime("%Y-%m")):
         """
         Get consumption overview data for a specific month
