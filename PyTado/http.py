@@ -17,6 +17,7 @@ from urllib.parse import urlencode
 
 import requests
 
+from PyTado import __version__
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
@@ -152,6 +153,7 @@ class Http:
         saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
+        user_agent: str | None = None
     ) -> None:
         """
         Initialize the HTTP client for interacting with the Tado API.
@@ -164,6 +166,8 @@ class Http:
             http_session (requests.Session | None): An optional pre-configured HTTP session.
                 If None, a new session will be created.
             debug (bool): If True, enables debug logging. Defaults to False.
+            user_agent (str | None): Optional user-agent header to use for the HTTP requests.
+                If None, a default user-agent PyTado/<PyTado-version> will be used.
 
         Returns:
             None
@@ -177,7 +181,8 @@ class Http:
         self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
-        self._headers = {"Referer": "https://app.tado.com/"}
+        self._headers = {"Referer": "https://app.tado.com/",
+                         "user-agent": user_agent or f"PyTado/{__version__}"}
 
         self._user_code: str | None = None
         self._device_verification_url: str | None = None
