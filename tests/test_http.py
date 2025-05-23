@@ -124,6 +124,27 @@ class TestHttp(unittest.TestCase):
         self.assertEqual(instance._id, 1234)
         self.assertEqual(instance.is_x_line, True)
 
+        @responses.activate
+        def test_user_agent(self):
+            """Test that the we set the correct user-agent."""
+            responses.replace(
+                responses.GET,
+                "https://my.tado.com/api/v2/homes/1234/",
+                json=json.loads(
+                    common.load_fixture(
+                        "home_1234/tadov2.my_api_v2_home_state.json"
+                    )
+                ),
+                match=[matchers.header_matcher({"user-agent": "MyCustomAgent/1.0"})],
+                status=200,
+            )
+
+            instance = Http(debug=True, user_agent="MyCustomAgent/1.0")
+            instance.device_activation()
+
+            # Verify that the login was successful
+            self.assertEqual(instance._id, 1234)
+
     @responses.activate
     def test_refresh_token_success(self):
         """Test that the refresh token is successfully updated."""
