@@ -43,7 +43,7 @@ class Tado(TadoBase):
     ):
         super().__init__(token_file_path, saved_refresh_token, http_session, debug)
 
-        if not self._http.is_x_line:
+        if self._http.is_x_line:
             raise TadoException("Tado is only usable with V3/V2 Generation")
 
     # ----------------- Home methods -----------------
