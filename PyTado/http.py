@@ -209,7 +209,9 @@ class Http:
         )
 
         if saved_refresh_token or self._load_token():
-            if self._refresh_token(refresh_token=saved_refresh_token, force_refresh=True):
+            if self._refresh_token(
+                refresh_token=saved_refresh_token, force_refresh=True
+            ):
                 self._device_ready()
         else:
             self._device_activation_status = self._login_device_flow()
@@ -304,7 +306,9 @@ class Http:
         data = self._configure_payload(headers, request)
         url = self._configure_url(request)
 
-        http_request = requests.Request(method=request.action, url=url, headers=headers, data=data)
+        http_request = requests.Request(
+            method=request.action, url=url, headers=headers, data=data
+        )
         prepped = http_request.prepare()
         prepped.hooks["response"].append(self._log_response)
 
@@ -325,8 +329,12 @@ class Http:
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
             url = f"{request.endpoint}{request.command}"
-        elif request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE:
-            url = f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
+        elif (
+            request.domain == Domain.DEVICES or request.domain == Domain.HOME_BY_BRIDGE
+        ):
+            url = (
+                f"{request.endpoint}{request.domain}/{request.device}/{request.command}"
+            )
         elif request.domain == Domain.ME:
             url = f"{request.endpoint}{request.domain}"
         else:
@@ -338,7 +346,9 @@ class Http:
 
         return url
 
-    def _configure_payload(self, headers: dict[str, str], request: TadoRequest) -> bytes:
+    def _configure_payload(
+        self, headers: dict[str, str], request: TadoRequest
+    ) -> bytes:
         if request.payload is None:
             return b""
 
@@ -387,7 +397,9 @@ class Http:
             _LOGGER.error("Failed to load refresh token: %s", e)
             raise TadoException(e) from e
 
-    def _refresh_token(self, refresh_token: str | None = None, force_refresh: bool = False) -> bool:
+    def _refresh_token(
+        self, refresh_token: str | None = None, force_refresh: bool = False
+    ) -> bool:
         """
         Refresh the OAuth token if it is about to expire or if forced.
 
@@ -517,7 +529,9 @@ class Http:
         _LOGGER.info("Please visit the following URL: %s", visit_url)
 
         expires_in_seconds = self._device_flow_data["expires_in"]
-        self._expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in_seconds)
+        self._expires_at = datetime.now(timezone.utc) + timedelta(
+            seconds=expires_in_seconds
+        )
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
@@ -527,11 +541,9 @@ class Http:
         return DeviceActivationStatus.PENDING
 
     def _check_device_activation(self) -> bool:
-        if (
-            self._expires_at is not None
-            and datetime.timestamp(datetime.now(timezone.utc))
-            > datetime.timestamp(self._expires_at)
-        ):
+        if self._expires_at is not None and datetime.timestamp(
+            datetime.now(timezone.utc)
+        ) > datetime.timestamp(self._expires_at):
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
@@ -559,7 +571,9 @@ class Http:
             token_response.status_code == 400
             and token_response.json()["error"] == "authorization_pending"
         ):
-            _LOGGER.info("Authorization pending, waiting for user to authorize. Continue polling.")
+            _LOGGER.info(
+                "Authorization pending, waiting for user to authorize. Continue polling."
+            )
             return False
 
         raise TadoException(f"Login failed. Reason: {token_response.reason}")
