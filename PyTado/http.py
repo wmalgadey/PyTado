@@ -177,6 +177,18 @@ class Http:
         else:
             _LOGGER.setLevel(logging.WARNING)
 
+        self._retries = Retry(
+            total=_DEFAULT_RETRIES,
+            backoff_factor=0.1,
+            backoff_jitter=0.5,
+            backoff_max=120,
+            status_forcelist=[502, 503, 504],
+        )
+
+        self._http_adapter = requests.adapters.HTTPAdapter(
+            max_retries=self._retries,
+        )
+
         self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
@@ -192,20 +204,8 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
 
-        self._retries = Retry(
-            total=_DEFAULT_RETRIES,
-            backoff_factor=0.1,
-            backoff_jitter=0.5,
-            backoff_max=120,
-            status_forcelist=[502, 503, 504],
-        )
-
-        self._session.mount(
-            "https://", requests.adapters.HTTPAdapter(max_retries=self._retries)
-        )
-        self._session.mount(
-            "http://", requests.adapters.HTTPAdapter(max_retries=self._retries)
-        )
+        self._session.mount("https://", self._http_adapter)
+        self._session.mount("http://", self._http_adapter)
 
         if saved_refresh_token or self._load_token():
             if self._refresh_token(
@@ -270,12 +270,8 @@ class Http:
     def _create_session(self) -> requests.Session:
         session = requests.Session()
         session.hooks["response"].append(self._log_response)
-        session.mount(
-            "https://", requests.adapters.HTTPAdapter(max_retries=self._retries)
-        )
-        session.mount(
-            "http://", requests.adapters.HTTPAdapter(max_retries=self._retries)
-        )
+        session.mount("https://", self._http_adapter)
+        session.mount("http://", self._http_adapter)
         return session
 
     def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
