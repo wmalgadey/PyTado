@@ -18,8 +18,7 @@ from urllib.parse import urlencode
 import requests
 import requests.adapters
 from urllib3 import Retry
-import urllib3
-import urllib3.util
+from urllib3.exceptions import MaxRetryError
 
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
@@ -317,7 +316,7 @@ class Http:
         except TadoWrongCredentialsException as e:
             _LOGGER.error("Credentials Exception: %s", e)
             raise e
-        except urllib3.exceptions.MaxRetryError as e:
+        except MaxRetryError as e:
             _LOGGER.error("Max retries exceeded: %s", e)
             raise TadoException(e) from e
 
