@@ -16,6 +16,10 @@ from typing import Any
 from urllib.parse import urlencode
 
 import requests
+import requests.adapters
+from urllib3 import Retry
+import urllib3
+import urllib3.util
 
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
@@ -189,6 +193,21 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
 
+        self._retries = Retry(
+            total=_DEFAULT_RETRIES,
+            backoff_factor=0.1,
+            backoff_jitter=0.5,
+            backoff_max=120,
+            status_forcelist=[502, 503, 504],
+        )
+
+        self._session.mount(
+            "https://", requests.adapters.HTTPAdapter(max_retries=self._retries)
+        )
+        self._session.mount(
+            "http://", requests.adapters.HTTPAdapter(max_retries=self._retries)
+        )
+
         if saved_refresh_token or self._load_token():
             if self._refresh_token(refresh_token=saved_refresh_token, force_refresh=True):
                 self._device_ready()
@@ -250,6 +269,12 @@ class Http:
     def _create_session(self) -> requests.Session:
         session = requests.Session()
         session.hooks["response"].append(self._log_response)
+        session.mount(
+            "https://", requests.adapters.HTTPAdapter(max_retries=self._retries)
+        )
+        session.mount(
+            "http://", requests.adapters.HTTPAdapter(max_retries=self._retries)
+        )
         return session
 
     def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
@@ -283,28 +308,14 @@ class Http:
         prepped = http_request.prepare()
         prepped.hooks["response"].append(self._log_response)
 
-        retries = _DEFAULT_RETRIES
-
-        while retries >= 0:
-            try:
-                response = self._session.send(prepped)
-                break
-            except TadoWrongCredentialsException as e:
-                _LOGGER.error("Credentials Exception: %s", e)
-                raise e
-            except requests.exceptions.ConnectionError as e:
-                if retries > 0:
-                    _LOGGER.warning("Connection error: %s", e)
-                    self._session.close()
-                    self._session = self._create_session()
-                    retries -= 1
-                else:
-                    _LOGGER.error(
-                        "Connection failed after %d retries: %s",
-                        _DEFAULT_RETRIES,
-                        e,
-                    )
-                    raise TadoException(e) from e
+        try:
+            response = self._session.send(prepped)
+        except TadoWrongCredentialsException as e:
+            _LOGGER.error("Credentials Exception: %s", e)
+            raise e
+        except urllib3.exceptions.MaxRetryError as e:
+            _LOGGER.error("Max retries exceeded: %s", e)
+            raise TadoException(e) from e
 
         if response.text is None or response.text == "":
             return {}
