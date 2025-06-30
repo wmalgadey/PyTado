@@ -70,10 +70,12 @@ class TadoClientInitializer:
             print("Click on the link to log in to your Tado account.")
             print("Device verification URL: ", self.get_verification_url())
             self.device_activation()
-            if self.http.device_activation_status == DeviceActivationStatus.COMPLETED:  # type: ignore[comparison-overlap]
+            # type: ignore[comparison-overlap]
+            if self.http.device_activation_status == DeviceActivationStatus.COMPLETED:
                 print("Device activation completed successfully.")
             else:
                 raise TadoException(
-                    "Device activation failed. Please check the device verification URL and try again."
+                    "Device activation failed. "
+                    "Please check the device verification URL and try again."
                 )
         return self.get_client()
