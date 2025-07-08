@@ -1,0 +1,13 @@
+{
+    "hasMultipleBoilerControlDevices": false,
+    "maxFlowTemperature": 55,
+    "maxFlowTemperatureConstraints": {
+        "min": 30,
+        "max": 80
+    },
+    "autoAdaptation": {
+        "enabled": true,
+        "maxFlowTemperature": 55
+    },
+    "openThermDeviceSerialNumber": "RU1234567890"
+}

@@ -97,6 +97,47 @@ class TadoTestCase(unittest.TestCase):
             assert running_times["lastUpdated"] == "2023-08-05T19:50:21Z"
             assert running_times["runningTimes"][0]["zones"][0]["id"] == 1
 
+    def test_get_flow_temperature_optimization(self):
+        """Test the get_flow_temperature_optimization method."""
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value=json.loads(common.load_fixture("flow_temperature_optimization.json")),
+        ):
+            flow_temp_optimization = self.tado_client.get_flow_temperature_optimization()
+
+            # Verify API call was made
+            assert self.tado_client._http.request.called
+
+            # Verify response data
+            assert flow_temp_optimization["maxFlowTemperature"] == 55
+            assert flow_temp_optimization["maxFlowTemperatureConstraints"]["min"] == 30
+            assert flow_temp_optimization["maxFlowTemperatureConstraints"]["max"] == 80
+            assert flow_temp_optimization["autoAdaptation"]["enabled"] is True
+            assert flow_temp_optimization["autoAdaptation"]["maxFlowTemperature"] == 55
+            assert flow_temp_optimization["openThermDeviceSerialNumber"] == "RU1234567890"
+
+    def test_set_flow_temperature_optimization(self):
+        """Test the set_flow_temperature_optimization method."""
+        with mock.patch(
+            "PyTado.http.Http.request",
+            return_value=json.loads(common.load_fixture("set_flow_temperature_optimization_issue_143.json")),
+        ):
+            # Set max flow temperature to 50°C
+            response = self.tado_client.set_flow_temperature_optimization(50)
+
+            # Verify API call was made with correct parameters
+            assert self.tado_client._http.request.called
+
+            # Verify the request had the correct payload
+            call_args = self.tado_client._http.request.call_args
+            request = call_args[0][0]
+            assert request.payload == {"maxFlowTemperature": 50}
+
+            # Verify response data
+            assert response["maxFlowTemperature"] == 50
+            assert response["maxFlowTemperatureConstraints"]["min"] == 30
+            assert response["maxFlowTemperatureConstraints"]["max"] == 80
+
     def get_eiq_consumption_overview(self):
             """Test the get_eiq_consumption_overview method."""
 
