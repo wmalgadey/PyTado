@@ -67,7 +67,7 @@ def get_me(self) -> PyTado.models.User: ...
 ```py
 # Old:
 def getDevices(self) -> list[dict[str, Any]]: ...
-def get_devices(self) -> list[dict[str, Any]]: ... 
+def get_devices(self) -> list[dict[str, Any]]: ...
 # New:
 def get_devices(self) -> list[PyTado.models.pre_line_x.device.Device] | list[PyTado.models.line_x.device.Device]: ...
 ```
@@ -354,7 +354,7 @@ To force a refresh of the properties, you can call the `update()` method on the 
 
 #### Methods:
 ##### Common Methods
-All common methods are available in both `TadoZone` and `TadoRoom`. 
+All common methods are available in both `TadoZone` and `TadoRoom`.
 They are also available trough the `Tado` client directly with the same name and `zone: int` as an additional parameter.
 ```py
 from PyTado.interface import TadoClientInitializer
@@ -374,7 +374,7 @@ def get_historic(self, date: date) -> PyTado.models.historic.Historic: ...
 
 @overload
 def get_schedule(
-    self, timetable: Timetable, day: DayType   
+    self, timetable: Timetable, day: DayType
 ) -> list[PyTado.models.pre_line_x.schedule.Schedule]: ... # Tado v2/v3/v3+
 
 @overload
@@ -458,5 +458,3 @@ def get_zone_control(self) -> PyTado.models.pre_line_x.zone.ZoneControl: ...
 
 def set_zone_heating_circuit(self, heating_circuit: int) -> PyTado.models.pre_line_x.zone.ZoneControl: ...
 ```
-
-
