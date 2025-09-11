@@ -23,3 +23,30 @@ class TokenManagerInterface(ABC):
             str | None: The loaded refresh token, or None if not available.
         """
         pass
+
+    def has_pending_device_data(self) -> bool:
+        """
+        Check if there is pending device data.
+
+        Returns:
+            bool: True if there is pending device data, False otherwise.
+        """
+        return False
+
+    def save_pending_device_data(self, device_data: dict) -> None:
+        """
+        Save the device data for pending device activation.
+
+        Args:
+            device_data (dict): The device data to save after initial device activation.
+        """
+        pass
+
+    def load_pending_device_data(self) -> dict:
+        """
+        Load the device data for pending device activation.
+
+        Returns:
+            dict | None: The device data, or None if not available.
+        """
+        return {}

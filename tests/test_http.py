@@ -57,9 +57,7 @@ class TestHttp(unittest.TestCase):
             responses.GET,
             "https://my.tado.com/api/v2/homes/1234/",
             json=json.loads(
-                common.load_fixture(
-                    "home_1234/tadov2.my_api_v2_home_state.json"
-                )
+                common.load_fixture("home_1234/tadov2.my_api_v2_home_state.json")
             ),
             status=200,
         )
@@ -231,7 +229,9 @@ class TestHttp(unittest.TestCase):
         """Test URL configuration for the ME domain."""
         http = Http()
         http._id = 123
-        request = TadoRequest(command="test", domain=Domain.HOME, params={"test": "value"})
+        request = TadoRequest(
+            command="test", domain=Domain.HOME, params={"test": "value"}
+        )
         url = http._configure_url(request)
         self.assertEqual(url, "https://my.tado.com/api/v2/homes/123/test?test=value")
 
@@ -241,8 +241,9 @@ class TestHttp(unittest.TestCase):
         """Test the device activation check process."""
 
         http = Http()
-        http._device_flow_data = {"interval": 5, "device_code": "mock_code"}
-        http._expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+        http._set_device_auth_data(
+            {"interval": 5, "device_code": "mock_code", "expires_in": 5}
+        )
 
         result = http._check_device_activation()
         self.assertTrue(result)

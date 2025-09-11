@@ -179,6 +179,7 @@ class Http:
             _LOGGER.setLevel(logging.WARNING)
 
         self._token_manager = token_manager
+        self._token_refresh: str | None = None
         self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
@@ -188,8 +189,10 @@ class Http:
         }
 
         self._user_code: str | None = None
+        self._device_code: str | None = None
         self._device_verification_url: str | None = None
         self._device_activation_status = DeviceActivationStatus.NOT_STARTED
+        self._device_activation_check_interval = 10
         self._expires_at: datetime | None = None
 
         self._id: int | None = None
@@ -443,6 +446,11 @@ class Http:
     def _login_device_flow(self) -> DeviceActivationStatus:
         """Start the login to the API using the device flow"""
 
+        if self._token_manager.has_pending_device_data():
+            return self._set_device_auth_data(
+                self._token_manager.load_pending_device_data()
+            )
+
         if self._device_activation_status != DeviceActivationStatus.NOT_STARTED:
             raise TadoException("The device has been started already")
 
@@ -464,30 +472,41 @@ class Http:
                     "Referer": "https://app.tado.com/",
                 },
             )
+
+            response.raise_for_status()
+
+            _LOGGER.debug("Device flow response: %s", response.json())
+
         except requests.exceptions.ConnectionError as e:
             raise TadoException(e) from e
-
-        if response.status_code != 200:
+        except requests.exceptions.HTTPError as e:
             raise TadoException(
-                f"Login failed. Status code: {
-                    response.status_code} and reason: {
-                    response.reason}"
-            )
+                f"Login failed. Status code: {response.status_code} "
+                f"and reason: {response.reason}"
+            ) from e
 
-        self._device_flow_data = response.json()
-        _LOGGER.debug("Device flow response: %s", self._device_flow_data)
+        return self._set_device_auth_data(response.json())
 
-        user_code = urlencode({"user_code": self._device_flow_data["user_code"]})
-        visit_url = f"{self._device_flow_data['verification_uri']}?{user_code}"
-        self._user_code = self._device_flow_data["user_code"]
-        self._device_verification_url = visit_url
+    def _set_device_auth_data(self, device_flow_data: dict) -> DeviceActivationStatus:
+        """Set the device auth data and return the status"""
+        self._token_manager.save_pending_device_data(device_flow_data)
 
-        _LOGGER.info("Please visit the following URL: %s", visit_url)
+        self._user_code = device_flow_data.get("user_code")
+        self._device_code = device_flow_data.get("device_code")
+
+        if self._user_code:
+            user_code = urlencode({"user_code": self._user_code})
+            visit_url = f"{device_flow_data['verification_uri']}?{user_code}"
+            self._device_verification_url = visit_url
+
+            _LOGGER.info("Please visit the following URL: %s", visit_url)
 
         expires_in_seconds = self._device_flow_data["expires_in"]
         self._expires_at = datetime.now(timezone.utc) + timedelta(
             seconds=expires_in_seconds
         )
+
+        self._device_activation_check_interval = device_flow_data["interval"]
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
@@ -506,7 +525,7 @@ class Http:
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
-        time.sleep((self._device_flow_data or {}).get("interval", 10))
+        time.sleep(self._device_activation_check_interval)
 
         try:
             token_response = self._session.request(
@@ -514,7 +533,7 @@ class Http:
                 url="https://login.tado.com/oauth2/token",
                 params={
                     "client_id": CLIENT_ID_DEVICE,
-                    "device_code": self._device_flow_data["device_code"],
+                    "device_code": self._device_code,
                     "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
                 },
             )

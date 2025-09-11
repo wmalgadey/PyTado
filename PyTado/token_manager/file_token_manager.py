@@ -19,6 +19,7 @@ class FileTokenManager(TokenManagerInterface):
 
         Args:
             token_file_path (str | None): Path to the file where the token is stored.
+            saved_refresh_token (str | None): A refresh token which should be used, no mather what.
         """
         self._token_file_path = token_file_path
         self._refresh_token = saved_refresh_token
