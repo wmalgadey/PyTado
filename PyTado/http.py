@@ -417,8 +417,8 @@ class Http:
                 return False
 
             raise TadoWrongCredentialsException(
-                f"Failed to refresh token, probably wrong credentials. Status code: {
-                    response.status_code}"
+                "Failed to refresh token, probably wrong credentials. "
+                f"Status code: {response.status_code}"
             )
 
         self._set_oauth_header(response.json())
@@ -470,9 +470,9 @@ class Http:
                 raise TadoException(e) from e
             except requests.exceptions.HTTPError as e:
                 raise TadoException(
-                    f"Login failed. Status code: {
-                        response.status_code} and reason: {
-                        response.reason}"
+                    "Login failed. "
+                    f"Status code: {response.status_code} "
+                    f"and reason: {response.reason}"
                 ) from e
 
             return self._set_device_auth_data(response.json())
