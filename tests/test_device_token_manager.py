@@ -1,7 +1,7 @@
 import io
 import unittest
 from unittest import mock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from PyTado.token_manager.device_token_manager import DeviceTokenManager, FileContent
 from PyTado.exceptions import TadoException
 
@@ -19,13 +19,21 @@ class TestDeviceTokenManager(unittest.TestCase):
         self.token_manager._token_file_path = "/mock/path/device_token.json"
 
     @mock.patch("os.path.exists", return_value=True)
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='{"pending_device": {"expires_at": "2099-12-31T23:59:59"}}')
+    @mock.patch(
+        "builtins.open",
+        new_callable=mock.mock_open,
+        read_data='{"pending_device": {"expires_at": "2099-12-31T23:59:59"}}',
+    )
     def test_has_pending_device_data_true(self, mock_open, mock_exists):
         """Test has_pending_device_data returns True when valid data exists."""
         self.assertTrue(self.token_manager.has_pending_device_data())
 
     @mock.patch("os.path.exists", return_value=True)
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='{"pending_device": {"expires_at": "2000-01-01T00:00:00"}}')
+    @mock.patch(
+        "builtins.open",
+        new_callable=mock.mock_open,
+        read_data='{"pending_device": {"expires_at": "2000-01-01T00:00:00"}}',
+    )
     def test_has_pending_device_data_false_expired(self, mock_open, mock_exists):
         """Test has_pending_device_data returns False when data is expired."""
         self.assertFalse(self.token_manager.has_pending_device_data())
@@ -36,14 +44,18 @@ class TestDeviceTokenManager(unittest.TestCase):
         self.assertFalse(self.token_manager.has_pending_device_data())
 
     @mock.patch("os.path.exists", return_value=True)
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='{}')
+    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data="{}")
     def test_get_pending_device_data_raises_exception(self, mock_open, mock_exists):
         """Test get_pending_device_data raises TadoException when no data exists."""
         with self.assertRaises(TadoException):
             self.token_manager.get_pending_device_data()
 
     @mock.patch("os.path.exists", return_value=True)
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data='{"pending_device": {"expires_at": "2099-12-31T23:59:59"}}')
+    @mock.patch(
+        "builtins.open",
+        new_callable=mock.mock_open,
+        read_data='{"pending_device": {"expires_at": "2099-12-31T23:59:59"}}',
+    )
     def test_get_pending_device_data_success(self, mock_open, mock_exists):
         """Test get_pending_device_data returns the correct data."""
         data = self.token_manager.get_pending_device_data()
@@ -54,7 +66,7 @@ class TestDeviceTokenManager(unittest.TestCase):
     def test_set_pending_device_data(self, mock_mkdir, mock_exists):
         """Test set_pending_device_data saves data correctly."""
         device_data = {
-            "expires_at": (datetime.now() + timedelta(days=1)).isoformat(),
+            "expires_at": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
             "device_code": "mock_code",
         }
 
@@ -67,13 +79,16 @@ class TestDeviceTokenManager(unittest.TestCase):
         mock_open = mock.mock_open()
         mock_open.return_value = buffer
 
-        #with patch("os.path.exists", return_value=False):
+        # with patch("os.path.exists", return_value=False):
         with mock.patch("builtins.open", mock_open) as mock_file:
             self.token_manager.set_pending_device_data(device_data)
 
             # self.assertTrue(self.token_manager.has_pending_device_data())
 
-        mock_file.assert_called_with(self.token_manager._token_file_path, 'w', encoding='utf-8')
+        mock_file.assert_called_with(
+            self.token_manager._token_file_path, "w", encoding="utf-8"
+        )
+
 
 # class TestDeviceTokenManager2(unittest.TestCase):
 #     """Unit tests for the DeviceTokenManager class."""

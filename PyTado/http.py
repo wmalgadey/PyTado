@@ -7,7 +7,7 @@ import json
 import logging
 import pprint
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from urllib.parse import urlencode
 
@@ -490,7 +490,9 @@ class Http:
         """Set the device auth data and return the status"""
         if "expires_at" not in device_flow_data:
             expires_in_seconds = device_flow_data["expires_in"]
-            expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
+            expires_at = datetime.now(timezone.utc) + timedelta(
+                seconds=expires_in_seconds
+            )
             device_flow_data["expires_at"] = expires_at.isoformat()
 
         self._device_manager.set_pending_device_data(device_flow_data)
