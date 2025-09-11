@@ -7,11 +7,7 @@ import json
 import logging
 import pprint
 import time
-from datetime import datetime, timedelta, timezone
-from json import dump as json_dump
-from json import load as json_load
-from pathlib import Path
-from multiprocessing import current_process
+from datetime import datetime, timedelta
 from typing import Any
 from urllib.parse import urlencode
 
@@ -437,7 +433,6 @@ class Http:
             raise TadoException("The device has been started already")
 
         while self._token_manager.is_locked():
-            print(f"[{current_process().pid}] waiting because locked")
             time.sleep(5)
 
         with self._token_manager.lock_device_activation("device_flow"):
