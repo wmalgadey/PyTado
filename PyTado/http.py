@@ -351,7 +351,8 @@ class Http:
         """Set the OAuth header and return the refresh token"""
 
         self._token_manager.save_oauth_data(oauth_data)
-        self._headers["Authorization"] = f"Bearer {oauth_data.get("access_token")}"
+        access_token = oauth_data.get("access_token")
+        self._headers["Authorization"] = f"Bearer {access_token}"
 
     def _refresh_token(
         self, refresh_token: str | None = None, force_refresh: bool = False
