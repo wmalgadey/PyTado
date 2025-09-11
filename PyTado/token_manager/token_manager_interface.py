@@ -28,12 +28,12 @@ class TokenManagerInterface(ABC):
         # Then we have a 30 seconds timespan to get a new refresh_token
         self._refresh_at = self._refresh_at - timedelta(seconds=30)
 
-    def save_oauth_data(self, oauth_data: dict) -> None:
+    def set_oauth_data(self, oauth_data: dict) -> None:
         """
-        Save the refresh token.
+        Set the oauth data.
 
         Args:
-            refresh_token (str): The refresh token to save.
+            oauth_data (dict): The oauth data to use.
         """
         self._set_oauth_data(oauth_data)
 
@@ -44,16 +44,16 @@ class TokenManagerInterface(ABC):
         Returns:
             bool: True if the refresh token is still valid, False otherwise.
         """
-        self.load_token()
+        self.get_token()
 
         return datetime.timestamp(datetime.now()) < datetime.timestamp(self._refresh_at)
 
     @abstractmethod
-    def load_token(self) -> str | None:
+    def get_token(self) -> str | None:
         """
-        Load the refresh token.
+        Get the refresh token.
 
         Returns:
-            str | None: The loaded refresh token, or None if not available.
+            str | None: The current refresh token, or None if not available.
         """
         return self._token_refresh

@@ -20,13 +20,8 @@ def token_manager_authenticated(request):
     mockit = mock.MagicMock()
 
     # Mock the methods of TokenManagerInterface
-    mockit.save_oauth_data = mock.MagicMock()
-    mockit.load_token = mock.MagicMock(return_value="mock_refresh_token")
-    mockit.has_pending_device_data = mock.MagicMock(return_value=False)
-    mockit.save_pending_device_data = mock.MagicMock()
-    mockit.load_pending_device_data = mock.MagicMock(return_value=None)
-    mockit.lock_device_activation = mock.MagicMock()
-    mockit.is_locked = mock.MagicMock(return_value=False)
+    mockit.set_oauth_data = mock.MagicMock()
+    mockit.get_token = mock.MagicMock(return_value="mock_refresh_token")
 
     request.cls.token_manager_authenticated = mockit
 
@@ -37,11 +32,11 @@ def token_manager_pending(request):
     mockit = mock.MagicMock(spec=CanManageDeviceActivation)
 
     # Mock the methods of TokenManagerInterface
-    mockit.save_oauth_data = mock.MagicMock()
-    mockit.load_token = mock.MagicMock(return_value=None)
+    mockit.set_oauth_data = mock.MagicMock()
+    mockit.get_token = mock.MagicMock(return_value=None)
     mockit.has_pending_device_data = mock.MagicMock(return_value=True)
-    mockit.save_pending_device_data = mock.MagicMock()
-    mockit.load_pending_device_data = mock.MagicMock(
+    mockit.set_pending_device_data = mock.MagicMock()
+    mockit.get_pending_device_data = mock.MagicMock(
         return_value={"interval": 5, "device_code": "mock_code", "expires_in": 5}
     )
     mockit.lock_device_activation = mock.MagicMock()
@@ -194,7 +189,7 @@ class TestHttp(unittest.TestCase):
         expected_params = {
             "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "refresh_token": self.token_manager_authenticated.load_token(),
+            "refresh_token": self.token_manager_authenticated.get_token(),
         }
         # Mock the refresh token response
         refresh_token = responses.replace(

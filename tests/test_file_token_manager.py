@@ -26,7 +26,7 @@ class TestFileTokenManager(unittest.TestCase):
 
         with mock.patch("builtins.open", mock_open) as mock_file:
             token_manager = FileTokenManager(token_file_path="path/to/open")
-            token_manager.save_oauth_data({"refresh_token": "another_value"})
+            token_manager.set_oauth_data({"refresh_token": "another_value"})
 
         mock_file.assert_called_with("path/to/open", 'w', encoding='utf-8')
         assert mock_open.return_value.getvalue() == '{"oauth_data": {"refresh_token": "another_value"}}'
@@ -45,6 +45,6 @@ class TestFileTokenManager(unittest.TestCase):
 
         with mock.patch("builtins.open", mock.mock_open(read_data='{"oauth_data": {"refresh_token": "saved_value"}}')) as mock_file:
             token_manager = FileTokenManager(token_file_path="path/to/open")
-            assert token_manager.load_token() == "saved_value"
+            assert token_manager.get_token() == "saved_value"
 
         mock_file.assert_called_with("path/to/open", encoding='utf-8')

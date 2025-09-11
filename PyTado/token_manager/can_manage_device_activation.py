@@ -41,7 +41,7 @@ class CanManageDeviceActivation(ABC):
         """
 
     @abstractmethod
-    def save_pending_device_data(self, device_data: dict) -> None:
+    def set_pending_device_data(self, device_data: dict) -> None:
         """
         Save the device data for pending device activation.
 
@@ -50,7 +50,7 @@ class CanManageDeviceActivation(ABC):
         """
 
     @abstractmethod
-    def load_pending_device_data(self) -> dict:
+    def get_pending_device_data(self) -> dict:
         """
         Load the device data for pending device activation.
 

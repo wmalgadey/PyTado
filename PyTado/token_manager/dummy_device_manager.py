@@ -11,11 +11,11 @@ class DummyDeviceManager(CanManageDeviceActivation):
         """Always return False for pending device data."""
         return False
 
-    def save_pending_device_data(self, device_data: dict) -> None:
+    def set_pending_device_data(self, device_data: dict) -> None:
         """Do nothing when saving pending device data."""
         pass
 
-    def load_pending_device_data(self) -> dict:
+    def get_pending_device_data(self) -> dict:
         """Return an empty dictionary for pending device data."""
         return {}
 

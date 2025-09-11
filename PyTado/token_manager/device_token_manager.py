@@ -1,3 +1,4 @@
+import enum
 import json
 import logging
 import os
@@ -16,7 +17,9 @@ from PyTado.token_manager import CanManageDeviceActivation, FileTokenManager
 
 _LOGGER = logging.getLogger(__name__)
 
-PENDING_DEVICE_KEY = "pending_device"
+
+class FileContent(enum.StrEnum):
+    PENDING_DEVICE = "pending_device"
 
 
 class FileLock:
@@ -74,35 +77,36 @@ class DeviceTokenManager(FileTokenManager, CanManageDeviceActivation):
 
     def has_pending_device_data(self) -> bool:
         """Check if there is pending device data."""
-        device_data = self._load_sync_file()
+        device_data = self._load_data()
 
         if (
             device_data
-            and PENDING_DEVICE_KEY in device_data
-            and datetime.now().timestamp()
-            < datetime.fromisoformat(device_data[PENDING_DEVICE_KEY]["expires_at"]).timestamp()
+            and FileContent.PENDING_DEVICE in device_data
+            and datetime.now().timestamp() < datetime.fromisoformat(
+                device_data[FileContent.PENDING_DEVICE]["expires_at"]
+            ).timestamp()
         ):
             return True
 
         return False
 
-    def save_pending_device_data(self, device_data) -> None:
+    def set_pending_device_data(self, device_data) -> None:
         """Save device data to the sync file."""
         if not device_data:
-            return self._save_sync_file({})
+            return self._save_data({})
 
-        self._save_sync_file({PENDING_DEVICE_KEY: device_data})
+        self._save_data({FileContent.PENDING_DEVICE: device_data})
 
-    def load_pending_device_data(self) -> dict:
-        """Load the device data from a file with file locking."""
-        data = self._load_sync_file()
+    def get_pending_device_data(self) -> dict:
+        """Get the device data from a file with file locking."""
+        data = self._load_data()
 
-        if not data or PENDING_DEVICE_KEY not in data:
+        if not data or FileContent.PENDING_DEVICE not in data:
             raise TadoException("No pending device data found")
 
-        return data.get(PENDING_DEVICE_KEY, {})
+        return data.get(FileContent.PENDING_DEVICE, {})
 
-    def _save_sync_file(self, data: dict) -> None:
+    def _save_data(self, data: dict) -> None:
         """Save data to the sync file with file locking."""
         if not self._token_file_path:
             raise ValueError("Token file path is not set")
@@ -123,7 +127,7 @@ class DeviceTokenManager(FileTokenManager, CanManageDeviceActivation):
             _LOGGER.error("Failed to save data to sync file: %s", e)
             raise
 
-    def _load_sync_file(self) -> dict:
+    def _load_data(self) -> dict:
         """Load data from the sync file with file locking."""
         if not self._token_file_path:
             raise ValueError("Token file path is not set")
