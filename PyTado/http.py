@@ -17,7 +17,12 @@ from PyTado import __version__
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
-from PyTado.token_manager import FileTokenManager, TokenManagerInterface
+from PyTado.token_manager import (
+    CanManageDeviceActivation,
+    FileTokenManager,
+    TokenManagerInterface,
+)
+from PyTado.token_manager.dummy_device_manager import DummyDeviceManager
 
 _LOGGER = Logger(__name__)
 
@@ -248,6 +253,13 @@ class Http:
         """
         return self._token_manager.load_token()
 
+    @property
+    def _device_manager(self) -> CanManageDeviceActivation:
+        if isinstance(self._token_manager, CanManageDeviceActivation):
+            return self._token_manager
+
+        return DummyDeviceManager()
+
     def _create_session(self) -> requests.Session:
         session = requests.Session()
         session.hooks["response"].append(self._log_response)
@@ -425,25 +437,23 @@ class Http:
     def _login_device_flow(self) -> DeviceActivationStatus:
         """Start the login to the API using the device flow"""
 
-        if self._token_manager.has_pending_device_data():
+        if self._device_manager.has_pending_device_data():
             return self._set_device_auth_data(
-                self._token_manager.load_pending_device_data()
+                self._device_manager.load_pending_device_data()
             )
 
         if self._device_activation_status != DeviceActivationStatus.NOT_STARTED:
-            raise TadoException("The device has been started already")
+            raise TadoException("The device activation has been started already")
 
-        while self._token_manager.is_locked():
+        while self._device_manager.is_locked():
             time.sleep(5)
 
-        with self._token_manager.lock_device_activation("device_flow"):
+        with self._device_manager.lock_device_activation("device_flow"):
             url = "https://login.tado.com/oauth2/device_authorize"
             data = {
                 "client_id": CLIENT_ID_DEVICE,
                 "scope": "offline_access",
             }
-
-            time.sleep(50)
 
             try:
                 response = self._session.request(
@@ -480,7 +490,7 @@ class Http:
             expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
             device_flow_data["expires_at"] = expires_at.isoformat()
 
-        self._token_manager.save_pending_device_data(device_flow_data)
+        self._device_manager.save_pending_device_data(device_flow_data)
 
         self._user_code = device_flow_data.get("user_code")
         self._device_code = device_flow_data.get("device_code")
@@ -507,8 +517,8 @@ class Http:
         if self.device_activation_status == DeviceActivationStatus.COMPLETED:
             return True
 
-        if not self._token_manager.has_pending_device_data():
-            self._token_manager.save_pending_device_data({})
+        if not self._device_manager.has_pending_device_data():
+            self._device_manager.save_pending_device_data({})
             raise TadoException("User took too long to enter key")
 
         _LOGGER.info(
@@ -545,9 +555,9 @@ class Http:
                 "Authorization pending, waiting for user to authorize. Continue polling."
             )
 
-            if self._token_manager.has_pending_device_data():
+            if self._device_manager.has_pending_device_data():
                 self._set_device_auth_data(
-                    self._token_manager.load_pending_device_data()
+                    self._device_manager.load_pending_device_data()
                 )
 
             return False
