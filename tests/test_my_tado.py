@@ -17,10 +17,16 @@ class TadoTestCase(unittest.TestCase):
         super().setUp()
         login_patch = mock.patch("PyTado.http.Http._login_device_flow")
         get_me_patch = mock.patch("PyTado.interface.api.Tado.get_me")
+        request_patch = mock.patch("PyTado.http.Http._refresh_token", return_value=True)
+        device_ready_patch = mock.patch("PyTado.http.Http._device_ready")
         login_patch.start()
         get_me_patch.start()
+        request_patch.start()
+        device_ready_patch.start()
         self.addCleanup(login_patch.stop)
         self.addCleanup(get_me_patch.stop)
+        self.addCleanup(request_patch.stop)
+        self.addCleanup(device_ready_patch.stop)
         check_x_patch = mock.patch(
             "PyTado.http.Http._check_x_line_generation", return_value=False
         )

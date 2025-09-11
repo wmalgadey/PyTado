@@ -1,12 +1,8 @@
-import json
 import unittest
 from unittest import mock
 
-from . import common
-
-from PyTado.http import DeviceActivationStatus, Http
+from PyTado.http import DeviceActivationStatus
 from PyTado.interface import Tado
-import PyTado.interface.api as API
 
 
 class TestTadoInterface(unittest.TestCase):
@@ -82,5 +78,5 @@ class TestTadoInterface(unittest.TestCase):
 
     def test_get_refresh_token(self):
         tado = Tado()
-        with mock.patch.object(tado._http, "_token_refresh", new="mock_refresh_token"):
+        with mock.patch.object(tado._http._token_manager, "_refresh_token", new="mock_refresh_token"):
             self.assertEqual(tado.get_refresh_token(), "mock_refresh_token")
