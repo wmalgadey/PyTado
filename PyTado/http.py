@@ -159,10 +159,6 @@ class Http:
 
         Args:
             token_manager (TokenManager): An instance of TokenManager to handle token persistence.
-            token_file_path (str | None): Path to the file where the token is stored.
-                If None, the token will not be saved to a file.
-            saved_refresh_token (str | None): A previously saved refresh token to use for
-                authentication. If None, a new token will be requested.
             http_session (requests.Session | None): An optional pre-configured HTTP session.
                 If None, a new session will be created.
             debug (bool): If True, enables debug logging. Defaults to False.
