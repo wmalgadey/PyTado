@@ -61,8 +61,9 @@ class DeviceTokenManager(TokenManagerInterface):
 
     def is_locked(self) -> bool:
         try:
-            with open(self._sync_file_path, encoding="utf-8") as f, FileLock(
-                f, LOCK_EX | LOCK_SH, "Check if locked"
+            with (
+                open(self._sync_file_path, encoding="utf-8") as f,
+                FileLock(f, LOCK_EX | LOCK_SH, "Check if locked"),
             ):
                 return False
         except BlockingIOError:
@@ -90,9 +91,8 @@ class DeviceTokenManager(TokenManagerInterface):
         if (
             device_data
             and PENDING_DEVICE_KEY in device_data
-            and datetime
-            .now().timestamp() < datetime
-            .fromisoformat(device_data[PENDING_DEVICE_KEY]["expires_at"]).timestamp()
+            and datetime.now().timestamp()
+            < datetime.fromisoformat(device_data[PENDING_DEVICE_KEY]["expires_at"]).timestamp()
         ):
             return True
 
@@ -121,8 +121,9 @@ class DeviceTokenManager(TokenManagerInterface):
             if token_dir and not os.path.exists(token_dir):
                 Path(token_dir).mkdir(parents=True, exist_ok=True)
 
-            with open(self._sync_file_path, "w", encoding="utf-8") as f, FileLock(
-                f, LOCK_EX, "Save data"
+            with (
+                open(self._sync_file_path, "w", encoding="utf-8") as f,
+                FileLock(f, LOCK_EX, "Save data"),
             ):
                 json_dump(data, f)
 
@@ -137,8 +138,9 @@ class DeviceTokenManager(TokenManagerInterface):
             return {}
 
         try:
-            with open(self._sync_file_path, encoding="utf-8") as f, FileLock(
-                f, LOCK_SH, "Load data"
+            with (
+                open(self._sync_file_path, encoding="utf-8") as f,
+                FileLock(f, LOCK_SH, "Load data"),
             ):
                 data = json_load(f)
 

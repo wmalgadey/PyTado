@@ -79,7 +79,8 @@ class Tado:
 
         if token_manager and (token_file_path or saved_refresh_token):
             raise ValueError(
-                "Cannot provide both token_manager and token_file_path/saved_refresh_token.")
+                "Cannot provide both token_manager and token_file_path/saved_refresh_token."
+            )
 
         self._http = Http(
             http_session=http_session,
@@ -129,7 +130,8 @@ class Tado:
                     self._api = API.Tado(http=self._http, debug=self._debug)
             else:
                 raise TadoException(
-                    "API is not initialized. Please complete device authentication first.")
+                    "API is not initialized. Please complete device authentication first."
+                )
 
     # region Deprecated Methods
     # pylint: disable=invalid-name
