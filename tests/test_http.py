@@ -5,17 +5,61 @@ import io
 import json
 import unittest
 from unittest import mock
+import pytest
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
 from PyTado.exceptions import TadoException
 from PyTado.http import Domain, Endpoint, Http, TadoRequest
+from PyTado.token_manager.token_manager_interface import TokenManagerInterface
 
 from . import common
 
 
+@pytest.fixture(scope="class")
+def token_manager_authenticated(request):
+    """Fixture to create a mock TokenManagerInterface."""
+    mockit = mock.MagicMock()
+
+    # Mock the methods of TokenManagerInterface
+    mockit.save_oauth_data = mock.MagicMock()
+    mockit.load_token = mock.MagicMock(return_value="mock_refresh_token")
+    mockit.has_pending_device_data = mock.MagicMock(return_value=False)
+    mockit.save_pending_device_data = mock.MagicMock()
+    mockit.load_pending_device_data = mock.MagicMock(return_value=None)
+    mockit.lock_device_activation = mock.MagicMock()
+    mockit.is_locked = mock.MagicMock(return_value=False)
+
+    request.cls.token_manager_authenticated = mockit
+
+
+@pytest.fixture(scope="class")
+def token_manager_pending(request):
+    """Fixture to create a mock TokenManagerInterface."""
+    mockit = mock.MagicMock()
+
+    # Mock the methods of TokenManagerInterface
+    mockit.save_oauth_data = mock.MagicMock()
+    mockit.load_token = mock.MagicMock(return_value=None)
+    mockit.has_pending_device_data = mock.MagicMock(return_value=True)
+    mockit.save_pending_device_data = mock.MagicMock()
+    mockit.load_pending_device_data = mock.MagicMock(
+        return_value={"interval": 5, "device_code": "mock_code", "expires_in": 5}
+    )
+    mockit.lock_device_activation = mock.MagicMock()
+    mockit.is_locked = mock.MagicMock(return_value=False)
+
+    request.cls.token_manager_pending = mockit
+
+
+@pytest.mark.usefixtures("token_manager_authenticated")
+@pytest.mark.usefixtures("token_manager_pending")
 class TestHttp(unittest.TestCase):
     """Test cases for the Http class."""
+
+    # will be replaced by token_manager_* fixtures
+    token_manager_authenticated: TokenManagerInterface = None
+    token_manager_pending: TokenManagerInterface = None
 
     def setUp(self):
         """Set up mock responses for HTTP requests."""
@@ -65,7 +109,7 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_login_successful(self):
         """Test that login is successful and sets the correct properties."""
-        instance = Http(debug=True)
+        instance = Http(debug=True, token_manager=self.token_manager_authenticated)
         instance.device_activation()
 
         # Verify that the login was successful
@@ -86,7 +130,7 @@ class TestHttp(unittest.TestCase):
             expected_exception=TadoException,
             msg="Your username or password is invalid",
         ):
-            instance = Http(debug=True)
+            instance = Http(debug=True, token_manager=self.token_manager_authenticated)
             instance.device_activation()
 
         responses.replace(
@@ -100,7 +144,7 @@ class TestHttp(unittest.TestCase):
             expected_exception=TadoException,
             msg="Login failed for unknown reason with status code 503",
         ):
-            instance = Http(debug=True)
+            instance = Http(debug=True, token_manager=self.token_manager_authenticated)
             instance.device_activation()
 
     @responses.activate
@@ -115,7 +159,7 @@ class TestHttp(unittest.TestCase):
             status=200,
         )
 
-        instance = Http(debug=True)
+        instance = Http(debug=True, token_manager=self.token_manager_authenticated)
         instance.device_activation()
 
         # Verify that the login was successful
@@ -146,13 +190,13 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_refresh_token_success(self):
         """Test that the refresh token is successfully updated."""
-        instance = Http(debug=True)
+        instance = Http(debug=True, token_manager=self.token_manager_authenticated)
         instance.device_activation()
 
         expected_params = {
             "client_id": CLIENT_ID_DEVICE,
             "grant_type": "refresh_token",
-            "refresh_token": "another_value",
+            "refresh_token": self.token_manager_authenticated.load_token(),
         }
         # Mock the refresh token response
         refresh_token = responses.replace(
@@ -169,8 +213,11 @@ class TestHttp(unittest.TestCase):
             status=200,
         )
 
+        self.token_manager_authenticated.has_valid_refresh_token = mock.MagicMock(
+            return_value=False
+        )
+
         # Force token refresh
-        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
         instance._refresh_token()
 
         assert refresh_token.call_count == 1
@@ -181,7 +228,7 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_refresh_token_failure(self):
         """Test that refresh token failure raises an exception."""
-        instance = Http(debug=True)
+        instance = Http(debug=True, token_manager=self.token_manager_authenticated)
         instance.device_activation()
 
         # Mock the refresh token response with failure
@@ -192,8 +239,9 @@ class TestHttp(unittest.TestCase):
             status=400,
         )
 
-        # Force token refresh
-        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        self.token_manager_authenticated.has_valid_refresh_token = mock.MagicMock(
+            return_value=False
+        )
 
         with self.assertRaises(TadoException):
             instance._refresh_token()
@@ -203,7 +251,7 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_configure_url_endpoint_mobile(self):
         """Test URL configuration for the MOBILE endpoint."""
-        http = Http()
+        http = Http(token_manager=self.token_manager_authenticated)
         request = TadoRequest(endpoint=Endpoint.MOBILE, command="test")
         url = http._configure_url(request)
         self.assertEqual(url, "https://my.tado.com/mobile/1.9/test")
@@ -211,7 +259,7 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_configure_url_domain_device(self):
         """Test URL configuration for the DEVICES domain."""
-        http = Http()
+        http = Http(token_manager=self.token_manager_authenticated)
         request = TadoRequest(command="test", domain=Domain.DEVICES, device="id1234")
         url = http._configure_url(request)
         self.assertEqual(url, "https://my.tado.com/api/v2/devices/id1234/test")
@@ -219,7 +267,7 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_configure_url_domain_me(self):
         """Test URL configuration for the ME domain."""
-        http = Http()
+        http = Http(token_manager=self.token_manager_authenticated)
         request = TadoRequest(command="test", domain=Domain.ME)
         url = http._configure_url(request)
         self.assertEqual(url, "https://my.tado.com/api/v2/me")
@@ -227,7 +275,7 @@ class TestHttp(unittest.TestCase):
     @responses.activate
     def test_configure_url_domain_home_with_params(self):
         """Test URL configuration for the ME domain."""
-        http = Http()
+        http = Http(token_manager=self.token_manager_authenticated)
         http._id = 123
         request = TadoRequest(
             command="test", domain=Domain.HOME, params={"test": "value"}
@@ -240,10 +288,7 @@ class TestHttp(unittest.TestCase):
     def test_check_device_activation(self, mock_sleep):
         """Test the device activation check process."""
 
-        http = Http()
-        http._set_device_auth_data(
-            {"interval": 5, "device_code": "mock_code", "expires_in": 5}
-        )
+        http = Http(token_manager=self.token_manager_pending)
 
         result = http._check_device_activation()
         self.assertTrue(result)

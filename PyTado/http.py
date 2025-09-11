@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from json import dump as json_dump
 from json import load as json_load
 from pathlib import Path
+from multiprocessing import current_process
 from typing import Any
 from urllib.parse import urlencode
 
@@ -175,8 +176,6 @@ class Http:
             _LOGGER.setLevel(logging.WARNING)
 
         self._token_manager = token_manager
-        self._token_refresh: str | None = None
-        self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
         self._headers = {
@@ -189,7 +188,6 @@ class Http:
         self._device_verification_url: str | None = None
         self._device_activation_status = DeviceActivationStatus.NOT_STARTED
         self._device_activation_check_interval = 10
-        self._expires_at: datetime | None = None
 
         self._id: int | None = None
         self._x_api: bool | None = None
@@ -353,23 +351,11 @@ class Http:
         headers["Mime-Type"] = "application/json;charset=UTF-8"
         return json.dumps(request.payload).encode("utf8")
 
-    def _set_oauth_header(self, data: dict[str, Any]) -> None:
+    def _set_oauth_header(self, oauth_data: dict[str, Any]) -> None:
         """Set the OAuth header and return the refresh token"""
 
-        access_token = data["access_token"]
-        expires_in = float(data["expires_in"])
-        refresh_token = data["refresh_token"]
-
-        self._token_refresh = refresh_token
-        self._refresh_at = datetime.now(timezone.utc)
-        self._refresh_at = self._refresh_at + timedelta(seconds=expires_in)
-        # We subtract 30 seconds from the correct refresh time.
-        # Then we have a 30 seconds timespan to get a new refresh_token
-        self._refresh_at = self._refresh_at - timedelta(seconds=30)
-
-        self._headers["Authorization"] = f"Bearer {access_token}"
-
-        self._token_manager.save_token(refresh_token)
+        self._token_manager.save_oauth_data(oauth_data)
+        self._headers["Authorization"] = f"Bearer {oauth_data.get("access_token")}"
 
     def _refresh_token(
         self, refresh_token: str | None = None, force_refresh: bool = False
@@ -393,7 +379,7 @@ class Http:
                                            and force_refresh is False.
         """
 
-        if self._refresh_at >= datetime.now(timezone.utc) and not force_refresh:
+        if self._token_manager.has_valid_refresh_token() and not force_refresh:
             return True
 
         url = "https://login.tado.com/oauth2/token"
@@ -450,41 +436,54 @@ class Http:
         if self._device_activation_status != DeviceActivationStatus.NOT_STARTED:
             raise TadoException("The device has been started already")
 
-        url = "https://login.tado.com/oauth2/device_authorize"
-        data = {
-            "client_id": CLIENT_ID_DEVICE,
-            "scope": "offline_access",
-        }
+        while self._token_manager.is_locked():
+            print(f"[{current_process().pid}] waiting because locked")
+            time.sleep(5)
 
-        try:
-            response = self._session.request(
-                method="post",
-                url=url,
-                params=data,
-                timeout=_DEFAULT_TIMEOUT,
-                data=json.dumps({}).encode("utf8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Referer": "https://app.tado.com/",
-                },
-            )
+        with self._token_manager.lock_device_activation("device_flow"):
+            url = "https://login.tado.com/oauth2/device_authorize"
+            data = {
+                "client_id": CLIENT_ID_DEVICE,
+                "scope": "offline_access",
+            }
 
-            response.raise_for_status()
+            time.sleep(50)
 
-            _LOGGER.debug("Device flow response: %s", response.json())
+            try:
+                response = self._session.request(
+                    method="post",
+                    url=url,
+                    params=data,
+                    timeout=_DEFAULT_TIMEOUT,
+                    data=json.dumps({}).encode("utf8"),
+                    headers={
+                        "Content-Type": "application/json",
+                        "Referer": "https://app.tado.com/",
+                    },
+                )
 
-        except requests.exceptions.ConnectionError as e:
-            raise TadoException(e) from e
-        except requests.exceptions.HTTPError as e:
-            raise TadoException(
-                f"Login failed. Status code: {response.status_code} "
-                f"and reason: {response.reason}"
-            ) from e
+                response.raise_for_status()
 
-        return self._set_device_auth_data(response.json())
+                _LOGGER.debug("Device flow response: %s", response.json())
+
+            except requests.exceptions.ConnectionError as e:
+                raise TadoException(e) from e
+            except requests.exceptions.HTTPError as e:
+                raise TadoException(
+                    f"Login failed. Status code: {
+                        response.status_code} and reason: {
+                        response.reason}"
+                ) from e
+
+            return self._set_device_auth_data(response.json())
 
     def _set_device_auth_data(self, device_flow_data: dict) -> DeviceActivationStatus:
         """Set the device auth data and return the status"""
+        if "expires_at" not in device_flow_data:
+            expires_in_seconds = device_flow_data["expires_in"]
+            expires_at = datetime.now() + timedelta(seconds=expires_in_seconds)
+            device_flow_data["expires_at"] = expires_at.isoformat()
+
         self._token_manager.save_pending_device_data(device_flow_data)
 
         self._user_code = device_flow_data.get("user_code")
@@ -497,16 +496,13 @@ class Http:
 
             _LOGGER.info("Please visit the following URL: %s", visit_url)
 
-        expires_in_seconds = self._device_flow_data["expires_in"]
-        self._expires_at = datetime.now(timezone.utc) + timedelta(
-            seconds=expires_in_seconds
-        )
-
         self._device_activation_check_interval = device_flow_data["interval"]
 
         _LOGGER.info(
             "Waiting for user to authorize the device. Expires at %s",
-            self._expires_at.strftime("%Y-%m-%d %H:%M:%S"),
+            datetime.fromisoformat(device_flow_data["expires_at"]).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            ),
         )
 
         return DeviceActivationStatus.PENDING
@@ -515,10 +511,14 @@ class Http:
         if self.device_activation_status == DeviceActivationStatus.COMPLETED:
             return True
 
-        if self._expires_at is not None and datetime.timestamp(
-            datetime.now(timezone.utc)
-        ) > datetime.timestamp(self._expires_at):
+        if not self._token_manager.has_pending_device_data():
+            self._token_manager.save_pending_device_data({})
             raise TadoException("User took too long to enter key")
+
+        _LOGGER.info(
+            "Waiting for %s seconds to check for device",
+            self._device_activation_check_interval,
+        )
 
         # Await the desired interval, before polling the API again
         time.sleep(self._device_activation_check_interval)
@@ -548,7 +548,19 @@ class Http:
             _LOGGER.info(
                 "Authorization pending, waiting for user to authorize. Continue polling."
             )
+
+            if self._token_manager.has_pending_device_data():
+                self._set_device_auth_data(
+                    self._token_manager.load_pending_device_data()
+                )
+
             return False
+
+        # Check if a user has already activated this device
+        if self._token_manager.has_valid_refresh_token():
+            if self._refresh_token(force_refresh=True):
+                self._device_ready()
+            return True
 
         raise TadoException(f"Login failed. Reason: {token_response.reason}")
 
