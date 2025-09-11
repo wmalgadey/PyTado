@@ -71,8 +71,7 @@ class FileTokenManager(TokenManagerInterface):
                     data = json_load(f)
 
                     if FileContent.REFRESH_TOKEN in data:
-                        self._set_oauth_data(
-                            {"refresh_token": data[FileContent.REFRESH_TOKEN]})
+                        self._set_oauth_data({"refresh_token": data[FileContent.REFRESH_TOKEN]})
                     else:
                         self._set_oauth_data(data.get(FileContent.OAUTH_DATA, {}))
 
