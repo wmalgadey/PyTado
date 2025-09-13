@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "python-tado"
-version = "0.19.2"
+version = "1.0.0"
 description = "PyTado from chrism0dwk, modified by w.malgadey, diplix, michaelarnauts, LenhartStephan, splifter, syssi, andersonshatch, Yippy, p0thi, Coffee2CodeNL, chiefdragon, FilBr, nikilase, albertomontesg, Moritz-Schmidt, palazzem"
 authors = [
   "Chris Jewell <chrism0dwk@gmail.com>",
@@ -42,6 +42,7 @@ pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pytest-socket = "*"
+pydantic = "^2.10.6"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
@@ -56,6 +57,9 @@ pytado = "PyTado.__main__:main"
 include = "PyTado"
 from = "."
 
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+
 [tool.coverage.report]
 show_missing = true
 
@@ -67,3 +71,6 @@ source = ["PyTado"]
 exclude_dirs = ["tests"]
 tests = []
 skips = []
+
+[tool.mypy]
+strict = true
