@@ -11,6 +11,7 @@ import requests
 import PyTado.interface.api as API
 from PyTado.exceptions import TadoException
 from PyTado.http import DeviceActivationStatus, Http
+from PyTado.token_manager import FileTokenManager, TokenManagerInterface
 
 
 def deprecated(new_func_name):
@@ -54,6 +55,7 @@ class Tado:
         token_file_path: str | None = None,
         saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
+        token_manager: TokenManagerInterface | None = None,
         debug: bool = False,
         user_agent: str | None = None,
     ):
@@ -67,15 +69,22 @@ class Tado:
                 Defaults to None.
             http_session (requests.Session | None, optional): An optional HTTP session to use for
                 requests (can be used in unit tests). Defaults to None.
+            token_manager (TokenManagerInterface | None, optional): An optional token manager to
+                use to implement custom ways to save or load tokens. Can't be used together with
+                token_file_path and saved_refresh_token. Defaults to None.
             debug (bool, optional): Flag to enable or disable debug mode. Defaults to False.
             user_agent (str | None): Optional user-agent header to use for the HTTP requests.
                 If None, a default user-agent PyTado/<PyTado-version> will be used.
         """
 
+        if token_manager and (token_file_path or saved_refresh_token):
+            raise ValueError(
+                "Cannot provide both token_manager and token_file_path/saved_refresh_token."
+            )
+
         self._http = Http(
-            token_file_path=token_file_path,
-            saved_refresh_token=saved_refresh_token,
             http_session=http_session,
+            token_manager=token_manager or FileTokenManager(token_file_path, saved_refresh_token),
             debug=debug,
             user_agent=user_agent,
         )

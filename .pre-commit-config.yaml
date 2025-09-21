@@ -1,4 +1,4 @@
-fail_fast: true
+fail_fast: false
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -7,16 +7,17 @@ repos:
     - id: no-commit-to-branch
       name: "Don't commit to master branch"
       args: [--branch, master]
+      fail_fast: true
+    - id: check-merge-conflict
+      fail_fast: true
     - id: check-ast
     - id: check-json
-    - id: check-merge-conflict
     - id: check-toml
     - id: check-yaml
     - id: check-json
     - id: end-of-file-fixer
     - id: mixed-line-ending
     - id: trailing-whitespace
-
 
 - repo: https://github.com/PyCQA/isort
   rev: 6.0.1
@@ -64,6 +65,7 @@ repos:
     - id: mypy
       exclude: tests/
       additional_dependencies: [types-requests]
+      fail_fast: true
 
 - repo: local
   hooks:
@@ -80,4 +82,4 @@ repos:
       types: [python]
       pass_filenames: false
       always_run: true
-      additional_dependencies: [responses, pytest-mock, pytest-socket]
+      additional_dependencies: [responses, platformdirs, pytest-mock, pytest-socket]

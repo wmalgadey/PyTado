@@ -22,13 +22,19 @@ class TadoZoneTestCase(unittest.TestCase):
         check_x_patch = mock.patch(
             "PyTado.http.Http._check_x_line_generation", return_value=False
         )
+        request_patch = mock.patch("PyTado.http.Http._refresh_token", return_value=True)
+        device_ready_patch = mock.patch("PyTado.http.Http._device_ready")
 
         login_patch.start()
         get_me_patch.start()
         check_x_patch.start()
+        request_patch.start()
+        device_ready_patch.start()
         self.addCleanup(login_patch.stop)
         self.addCleanup(get_me_patch.stop)
         self.addCleanup(check_x_patch.stop)
+        self.addCleanup(request_patch.stop)
+        self.addCleanup(device_ready_patch.stop)
 
         self.http = Http()
         self.tado_client = Tado(self.http)
