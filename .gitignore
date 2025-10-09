@@ -177,3 +177,4 @@ _site/
 # node/npm
 node_modules/
 package-lock.json
+docs/content/api.md
