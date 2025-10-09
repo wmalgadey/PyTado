@@ -16,11 +16,22 @@ omit =
 show_missing = True
 
 # Exclude certain lines from coverage calculations. For instance, you might exclude:
-exclude_lines =
+#exclude_lines =
+exclude_also =
     pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
     # Defensive code
     if __name__ == .__main__.:
     raise NotImplementedError
+    if TYPE_CHECKING:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    @overload
 
 [html]
 # Directory where the HTML coverage report will be generated.

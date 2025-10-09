@@ -42,6 +42,7 @@ pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pytest-socket = "*"
+pydantic = "^2.10.6"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
@@ -56,6 +57,9 @@ pytado = "PyTado.__main__:main"
 include = "PyTado"
 from = "."
 
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+
 [tool.coverage.report]
 show_missing = true
 
@@ -67,3 +71,6 @@ source = ["PyTado"]
 exclude_dirs = ["tests"]
 tests = []
 skips = []
+
+[tool.mypy]
+strict = true
