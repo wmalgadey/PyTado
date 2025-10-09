@@ -8,6 +8,7 @@ import logging
 import os
 import pprint
 import time
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from json import dump as json_dump
 from json import load as json_load
@@ -21,7 +22,7 @@ from urllib3 import Retry
 from urllib3.exceptions import MaxRetryError
 
 from PyTado import __version__
-from PyTado.const import CLIENT_ID_DEVICE
+from PyTado.const import CLIENT_ID_DEVICE, HTTP_CODES_OK
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
 
@@ -73,55 +74,31 @@ class DeviceActivationStatus(enum.StrEnum):
     COMPLETED = "COMPLETED"
 
 
+@dataclass
 class TadoRequest:
     """Data Container for my.tado.com API Requests"""
 
-    def __init__(
-        self,
-        endpoint: Endpoint = Endpoint.MY_API,
-        command: str | None = None,
-        action: Action | str = Action.GET,
-        payload: dict[str, Any] | None = None,
-        domain: Domain = Domain.HOME,
-        device: int | str | None = None,
-        mode: Mode = Mode.OBJECT,
-        params: dict[str, Any] | None = None,
-    ) -> None:
-        self.endpoint = endpoint
-        self.command = command
-        self.action = action
-        self.payload = payload
-        self.domain = domain
-        self.device = device
-        self.mode = mode
-        self.params = params
+    endpoint: Endpoint = Endpoint.MY_API
+    command: str | None = None
+    action: Action | str = Action.GET
+    payload: dict[str, Any] | list[Any] | None = None
+    domain: Domain = Domain.HOME
+    device: int | str | None = None
+    mode: Mode = Mode.OBJECT
+    params: dict[str, Any] | None = None
 
 
+@dataclass
 class TadoXRequest(TadoRequest):
     """Data Container for hops.tado.com (Tado X) API Requests"""
 
-    def __init__(
-        self,
-        endpoint: Endpoint = Endpoint.HOPS_API,
-        command: str | None = None,
-        action: Action | str = Action.GET,
-        payload: dict[str, Any] | None = None,
-        domain: Domain = Domain.HOME,
-        device: int | str | None = None,
-        mode: Mode = Mode.OBJECT,
-        params: dict[str, Any] | None = None,
-    ) -> None:
-        super().__init__(
-            endpoint=endpoint,
-            command=command,
-            action=action,
-            payload=payload,
-            domain=domain,
-            device=device,
-            mode=mode,
-            params=params,
-        )
-        self._action = action
+    endpoint: Endpoint = Endpoint.HOPS_API
+    _action: Action | str = (
+        Action.GET
+    )  # private variable to manipulate action property in this class
+
+    def __post_init__(self) -> None:
+        self._action = self.action
 
     @property
     def action(self) -> Action | str:
@@ -131,7 +108,7 @@ class TadoXRequest(TadoRequest):
         return self._action
 
     @action.setter
-    def action(self, value: Action | str) -> None:
+    def action(self, value: Action | str) -> None:  # type: ignore
         """Set request action"""
         self._action = value
 
@@ -150,13 +127,28 @@ _DEFAULT_RETRIES = 5
 class Http:
     """API Request Class"""
 
+    _refresh_at: datetime
+    _session: requests.Session
+    _headers: dict[str, str]
+    _username: str
+    _password: str
+    _id: int
+    _token_refresh: str | None = None
+    _x_api: bool | None = None
+    _user_code: str | None = None
+    _device_verification_url: str | None = None
+    _device_activation_status: DeviceActivationStatus = (
+        DeviceActivationStatus.NOT_STARTED
+    )
+    _expires_at: datetime | None = None
+
     def __init__(
         self,
         token_file_path: str | None = None,
         saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
-        user_agent: str | None = None
+        user_agent: str | None = None,
     ) -> None:
         """
         Initialize the HTTP client for interacting with the Tado API.
@@ -196,8 +188,10 @@ class Http:
         self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
-        self._headers = {"Referer": "https://app.tado.com/",
-                         "user-agent": user_agent or f"PyTado/{__version__}"}
+        self._headers = {
+            "Referer": "https://app.tado.com/",
+            "user-agent": user_agent or f"PyTado/{__version__}",
+        }
 
         self._user_code: str | None = None
         self._device_verification_url: str | None = None
@@ -279,7 +273,9 @@ class Http:
         session.mount("http://", self._http_adapter)
         return session
 
-    def _log_response(self, response: requests.Response, *args, **kwargs) -> None:
+    def _log_response(
+        self, response: requests.Response, *args: Any, **kwargs: Any
+    ) -> None:
         og_request_method = response.request.method
         og_request_url = response.request.url
         og_request_headers = response.request.headers
@@ -298,7 +294,7 @@ class Http:
             f"\n\tData: {response_data}"
         )
 
-    def request(self, request: TadoRequest) -> dict[str, Any]:
+    def request(self, request: TadoRequest) -> dict[str, Any] | list[Any]:
         """Request something from the API with a TadoRequest"""
         self._refresh_token()
 
@@ -321,10 +317,25 @@ class Http:
             _LOGGER.error("Max retries exceeded: %s", e)
             raise TadoException(e) from e
 
-        if response.text is None or response.text == "":
+        if response.text == "":
             return {}
 
-        return response.json()
+        if response.status_code not in HTTP_CODES_OK:
+            _LOGGER.error(
+                "Request %s failed with status code %d: %s",
+                url,
+                response.status_code,
+                response.json(),
+            )
+            raise TadoException(
+                f"Request failed with status code {response.status_code}"
+            )
+
+        response_json = response.json()
+        if isinstance(response_json, (dict, list)):
+            return response_json
+
+        raise TadoException("Unexpected response type")
 
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
@@ -377,7 +388,7 @@ class Http:
 
         self._save_token()
 
-        return refresh_token
+        return str(refresh_token)
 
     def _load_token(self) -> bool:
         """Load the refresh token from a file."""
@@ -465,7 +476,7 @@ class Http:
 
         return True
 
-    def _save_token(self):
+    def _save_token(self) -> None:
         """Save the refresh token to a file."""
         if not self._token_file_path or not self._token_refresh:
             return
@@ -547,7 +558,7 @@ class Http:
             raise TadoException("User took too long to enter key")
 
         # Await the desired interval, before polling the API again
-        time.sleep(self._device_flow_data["interval"])
+        time.sleep(self._device_flow_data.get("interval", 0))
 
         try:
             token_response = self._session.request(
@@ -590,7 +601,7 @@ class Http:
 
         self._device_ready()
 
-    def _device_ready(self):
+    def _device_ready(self) -> None:
         """after device refresh code has been obtained"""
         self._id = self._get_id()
         self._x_api = self._check_x_line_generation()
@@ -603,11 +614,16 @@ class Http:
         request.action = Action.GET
         request.domain = Domain.ME
 
-        homes_ = self.request(request)["homes"]
+        response = self.request(request)
 
-        return homes_[0]["id"]
+        if not isinstance(response, dict):
+            raise TadoException("Unexpected response type")
 
-    def _check_x_line_generation(self):
+        homes_ = response["homes"]
+
+        return int(homes_[0]["id"])
+
+    def _check_x_line_generation(self) -> bool:
         # get home info
         request = TadoRequest()
         request.action = Action.GET
@@ -615,5 +631,8 @@ class Http:
         request.command = ""
 
         home_ = self.request(request)
+
+        if not isinstance(home_, dict):
+            raise TadoException("Unexpected response type")
 
         return "generation" in home_ and home_["generation"] == "LINE_X"
