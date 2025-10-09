@@ -12,6 +12,10 @@ from PyTado.exceptions import TadoException
 from PyTado.http import Action, Mode, TadoXRequest
 from PyTado.models import pre_line_x
 from PyTado.models.home import HomeState
+from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
+from PyTado.models.line_x.room import RoomState
+from PyTado.models.line_x.schedule import Schedule as ScheduleX
+from PyTado.models.line_x.schedule import SetSchedule
 from PyTado.models.pre_line_x.schedule import Schedule
 from PyTado.models.pre_line_x.zone import TemperatureCapabilitiesValues
 from PyTado.types import (
@@ -29,16 +33,13 @@ from PyTado.types import (
     VerticalSwing,
     ZoneType,
 )
+from PyTado.zone.base_zone import BaseZone
 
 if TYPE_CHECKING:
     from PyTado.interface.api.hops_tado import TadoX  # pragma: no cover
-from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
-from PyTado.models.line_x.room import RoomState
-from PyTado.models.line_x.schedule import Schedule as ScheduleX
-from PyTado.models.line_x.schedule import SetSchedule
-from PyTado.zone.base_zone import BaseZone
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 _LOGGER.setLevel(logging.DEBUG)
 
@@ -56,26 +57,28 @@ class TadoRoom(BaseZone):
 
     @cached_property
     def _raw_state(self) -> RoomState:
-        print("Getting room state for room %s", self.id)
+        print("Getting room state for room %s", self._id)
         request = TadoXRequest()
-        request.command = f"rooms/{self.id:d}"
+        request.command = f"rooms/{self._id:d}"
         data = self._http.request(request)
 
         return RoomState.model_validate(data)
 
     @cached_property
     def _raw_room(self) -> DevicesRooms:
-        print("Getting room data for room %s", self.id)
+        print("Getting room data for room %s", self._id)
         request = TadoXRequest()
         request.command = "roomsAndDevices"
 
         rooms_and_devices = DevicesResponse.model_validate(self._http.request(request))
 
         room = next(
-            filter(lambda x: x.room_id == self.id, rooms_and_devices.rooms), None
+            filter(lambda x: x.room_id == self._id, rooms_and_devices.rooms), None
         )
         if room is None:
-            raise TadoException(f"Room {self.id} not found in roomsAndDevices response")
+            raise TadoException(
+                f"Room {self._id} not found in roomsAndDevices response"
+            )
 
         return room
 
@@ -250,7 +253,7 @@ class TadoRoom(BaseZone):
         """
 
         request = TadoXRequest()
-        request.command = f"rooms/{self.id:d}/schedule"
+        request.command = f"rooms/{self._id:d}/schedule"
 
         return ScheduleX.model_validate(self._http.request(request))
 
@@ -270,7 +273,7 @@ class TadoRoom(BaseZone):
     ) -> None | list[Schedule]:
         if isinstance(data, SetSchedule):
             request = TadoXRequest()
-            request.command = f"rooms/{self.id:d}/schedule"
+            request.command = f"rooms/{self._id:d}/schedule"
             request.action = Action.SET
             request.payload = data.model_dump(by_alias=True, exclude_defaults=True)
             request.mode = Mode.OBJECT
@@ -284,7 +287,7 @@ class TadoRoom(BaseZone):
         """
 
         request = TadoXRequest()
-        request.command = f"rooms/{self.id:d}/resumeSchedule"
+        request.command = f"rooms/{self._id:d}/resumeSchedule"
         request.action = Action.SET
 
         self._http.request(request)
@@ -352,7 +355,7 @@ class TadoRoom(BaseZone):
             )
 
         request = TadoXRequest()
-        request.command = f"rooms/{self.id:d}/manualControl"
+        request.command = f"rooms/{self._id:d}/manualControl"
         request.action = Action.SET
         request.payload = post_data
 

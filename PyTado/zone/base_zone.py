@@ -1,16 +1,34 @@
+"""Base module for Tado zone (room) management and control.
+
+This module provides the abstract base class for interacting with Tado zones/rooms,
+implementing core functionality for both legacy (pre-LineX) and current (LineX) Tado devices.
+It defines the interface for:
+
+- Zone state monitoring (temperature, humidity, HVAC status)
+- Climate control operations (setting temperature, modes, schedules)
+- Device management and configuration
+- Window detection features
+- Timer and schedule management
+- Power and presence handling
+
+The BaseZone class serves as the foundation for specific zone implementations
+(MyZone and HopsZone) while ensuring consistent behavior across different
+Tado API versions and device generations.
+
+Note:
+    All temperature values are in Celsius
+    All percentage values are from 0 to 100
+"""
+
 from abc import abstractmethod
 from datetime import date, datetime, timedelta
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, overload
 
 from PyTado.http import Http, TadoRequest
-from PyTado.models.pre_line_x.zone import Capabilities
-
-if TYPE_CHECKING:
-    from PyTado.interface.api.hops_tado import TadoX
-    from PyTado.interface.api.my_tado import Tado
 from PyTado.models import line_x, pre_line_x
 from PyTado.models.historic import Historic
+from PyTado.models.pre_line_x.zone import Capabilities
 from PyTado.models.return_models import Climate
 from PyTado.types import (
     DayType,
@@ -27,19 +45,47 @@ from PyTado.types import (
     ZoneType,
 )
 
+if TYPE_CHECKING:
+    from PyTado.interface.api.hops_tado import TadoX
+    from PyTado.interface.api.my_tado import Tado
+
 
 class BaseZone:
-    id: int
+    """Base class for Tado zone/room control.
+
+    This class provides the foundation for interacting with Tado zones/rooms,
+    implementing common functionality and defining the interface that specific
+    zone implementations must follow.
+
+    Attributes:
+        id: The unique identifier of the zone/room
+        _home: Reference to the parent Tado/TadoX instance
+        _http: HTTP client for making API requests
+    """
+
+    _id: int
 
     _home: "Tado | TadoX"
     _http: Http
 
     def __init__(self, home: "Tado | TadoX", id: int):
+        """Initialize a new BaseZone instance.
+
+        Args:
+            home: The parent Tado/TadoX instance this zone/room belongs to
+            id: The unique identifier of the zone/room
+        """
         self._home = home
-        self._http = home._http
-        self.id = id
+        self._http = home._http  # type: ignore
+        self._id = id
 
     def update(self) -> None:
+        """Force update of the zone's cached state.
+
+        This method clears the cached state and room data, forcing a fresh
+        fetch on the next access. This is useful when the zone's state
+        might have changed externally.
+        """
         try:
             del self._raw_state
         except AttributeError:
@@ -230,6 +276,9 @@ class BaseZone:
     def power(self) -> Power:
         """
         Heating power in the zone/room.
+
+        Returns:
+            Power: The current power state (ON/OFF)
         """
         return self._raw_state.setting.power
 
@@ -238,18 +287,32 @@ class BaseZone:
     def zone_type(self) -> ZoneType | None:
         """
         Type of the zone/room.
+
+        Returns:
+            ZoneType | None: The type of zone (HEATING/HOT_WATER/AIR_CONDITIONING)
+                            or None if not set
         """
         pass
 
     @property
     def setting(self) -> line_x.Setting | pre_line_x.Setting:
+        """Current zone settings from the Tado API.
+
+        Returns:
+            Setting: The current settings object containing temperature, mode, and other
+                    configuration parameters. The exact type depends on the API version
+                    being used (LineX vs pre-LineX).
+        """
         return self._raw_state.setting
 
     @property
     @abstractmethod
     def overlay_active(self) -> bool:
-        """
-        Overlay active status.
+        """Check if manual control/overlay is currently active.
+
+        Returns:
+            bool: True if the zone is under manual control (overlay is active),
+                 False if following the automated schedule
         """
         pass
 
@@ -265,17 +328,16 @@ class BaseZone:
 
     @abstractmethod
     def get_capabilities(self) -> Capabilities:
-        """Gets capabilities of the zone"""
-        ...
+        """Gets capabilities of the zone/room."""
 
-    def get_historic(self, date: date) -> Historic:
+    def get_historic(self, day_report_date: date) -> Historic:
         """
-        Gets historic information on given date for zone
+        Gets historic information on given date for zone/room
         """
 
         request = TadoRequest()
         request.command = (
-            f"zones/{self.id:d}/dayReport?date={date.strftime('%Y-%m-%d')}"
+            f"zones/{self._id:d}/dayReport?date={day_report_date.strftime('%Y-%m-%d')}"
         )
         return Historic.model_validate(self._http.request(request))
 
@@ -333,6 +395,11 @@ class BaseZone:
 
     @abstractmethod
     def reset_zone_overlay(self) -> None:
+        """Reset any manual control/overlay back to the automated schedule.
+
+        This cancels any temporary temperature settings or mode changes and
+        returns the zone to following its configured schedule.
+        """
         pass
 
     @overload

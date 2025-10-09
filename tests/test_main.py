@@ -2,6 +2,15 @@ import unittest
 from unittest import mock
 
 import pytest
+from unittest import mock
+from PyTado.__main__ import (
+    main,
+    log_in,
+    get_me,
+    get_state,
+    get_states,
+    get_capabilities,
+)
 
 from PyTado.__main__ import (
     get_capabilities,
@@ -82,7 +91,10 @@ class TestMain(unittest.TestCase):
         args = mock.Mock()
         mock_tado_instance = mock.Mock()
         mock_log_in.return_value = mock_tado_instance
-        mock_tado_instance.get_zone_states.return_value = [{"zone": "state1"}, {"zone": "state2"}]
+        mock_tado_instance.get_zone_states.return_value = [
+            {"zone": "state1"},
+            {"zone": "state2"},
+        ]
 
         # Call the method
         with mock.patch("builtins.print") as mock_print:

@@ -17,7 +17,11 @@ from typing import Any
 from urllib.parse import urlencode
 
 import requests
+import requests.adapters
+from urllib3 import Retry
+from urllib3.exceptions import MaxRetryError
 
+from PyTado import __version__
 from PyTado.const import CLIENT_ID_DEVICE, HTTP_CODES_OK
 from PyTado.exceptions import TadoException, TadoWrongCredentialsException
 from PyTado.logger import Logger
@@ -89,7 +93,9 @@ class TadoXRequest(TadoRequest):
     """Data Container for hops.tado.com (Tado X) API Requests"""
 
     endpoint: Endpoint = Endpoint.HOPS_API
-    _action: Action | str = Action.GET
+    _action: Action | str = (
+        Action.GET
+    )  # private variable to manipulate action property in this class
 
     def __post_init__(self) -> None:
         self._action = self.action
@@ -102,7 +108,7 @@ class TadoXRequest(TadoRequest):
         return self._action
 
     @action.setter
-    def action(self, value: Action | str) -> None:
+    def action(self, value: Action | str) -> None:  # type: ignore
         """Set request action"""
         self._action = value
 
@@ -142,6 +148,7 @@ class Http:
         saved_refresh_token: str | None = None,
         http_session: requests.Session | None = None,
         debug: bool = False,
+        user_agent: str | None = None,
     ) -> None:
         """
         Initialize the HTTP client for interacting with the Tado API.
@@ -154,6 +161,8 @@ class Http:
             http_session (requests.Session | None): An optional pre-configured HTTP session.
                 If None, a new session will be created.
             debug (bool): If True, enables debug logging. Defaults to False.
+            user_agent (str | None): Optional user-agent header to use for the HTTP requests.
+                If None, a default user-agent PyTado/<PyTado-version> will be used.
 
         Returns:
             None
@@ -164,12 +173,38 @@ class Http:
         else:
             _LOGGER.setLevel(logging.WARNING)
 
+        self._retries = Retry(
+            total=_DEFAULT_RETRIES,
+            backoff_factor=0.1,
+            backoff_jitter=0.5,
+            backoff_max=120,
+            status_forcelist=[502, 503, 504],
+        )
+
+        self._http_adapter = requests.adapters.HTTPAdapter(
+            max_retries=self._retries,
+        )
+
         self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
-        self._headers = {"Referer": "https://app.tado.com/"}
+        self._headers = {
+            "Referer": "https://app.tado.com/",
+            "user-agent": user_agent or f"PyTado/{__version__}",
+        }
 
+        self._user_code: str | None = None
+        self._device_verification_url: str | None = None
+        self._device_activation_status = DeviceActivationStatus.NOT_STARTED
+        self._expires_at: datetime | None = None
+
+        self._id: int | None = None
+        self._token_refresh: str | None = None
+        self._x_api: bool | None = None
         self._token_file_path = token_file_path
+
+        self._session.mount("https://", self._http_adapter)
+        self._session.mount("http://", self._http_adapter)
 
         if saved_refresh_token or self._load_token():
             if self._refresh_token(
@@ -234,6 +269,8 @@ class Http:
     def _create_session(self) -> requests.Session:
         session = requests.Session()
         session.hooks["response"].append(self._log_response)
+        session.mount("https://", self._http_adapter)
+        session.mount("http://", self._http_adapter)
         return session
 
     def _log_response(
@@ -257,7 +294,7 @@ class Http:
             f"\n\tData: {response_data}"
         )
 
-    def request(self, request: TadoRequest) -> dict[str, Any] | list[Any]:
+    def request(self, request: TadoRequest) -> dict[str, Any] | list[Any] | str:
         """Request something from the API with a TadoRequest"""
         self._refresh_token()
 
@@ -271,30 +308,16 @@ class Http:
         prepped = http_request.prepare()
         prepped.hooks["response"].append(self._log_response)
 
-        retries = _DEFAULT_RETRIES
+        try:
+            response = self._session.send(prepped)
+        except TadoWrongCredentialsException as e:
+            _LOGGER.error("Credentials Exception: %s", e)
+            raise e
+        except MaxRetryError as e:
+            _LOGGER.error("Max retries exceeded: %s", e)
+            raise TadoException(e) from e
 
-        while retries >= 0:
-            try:
-                response = self._session.send(prepped)
-                break
-            except TadoWrongCredentialsException as e:
-                _LOGGER.error("Credentials Exception: %s", e)
-                raise e
-            except requests.exceptions.ConnectionError as e:
-                if retries > 0:
-                    _LOGGER.warning("Connection error: %s", e)
-                    self._session.close()
-                    self._session = self._create_session()
-                    retries -= 1
-                else:
-                    _LOGGER.error(
-                        "Connection failed after %d retries: %s",
-                        _DEFAULT_RETRIES,
-                        e,
-                    )
-                    raise TadoException(e) from e
-
-        if response.text is None or response.text == "":
+        if response.text == "":
             return {}
 
         if response.status_code not in HTTP_CODES_OK:
@@ -309,10 +332,10 @@ class Http:
             )
 
         response_json = response.json()
-        if isinstance(response_json, dict) or isinstance(response_json, list):
+        if isinstance(response_json, (dict, list, str)):
             return response_json
-        else:
-            raise TadoException("Unexpected response type")
+
+        raise TadoException("Unexpected response type")
 
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:

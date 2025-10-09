@@ -7,17 +7,19 @@ from datetime import datetime, timedelta
 from functools import cached_property
 from typing import Any, final, overload
 
+from PyTado.const import (
+    FAN_SPEED_TO_FAN_LEVEL,
+    TADO_MODES_TO_HVAC_ACTION,
+)
 from PyTado.exceptions import TadoException
 from PyTado.http import Action, Mode, TadoRequest
 from PyTado.models import line_x, pre_line_x
 from PyTado.models.pre_line_x.schedule import Schedule, Schedules
 from PyTado.models.pre_line_x.zone import Capabilities, ZoneControl
 from PyTado.types import (
-    TADO_MODES_TO_HVAC_ACTION,
     DayType,
     FanLevel,
     FanSpeed,
-    FanSpeedToFanLevel,
     HorizontalSwing,
     HvacAction,
     HvacMode,
@@ -36,10 +38,12 @@ _LOGGER = logging.getLogger(__name__)
 
 @final
 class TadoZone(BaseZone):
+    """Tado Zone data structure for my.tado.com."""
+
     @cached_property
     def _raw_state(self) -> pre_line_x.ZoneState:
         request = TadoRequest()
-        request.command = f"zones/{self.id}/state"
+        request.command = f"zones/{self._id}/state"
 
         return pre_line_x.ZoneState.model_validate(self._http.request(request))
 
@@ -51,9 +55,9 @@ class TadoZone(BaseZone):
         zones = [
             pre_line_x.Zone.model_validate(zone) for zone in self._http.request(request)
         ]
-        zone = next(filter(lambda z: z.id == self.id, zones), None)
+        zone = next(filter(lambda z: z.id == self._id, zones), None)
         if zone is None:
-            raise TadoException(f"Zone with id {self.id} not found")
+            raise TadoException(f"Zone with id {self._id} not found")
 
         return zone
 
@@ -177,7 +181,7 @@ class TadoZone(BaseZone):
     @cached_property
     def _default_overlay(self) -> pre_line_x.ZoneOverlayDefault:
         request = TadoRequest()
-        request.command = f"zones/{self.id}/defaultOverlay"
+        request.command = f"zones/{self._id}/defaultOverlay"
 
         return pre_line_x.ZoneOverlayDefault.model_validate(self._http.request(request))
 
@@ -260,7 +264,7 @@ class TadoZone(BaseZone):
         if self._raw_state.setting.fan_level:
             return self._raw_state.setting.fan_level
         if self._raw_state.setting.fan_speed:
-            return FanSpeedToFanLevel.get(self._raw_state.setting.fan_speed, None)
+            return FAN_SPEED_TO_FAN_LEVEL.get(self._raw_state.setting.fan_speed, None)
         return None
 
     @property
@@ -289,7 +293,7 @@ class TadoZone(BaseZone):
 
     def get_capabilities(self) -> Capabilities:
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/capabilities"
+        request.command = f"zones/{self._id:d}/capabilities"
 
         return Capabilities.model_validate(self._http.request(request))
 
@@ -299,7 +303,7 @@ class TadoZone(BaseZone):
         """
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/schedule/activeTimetable"
+        request.command = f"zones/{self._id:d}/schedule/activeTimetable"
         request.mode = Mode.PLAIN
         data = self._http.request(request)
 
@@ -330,11 +334,11 @@ class TadoZone(BaseZone):
         request = TadoRequest()
         if day:
             request.command = (
-                f"zones/{self.id:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+                f"zones/{self._id:d}/schedule/timetables/{timetable:d}/blocks/{day}"
             )
         else:
             request.command = (
-                f"zones/{self.id:d}/schedule/timetables/{timetable:d}/blocks"
+                f"zones/{self._id:d}/schedule/timetables/{timetable:d}/blocks"
             )
         request.mode = Mode.PLAIN
 
@@ -361,7 +365,7 @@ class TadoZone(BaseZone):
         if isinstance(data, list):
             request = TadoRequest()
             request.command = (
-                f"zones/{self.id:d}/schedule/timetables/{timetable:d}/blocks/{day}"
+                f"zones/{self._id:d}/schedule/timetables/{timetable:d}/blocks/{day}"
             )
             request.action = Action.CHANGE
             request.payload = [schedule.model_dump(by_alias=True) for schedule in data]
@@ -374,7 +378,7 @@ class TadoZone(BaseZone):
         """
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/overlay"
+        request.command = f"zones/{self._id:d}/overlay"
         request.action = Action.RESET
         request.mode = Mode.PLAIN
 
@@ -421,7 +425,7 @@ class TadoZone(BaseZone):
         fan_level: FanLevel | None = None,
         vertical_swing: VerticalSwing | None = None,
         horizontal_swing: HorizontalSwing | None = None,
-    ) -> None | dict[str, Any]:
+    ) -> None | dict[str, Any] | list[Any] | str:
         post_data: dict[str, Any] = {
             "setting": {"type": device_type or self._raw_room.type, "power": power},
             "termination": {"typeSkillBasedApp": overlay_mode},
@@ -448,7 +452,7 @@ class TadoZone(BaseZone):
             post_data["termination"]["durationInSeconds"] = duration.total_seconds()
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/overlay"
+        request.command = f"zones/{self._id:d}/overlay"
         request.action = Action.CHANGE
         request.payload = post_data
 
@@ -461,7 +465,7 @@ class TadoZone(BaseZone):
         """
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/state/openWindow/activate"
+        request.command = f"zones/{self._id:d}/state/openWindow/activate"
         request.action = Action.SET
         request.mode = Mode.PLAIN
 
@@ -473,7 +477,7 @@ class TadoZone(BaseZone):
         """
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/state/openWindow"
+        request.command = f"zones/{self._id:d}/state/openWindow"
         request.action = Action.RESET
         request.mode = Mode.PLAIN
 
@@ -485,7 +489,7 @@ class TadoZone(BaseZone):
         """
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/control"
+        request.command = f"zones/{self._id:d}/control"
 
         return ZoneControl.model_validate(self._http.request(request))
 
@@ -495,7 +499,7 @@ class TadoZone(BaseZone):
         """
 
         request = TadoRequest()
-        request.command = f"zones/{self.id:d}/control/heatingCircuit"
+        request.command = f"zones/{self._id:d}/control/heatingCircuit"
         request.action = Action.CHANGE
         request.payload = {"circuitNumber": heating_circuit}
 

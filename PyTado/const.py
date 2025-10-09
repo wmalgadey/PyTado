@@ -1,16 +1,22 @@
 """Constant values for the Tado component."""
 
+from PyTado.types import FanLevel, FanSpeed, HvacAction, HvacMode
+
 # API client ID
-import enum
-
-from PyTado.types import HvacMode
-
 CLIENT_ID_DEVICE = "1bb50063-6b0c-4d11-bd99-387f4a91cc46"  # nosec B105
 
 
 CONST_LINK_OFFLINE = "OFFLINE"
 CONST_CONNECTION_OFFLINE = "OFFLINE"
 
+
+FAN_SPEED_TO_FAN_LEVEL = {
+    FanSpeed.OFF: FanLevel.OFF,
+    FanSpeed.AUTO: FanLevel.AUTO,
+    FanSpeed.LOW: FanLevel.LEVEL1,
+    FanSpeed.MIDDLE: FanLevel.LEVEL2,
+    FanSpeed.HIGH: FanLevel.LEVEL3,
+}
 
 # When we change the temperature setting, we need an overlay mode
 CONST_OVERLAY_TADO_MODE = (
@@ -31,6 +37,21 @@ ORDERED_KNOWN_TADO_MODES = [
     HvacMode.FAN,
 ]
 
+TADO_MODES_TO_HVAC_ACTION: dict[HvacMode, HvacAction] = {
+    HvacMode.HEAT: HvacAction.HEATING,
+    HvacMode.DRY: HvacAction.DRYING,
+    HvacMode.FAN: HvacAction.FAN,
+    HvacMode.COOL: HvacAction.COOLING,
+}
+
+TADO_HVAC_ACTION_TO_MODES: dict[HvacAction, HvacMode | HvacAction] = {
+    HvacAction.HEATING: HvacMode.HEAT,
+    HvacAction.HOT_WATER: HvacAction.HEATING,
+    HvacAction.DRYING: HvacMode.DRY,
+    HvacAction.FAN: HvacMode.FAN,
+    HvacAction.COOLING: HvacMode.COOL,
+}
+
 # These modes will not allow a temp to be set
 TADO_MODES_WITH_NO_TEMP_SETTING = [
     HvacMode.AUTO,
@@ -49,10 +70,3 @@ HOME_DOMAIN = "homes"
 DEVICE_DOMAIN = "devices"
 
 HTTP_CODES_OK = [200, 201, 202, 204]
-
-
-class Unit(enum.Enum):
-    """unit Enum"""
-
-    M3 = "m3"
-    KWH = "kWh"

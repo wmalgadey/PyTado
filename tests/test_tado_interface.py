@@ -1,8 +1,11 @@
 import unittest
 from unittest import mock
 
-from PyTado.http import DeviceActivationStatus
-from PyTado.interface import TadoClientInitializer, Tado
+from . import common
+
+from PyTado.http import DeviceActivationStatus, Http
+from PyTado.interface import Tado
+import PyTado.interface.api as API
 
 
 class TestTadoInterface(unittest.TestCase):
@@ -38,13 +41,11 @@ class TestTadoInterface(unittest.TestCase):
         check_x_patch.start()
         self.addCleanup(check_x_patch.stop)
 
-        tado_interface = TadoClientInitializer()
+        tado_interface = Tado()
         tado_interface.device_activation()
+        tado_interface.get_me()
 
-        client = tado_interface.get_client()
-        client.get_me()
-
-        assert not tado_interface.http.is_x_line
+        assert not tado_interface._http.is_x_line
 
         mock_my_get_me.assert_called_once()
         mock_hops_get_me.assert_not_called()
@@ -56,13 +57,11 @@ class TestTadoInterface(unittest.TestCase):
         with mock.patch("PyTado.http.Http._check_x_line_generation") as check_x_patch:
             check_x_patch.return_value = True
 
-            tado_interface = TadoClientInitializer()
+            tado_interface = Tado()
             tado_interface.device_activation()
+            tado_interface.get_me()
 
-            client = tado_interface.get_client()
-            client.get_me()
-
-            assert tado_interface.http.is_x_line
+            assert tado_interface._http.is_x_line
 
             mock_my_get_me.assert_not_called()
             mock_hops_get_me.assert_called_once()
@@ -77,3 +76,8 @@ class TestTadoInterface(unittest.TestCase):
                 tado_interface.get_me()
 
                 self.assertIn("API Error", str(context.exception))
+
+    def test_get_refresh_token(self):
+        tado = Tado()
+        with mock.patch.object(tado._http, "_token_refresh", new="mock_refresh_token"):
+            self.assertEqual(tado.get_refresh_token(), "mock_refresh_token")

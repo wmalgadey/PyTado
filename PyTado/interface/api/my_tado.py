@@ -20,7 +20,7 @@ from PyTado.models.pre_line_x.zone import (
     ZoneOverlayDefault,
     ZoneState,
 )
-from PyTado.models.return_models import TemperatureOffset
+from PyTado.models.return_models import SuccessResult, TemperatureOffset
 from PyTado.zone.my_zone import TadoZone
 
 
@@ -174,7 +174,7 @@ class Tado(TadoBase):
 
         return ZoneOverlayDefault.model_validate(self._http.request(request))
 
-    def get_open_window_detected(self, zone):
+    def get_open_window_detected(self, zone: int) -> dict[str, bool]:
         """
         Returns whether an open window is detected.
         """
@@ -189,7 +189,7 @@ class Tado(TadoBase):
         else:
             return {"openWindowDetected": False}
 
-    def set_open_window(self, zone: int) -> None:
+    def set_open_window(self, zone: int) -> SuccessResult:
         """
         Sets the window in zone to open
         Note: This can only be set if an open window was detected in this zone
@@ -200,9 +200,9 @@ class Tado(TadoBase):
         request.action = Action.SET
         request.mode = Mode.PLAIN
 
-        self._http.request(request)
+        return SuccessResult.model_validate(self._http.request(request))
 
-    def reset_open_window(self, zone: int) -> None:
+    def reset_open_window(self, zone: int) -> SuccessResult:
         """
         Sets the window in zone to closed
         """
@@ -212,7 +212,7 @@ class Tado(TadoBase):
         request.action = Action.RESET
         request.mode = Mode.PLAIN
 
-        self._http.request(request)
+        return SuccessResult.model_validate(self._http.request(request))
 
     def get_zone_control(self, zone: int) -> ZoneControl:
         """
@@ -238,7 +238,7 @@ class Tado(TadoBase):
 
     # ----------------- Device methods -----------------
 
-    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
+    def set_child_lock(self, device_id: str, child_lock: bool) -> SuccessResult:
         """
         Sets the child lock on a device
         """
@@ -250,20 +250,7 @@ class Tado(TadoBase):
         request.domain = Domain.DEVICES
         request.payload = {"childLockEnabled": child_lock}
 
-        self._http.request(request)
-
-    def get_device_info(self, device_id: str) -> Device:
-        """
-        Gets information about devices
-        """
-
-        request = TadoRequest()
-        request.command = ""
-        request.action = Action.GET
-        request.domain = Domain.DEVICES
-        request.device = device_id
-
-        return Device.model_validate(self._http.request(request))
+        return SuccessResult.model_validate(self._http.request(request))
 
     def get_temp_offset(self, device_id: str) -> TemperatureOffset:
         """
@@ -329,7 +316,7 @@ class Tado(TadoBase):
 
     def set_boiler_max_output_temperature(
         self, bridge_id: str, auth_key: str, temperature_in_celcius: float
-    ) -> None:
+    ) -> SuccessResult:
         """
         Set the boiler max output temperature with home by bridge endpoint
         """
@@ -344,9 +331,11 @@ class Tado(TadoBase):
             "boilerMaxOutputTemperatureInCelsius": temperature_in_celcius
         }
 
-        return self._http.request(request)
+        return SuccessResult.model_validate(self._http.request(request))
 
-    def set_flow_temperature_optimization(self, max_flow_temperature: float):
+    def set_flow_temperature_optimization(
+        self, max_flow_temperature: float
+    ) -> FlowTemperatureOptimization:
         """
         Set the flow temperature optimization.
 
@@ -359,7 +348,7 @@ class Tado(TadoBase):
         request.command = "flowTemperatureOptimization"
         request.payload = {"maxFlowTemperature": max_flow_temperature}
 
-        return self._http.request(request)
+        return FlowTemperatureOptimization.model_validate(self._http.request(request))
 
     def get_flow_temperature_optimization(self) -> FlowTemperatureOptimization:
         """

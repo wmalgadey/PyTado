@@ -33,10 +33,11 @@ from PyTado.models.home import (
 )
 from PyTado.models.line_x import Device as DeviceX
 from PyTado.models.line_x import RoomState
+from PyTado.models.line_x.room import XOpenWindow
 from PyTado.models.line_x.schedule import SetSchedule
 from PyTado.models.pre_line_x import Device, Schedule, ZoneState
-from PyTado.models.pre_line_x.zone import Capabilities
-from PyTado.models.return_models import TemperatureOffset
+from PyTado.models.pre_line_x.zone import Capabilities, OpenWindow
+from PyTado.models.return_models import SuccessResult, TemperatureOffset
 from PyTado.types import (
     DayType,
     FanLevel,
@@ -149,7 +150,9 @@ class TadoBase(metaclass=ABCMeta):
     # -------------- Home methods --------------
 
     def get_me(self) -> User:
-        """Gets home information."""
+        """
+        Gets home information.
+        """
 
         request = TadoRequest()
         request.action = Action.GET
@@ -160,18 +163,19 @@ class TadoBase(metaclass=ABCMeta):
     @abstractmethod
     def get_devices(self) -> list[Device] | list[DeviceX]:
         """Gets device information."""
-        pass
 
     @abstractmethod
     def get_zones(self) -> list[TadoZone] | list[TadoRoom]:
-        pass
+        """Gets zones information."""
 
     @abstractmethod
     def get_zone_states(self) -> dict[str, ZoneState] | dict[str, RoomState]:
-        pass
+        """Gets current state of Zone as a TadoZone object."""
 
     def get_home_state(self) -> HomeState:
-        """Gets current state of Home."""
+        """
+        Gets current state of Home.
+        """
         # Without an auto assist skill, presence is not switched automatically.
         # Instead a button is shown in the app - showHomePresenceSwitchButton,
         # which is an indicator, that the homeState can be switched:
@@ -213,21 +217,21 @@ class TadoBase(metaclass=ABCMeta):
         """
         return self._auto_geofencing_supported
 
-    def set_home(self) -> None:
+    def set_home(self) -> SuccessResult:
         """
         Sets HomeState to HOME
         """
 
         return self.change_presence(Presence.HOME)
 
-    def set_away(self) -> None:
+    def set_away(self) -> SuccessResult:
         """
         Sets HomeState to AWAY
         """
 
         return self.change_presence(Presence.AWAY)
 
-    def change_presence(self, presence: Presence) -> None:
+    def change_presence(self, presence: Presence) -> SuccessResult:
         """
         Sets HomeState to presence
         """
@@ -237,7 +241,7 @@ class TadoBase(metaclass=ABCMeta):
         request.action = Action.CHANGE
         request.payload = {"homePresence": presence}
 
-        self._http.request(request)
+        return SuccessResult.model_validate(self._http.request(request))
 
     def set_auto(self) -> None:
         """
@@ -266,10 +270,7 @@ class TadoBase(metaclass=ABCMeta):
 
     @abstractmethod
     def get_air_comfort(self) -> AirComfort:
-        """
-        Gets air quality information
-        """
-        pass
+        """Gets air quality information"""
 
     def get_users(self) -> list[User]:
         """
@@ -294,7 +295,7 @@ class TadoBase(metaclass=ABCMeta):
             for device in self._http.request(request)
         ]
 
-    def get_running_times(self, date: date = date.today()) -> RunningTimes:
+    def get_running_times(self, from_date: date = date.today()) -> RunningTimes:
         """
         Get the running times from the Minder API
         """
@@ -303,7 +304,7 @@ class TadoBase(metaclass=ABCMeta):
         request.command = "runningTimes"
         request.action = Action.GET
         request.endpoint = Endpoint.MINDER
-        request.params = {"from": date.strftime("%Y-%m-%d")}
+        request.params = {"from": from_date.strftime("%Y-%m-%d")}
 
         return RunningTimes.model_validate(self._http.request(request))
 
@@ -311,28 +312,29 @@ class TadoBase(metaclass=ABCMeta):
 
     @abstractmethod
     def get_zone(self, zone: int) -> TadoZone | TadoRoom:
-        pass
+        """Gets the specified zone as a TadoZone or TadoRoom object."""
 
     @abstractmethod
     def get_zone_state(self, zone: int) -> ZoneState | RoomState:
         """Gets current state of Zone as a ZoneState or RoomState object."""
-        pass
 
     @abstractmethod
     def get_state(self, zone: int) -> ZoneState | RoomState:
-        pass
+        """Gets current state of Zone as a ZoneState or RoomState object."""
 
     def get_capabilities(self, zone: int) -> Capabilities:
+        """Gets capabilities of the specified zone."""
         return self.get_zone(zone).get_capabilities()
 
     def get_climate(self, zone: int) -> Climate:
+        """Gets the climate for the specified zone."""
         return self.get_zone(zone).get_climate()
 
-    def get_historic(self, zone: int, date: date) -> Historic:
+    def get_historic(self, zone: int, day_report_date: date) -> Historic:
         """
         Gets historic information on given date for zone
         """
-        return self.get_zone(zone).get_historic(date)
+        return self.get_zone(zone).get_historic(day_report_date)
 
     @overload
     def get_schedule(
@@ -350,6 +352,7 @@ class TadoBase(metaclass=ABCMeta):
     def get_schedule(
         self, zone: int, timetable: Timetable | None = None, day: DayType | None = None
     ) -> line_x.Schedule | list[pre_line_x.Schedule]:
+        """Gets the schedule for the specified zone."""
         if timetable is None and day is None:
             return self.get_zone(zone).get_schedule()
         elif timetable is None or day is None:
@@ -373,6 +376,8 @@ class TadoBase(metaclass=ABCMeta):
         timetable: Timetable | None = None,
         day: DayType | None = None,
     ) -> None | list[Schedule]:
+        """Sets the schedule for the specified zone."""
+
         if isinstance(data, SetSchedule):
             # For Tado X API, data is a SetSchedule object
             return self.get_zone(zone).set_schedule(data)
@@ -384,6 +389,7 @@ class TadoBase(metaclass=ABCMeta):
         return self.get_zone(zone).set_schedule(data, timetable, day)
 
     def reset_zone_overlay(self, zone: int) -> None:
+        """Resets the zone overlay for the specified zone."""
         self.get_zone(zone).reset_zone_overlay()
 
     @overload
@@ -431,6 +437,7 @@ class TadoBase(metaclass=ABCMeta):
         vertical_swing: VerticalSwing | None = None,
         horizontal_swing: HorizontalSwing | None = None,
     ) -> None | dict[str, Any]:
+        """Sets a zone overlay for the specified zone."""
         return self.get_zone(zone).set_zone_overlay(
             overlay_mode,
             set_temp,
@@ -446,32 +453,38 @@ class TadoBase(metaclass=ABCMeta):
             horizontal_swing,
         )
 
-    def get_window_state(self, zone):
+    def get_window_state(self, zone: int) -> OpenWindow | XOpenWindow | None:
         """
         Returns the state of the window for zone
         """
 
-        return {"openWindow": self.get_state(zone).open_window}
+        return self.get_state(zone).open_window
 
     @abstractmethod
     def get_open_window_detected(self, zone: int) -> dict[str, Any]:
-        pass
+        """Returns whether an open window is detected."""
 
     # --------------- Device methods ---------------
 
     @abstractmethod
-    def set_child_lock(self, device_id: str, child_lock: bool) -> None:
-        pass
+    def set_child_lock(self, device_id: str, child_lock: bool) -> SuccessResult | None:
+        """Set the child lock on the device."""
 
-    @abstractmethod
-    def get_device_info(self, device_id: str) -> Device | DeviceX:
-        pass
+    def get_device_info(self, device_id: str, cmd: str) -> Device | DeviceX:
+        """Get information about a device."""
+        request = TadoRequest()
+        request.command = cmd
+        request.action = Action.GET
+        request.domain = Domain.DEVICES
+        request.device = device_id
+
+        return Device.model_validate(self._http.request(request))
 
     @abstractmethod
     def set_temp_offset(
         self, device_id: str, offset: float = 0, measure: str = "celsius"
-    ) -> TemperatureOffset | None:
-        pass
+    ) -> TemperatureOffset | SuccessResult:
+        """Set the Temperature offset on the device."""
 
     # --------------- Energy IQ methods ---------------
 
@@ -509,7 +522,9 @@ class TadoBase(metaclass=ABCMeta):
             for reading in respones.get("readings", [])
         ]
 
-    def set_eiq_meter_readings(self, date: date = date.today(), reading: int = 0):
+    def set_eiq_meter_readings(
+        self, reading_date: date = date.today(), reading: int = 0
+    ) -> SuccessResult | None:
         """
         Send Meter Readings to Tado, reading is without decimals
         """
@@ -518,9 +533,12 @@ class TadoBase(metaclass=ABCMeta):
         request.command = "meterReadings"
         request.action = Action.SET
         request.endpoint = Endpoint.EIQ
-        request.payload = {"date": date.strftime("%Y-%m-%d"), "reading": reading}
+        request.payload = {
+            "date": reading_date.strftime("%Y-%m-%d"),
+            "reading": reading,
+        }
 
-        return self._http.request(request)
+        return SuccessResult.model_validate(self._http.request(request))
 
     def set_eiq_tariff(
         self,
@@ -529,7 +547,7 @@ class TadoBase(metaclass=ABCMeta):
         tariff: float = 0,
         unit: str = "m3",
         is_period: bool = False,
-    ):
+    ) -> SuccessResult | None:
         """
         Send Tariffs to Tado,
         tariff is with decimals, unit is either m3 or kWh,
@@ -538,6 +556,7 @@ class TadoBase(metaclass=ABCMeta):
 
         tariff_in_cents = tariff * 100
 
+        payload: dict[str, float | str]
         if is_period:
             payload = {
                 "tariffInCents": tariff_in_cents,
@@ -558,4 +577,25 @@ class TadoBase(metaclass=ABCMeta):
         request.endpoint = Endpoint.EIQ
         request.payload = payload
 
-        return self._http.request(request)
+        return SuccessResult.model_validate(self._http.request(request))
+
+    def set_away_radius_in_meters(self, meters: int) -> SuccessResult | None:
+        """
+        When the distance between home location and the location of a
+        mobile device which can control this home is greater than
+        this distance, tado considers the mobile device to be outside
+        of home. Can be checked by calling get_installation().
+
+        Included is check to ignore request to less than 100 meters
+        """
+        if meters < 100:
+            return
+
+        request = TadoRequest()
+        request.action = Action.CHANGE
+        request.domain = Domain.HOME
+        request.endpoint = Endpoint.MY_API
+        request.command = "awayRadiusInMeters"
+        request.payload = {"awayRadiusInMeters": f"{meters}"}
+
+        return SuccessResult.model_validate(self._http.request(request))

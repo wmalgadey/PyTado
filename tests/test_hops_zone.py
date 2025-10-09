@@ -58,7 +58,7 @@ class TadoZoneTestCase(common.TadoBaseTestCase, is_x_line=True):
         room = self.tado_client.get_zone(1)
 
         assert room.current_hvac_mode == HvacMode.AUTO
-        assert room.id == 1
+        assert room._id == 1
         assert room.current_humidity == 38
         assert room.current_temp == 24.0
         assert room.target_temp == 22.0

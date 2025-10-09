@@ -1,3 +1,21 @@
+"""Utility module providing base model and validation functionality for PyTado.
+
+This module defines the foundational model infrastructure used throughout the PyTado library,
+centered around Pydantic for data validation and serialization. It includes:
+
+- A Base model class with customized configuration for:
+  - Automatic camelCase/snake_case field name conversion
+  - Flexible extra field handling
+  - JSON serialization utilities
+- Debug-focused validation wrapper that logs:
+  - Extra fields present in the data but not in the model
+  - Fields defined in the model but not present in the data
+  - Validation errors with detailed context
+
+This module serves as the backbone for all data models in PyTado, ensuring consistent
+handling of API data and providing helpful debugging information during development.
+"""
+
 from typing import Any, Self
 
 from pydantic import (
@@ -32,7 +50,7 @@ class Base(BaseModel):
                 field_name, to_camel(field_name)
             ),
             serialization_alias=to_camel,
-        )
+        ),
     )
 
     def to_json(self) -> str:
@@ -60,16 +78,16 @@ class Base(BaseModel):
 
             if extra:
                 for key, value in extra.items():
-                    LOGGER.warning(
-                        f"Model {cls} has extra key: {key} with value {value}"
-                    ) if value is not None else None
+                    if value is not None:
+                        LOGGER.warning(
+                            "Model %s has extra key: %s with value %r", cls, key, value
+                        )
 
             unused_keys = model.model_fields.keys() - model.model_fields_set
-            LOGGER.debug(
-                f"Model {cls} has unused keys: {unused_keys}"
-            ) if unused_keys else None
+            if unused_keys:
+                LOGGER.debug("Model %s has unused keys: %r", cls, unused_keys)
 
             return model
         except ValidationError:
-            LOGGER.error(f"Model {cls} failed to validate with data {data}")
+            LOGGER.error("Model %s failed to validate with data %r", cls, data)
             raise

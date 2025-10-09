@@ -1,3 +1,12 @@
+"""
+This module contains type definitions and enumerations for the PyTado library.
+
+As opposed to const.py, this module is intended to define types that are used
+throughout the library, such as Enums for various states and modes. It provides
+a centralized location for type-related definitions, enhancing code organization
+and maintainability.
+"""
+
 from enum import IntEnum, StrEnum
 from typing import Any
 
@@ -7,6 +16,21 @@ logger = Logger(__name__)
 
 
 class StrEnumMissing(StrEnum):
+    """
+    A custom string-based Enum class that provides enhanced handling for missing enum values.
+
+    When an unknown value is encountered, the `_missing_` class method is invoked, which:
+    - Logs a debug message indicating the missing key.
+    - Dynamically creates a new enum member with the missing value, allowing the program
+      to continue without raising an exception.
+
+    The `__str__` method is overridden to return the enum member's name as its string
+    representation.
+
+    This class is useful for debugging and gracefully handling unexpected enum values, but
+    the `_missing_` method can be removed if not needed.
+    """
+
     def __str__(self) -> str:
         return self.name
 
@@ -15,7 +39,7 @@ class StrEnumMissing(StrEnum):
         """Debug missing enum values and return a missing value.
         (This is just for debugging, can be removed if not needed anymore)
         """
-        logger.debug(f"enum {cls} is missing key {value}")
+        logger.debug("enum %s is missing key %r", cls, value)
         unknown_enum_val = str.__new__(cls)
         unknown_enum_val._name_ = str(value)
         unknown_enum_val._value_ = value
@@ -55,6 +79,11 @@ class ZoneType(StrEnumMissing):
 
 
 class HvacMode(StrEnumMissing):
+    """
+    HVAC Mode Enum representing the different operating modes of a heating,
+    ventilation, and air conditioning system.
+    """
+
     OFF = "OFF"
     SMART_SCHEDULE = "SMART_SCHEDULE"
     AUTO = "AUTO"
@@ -81,6 +110,8 @@ class FanLevel(StrEnumMissing):
 
 
 class FanSpeed(StrEnumMissing):
+    """Enum representing the fan speed settings."""
+
     OFF = "OFF"
     AUTO = "AUTO"
     LOW = "LOW"
@@ -88,16 +119,9 @@ class FanSpeed(StrEnumMissing):
     HIGH = "HIGH"
 
 
-FanSpeedToFanLevel = {
-    FanSpeed.OFF: FanLevel.OFF,
-    FanSpeed.AUTO: FanLevel.AUTO,
-    FanSpeed.LOW: FanLevel.LEVEL1,
-    FanSpeed.MIDDLE: FanLevel.LEVEL2,
-    FanSpeed.HIGH: FanLevel.LEVEL3,
-}
-
-
 class VerticalSwing(StrEnumMissing):
+    """Enum for controlling the vertical air flow direction."""
+
     OFF = "OFF"
     ON = "ON"
     MID_UP = "MID_UP"
@@ -108,6 +132,8 @@ class VerticalSwing(StrEnumMissing):
 
 
 class HorizontalSwing(StrEnumMissing):
+    """Enum for controlling the horizontal air flow direction."""
+
     OFF = "OFF"
     ON = "ON"
     LEFT = "LEFT"
@@ -118,17 +144,17 @@ class HorizontalSwing(StrEnumMissing):
 
 
 class OverlayMode(StrEnumMissing):
+    """Overlay Mode Enum for controlling schedule override behavior."""
+
     TADO_MODE = "TADO_MODE"
-    """resume schedule on next time block or on presence change"""
     NEXT_TIME_BLOCK = "NEXT_TIME_BLOCK"
-    """resume schedule on next time block"""
     MANUAL = "MANUAL"
-    """never resume schedule automatically"""
     TIMER = "TIMER"
-    """resume schedule after a certain time"""
 
 
 class HvacAction(StrEnumMissing):
+    """Enum representing the current operation being performed by the system."""
+
     HEATING = "HEATING"
     DRYING = "DRYING"
     FAN = "FAN"
@@ -138,23 +164,9 @@ class HvacAction(StrEnumMissing):
     HOT_WATER = "HOT_WATER"
 
 
-TADO_MODES_TO_HVAC_ACTION: dict[HvacMode, HvacAction] = {
-    HvacMode.HEAT: HvacAction.HEATING,
-    HvacMode.DRY: HvacAction.DRYING,
-    HvacMode.FAN: HvacAction.FAN,
-    HvacMode.COOL: HvacAction.COOLING,
-}
-
-TADO_HVAC_ACTION_TO_MODES: dict[HvacAction, HvacMode | HvacAction] = {
-    HvacAction.HEATING: HvacMode.HEAT,
-    HvacAction.HOT_WATER: HvacAction.HEATING,
-    HvacAction.DRYING: HvacMode.DRY,
-    HvacAction.FAN: HvacMode.FAN,
-    HvacAction.COOLING: HvacMode.COOL,
-}
-
-
 class DayType(StrEnumMissing):
+    """Enumeration representing different types of days or day ranges."""
+
     MONDAY = "MONDAY"
     TUESDAY = "TUESDAY"
     WEDNESDAY = "WEDNESDAY"
@@ -186,3 +198,10 @@ class BatteryState(StrEnumMissing):
     LOW = "LOW"
     DEPLETED = "DEPLETED"
     NORMAL = "NORMAL"
+
+
+class Unit(StrEnumMissing):
+    """Unit Enum"""
+
+    M3 = "m3"
+    KWH = "kWh"
