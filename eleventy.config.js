@@ -4,9 +4,6 @@ import pluginNavigation from "@11ty/eleventy-navigation";
 
 import pluginFilters from "./docs/_config/filters.js";
 
-const { execSync } = require("child_process");
-const fs = require("fs");
-
 /** @param {import("@11ty/eleventy").UserConfig} eleventyConfig */
 export default async function (eleventyConfig) {
 	// Drafts, see also _data/eleventyDataSchema.js
@@ -22,12 +19,6 @@ export default async function (eleventyConfig) {
 		.addPassthroughCopy({
 			"./public/": "/"
 		});
-
-	// Generate API documentation
-	eleventyConfig.on("beforeBuild", () => {
-		console.log("generate API-docs...");
-		execSync("pydoc-markdown > docs/content/api.md");
-	});
 
 	// Run Eleventy when these files change:
 	// https://www.11ty.dev/docs/watch-serve/#add-your-own-watch-targets
