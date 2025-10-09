@@ -36,10 +36,9 @@ jobs:
       - run: npm run build-ghpages
 
       - name: Upload gh-pages artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: ./_site
+          path: ./_site/
 
   deploy:
     needs: build
