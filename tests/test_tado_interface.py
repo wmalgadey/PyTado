@@ -54,20 +54,18 @@ class TestTadoInterface(unittest.TestCase):
     @mock.patch("PyTado.interface.api.my_tado.Tado.get_me")
     @mock.patch("PyTado.interface.api.hops_tado.TadoX.get_me")
     def test_interface_with_tadox_api(self, mock_hops_get_me, mock_my_get_me):
-        check_x_patch = mock.patch(
-            "PyTado.http.Http._check_x_line_generation", return_value=True
-        )
-        check_x_patch.start()
-        self.addCleanup(check_x_patch.stop)
 
-        tado_interface = Tado()
-        tado_interface.device_activation()
-        tado_interface.get_me()
+        with mock.patch("PyTado.http.Http._check_x_line_generation") as check_x_patch:
+            check_x_patch.return_value = True
 
-        assert tado_interface._http.is_x_line
+            tado_interface = Tado()
+            tado_interface.device_activation()
+            tado_interface.get_me()
 
-        mock_my_get_me.assert_not_called()
-        mock_hops_get_me.assert_called_once()
+            assert tado_interface._http.is_x_line
+
+            mock_my_get_me.assert_not_called()
+            mock_hops_get_me.assert_called_once()
 
     def test_error_handling_on_api_calls(self):
         with mock.patch("PyTado.interface.api.my_tado.Tado.get_me") as mock_it:

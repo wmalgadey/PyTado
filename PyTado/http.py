@@ -294,7 +294,7 @@ class Http:
             f"\n\tData: {response_data}"
         )
 
-    def request(self, request: TadoRequest) -> dict[str, Any] | list[Any]:
+    def request(self, request: TadoRequest) -> dict[str, Any] | list[Any] | str:
         """Request something from the API with a TadoRequest"""
         self._refresh_token()
 
@@ -332,7 +332,7 @@ class Http:
             )
 
         response_json = response.json()
-        if isinstance(response_json, (dict, list)):
+        if isinstance(response_json, (dict, list, str)):
             return response_json
 
         raise TadoException("Unexpected response type")

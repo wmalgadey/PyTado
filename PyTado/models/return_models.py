@@ -12,5 +12,17 @@ class Climate(Base):
 
 
 class TemperatureOffset(Base):
+    """
+    TemperatureOffset model represents the temperature offset in both Celsius and Fahrenheit.
+    """
+
     celsius: float
     fahrenheit: float
+
+
+class SuccessResult(Base):
+    """
+    Model representing the result of a set operation.
+    """
+
+    success: bool

@@ -2,131 +2,360 @@
 Adapter to represent a tado zones and state for hops.tado.com (Tado X) API.
 """
 
-import dataclasses
 import logging
-from typing import Any, Self
+from datetime import datetime, timedelta
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, final, overload
 
-from PyTado.const import (
-    CONST_CONNECTION_OFFLINE,
-    CONST_HORIZONTAL_SWING_OFF,
-    CONST_HVAC_HEAT,
-    CONST_HVAC_IDLE,
-    CONST_HVAC_OFF,
-    CONST_MODE_HEAT,
-    CONST_MODE_OFF,
-    CONST_MODE_SMART_SCHEDULE,
-    CONST_VERTICAL_SWING_OFF,
-    DEFAULT_TADOX_PRECISION,
+from PyTado import const
+from PyTado.exceptions import TadoException
+from PyTado.http import Action, Mode, TadoXRequest
+from PyTado.models import pre_line_x
+from PyTado.models.home import HomeState
+from PyTado.models.line_x.device import Device, DevicesResponse, DevicesRooms
+from PyTado.models.line_x.room import RoomState
+from PyTado.models.line_x.schedule import Schedule as ScheduleX
+from PyTado.models.line_x.schedule import SetSchedule
+from PyTado.models.pre_line_x.schedule import Schedule
+from PyTado.models.pre_line_x.zone import TemperatureCapabilitiesValues
+from PyTado.types import (
+    ConnectionState,
+    DayType,
+    FanLevel,
+    FanSpeed,
+    HorizontalSwing,
+    HvacAction,
+    HvacMode,
+    OverlayMode,
+    Power,
+    Presence,
+    Timetable,
+    VerticalSwing,
+    ZoneType,
 )
+from PyTado.zone.base_zone import BaseZone
 
-from .my_zone import TadoZone
+if TYPE_CHECKING:
+    from PyTado.interface.api.hops_tado import TadoX  # pragma: no cover
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 
-@dataclasses.dataclass(frozen=True, kw_only=True)
-class TadoXZone(TadoZone):
-    """Tado Zone data structure for hops.tado.com (Tado X) API."""
+@final
+class TadoRoom(BaseZone):
+    _home: "TadoX"
 
-    precision: float = DEFAULT_TADOX_PRECISION
+    def update(self) -> None:
+        try:
+            del self._home_state
+        except AttributeError:
+            pass
+        return super().update()
 
-    @classmethod
-    def from_data(cls, zone_id: int, data: dict[str, Any]) -> Self:
-        """Handle update callbacks for X zones with specific parsing."""
-        _LOGGER.debug("Processing data from X zone %d", zone_id)
-        kwargs: dict[str, Any] = {}
+    @cached_property
+    def _raw_state(self) -> RoomState:
+        print("Getting room state for room %s", self._id)
+        request = TadoXRequest()
+        request.command = f"rooms/{self._id:d}"
+        data = self._http.request(request)
 
-        # X-specific temperature parsing
-        if "sensorDataPoints" in data:
-            sensor_data = data["sensorDataPoints"]
+        return RoomState.model_validate(data)
 
-            if "insideTemperature" in sensor_data:
-                inside_temp = sensor_data["insideTemperature"]
-                if "value" in inside_temp:
-                    kwargs["current_temp"] = float(inside_temp["value"])
-                kwargs["current_temp_timestamp"] = None
-                if "precision" in sensor_data["insideTemperature"]:
-                    kwargs["precision"] = sensor_data["insideTemperature"]["precision"]["celsius"]
+    @cached_property
+    def _raw_room(self) -> DevicesRooms:
+        print("Getting room data for room %s", self._id)
+        request = TadoXRequest()
+        request.command = "roomsAndDevices"
 
-            # X-specific humidity parsing
-            if "humidity" in sensor_data:
-                kwargs["current_humidity"] = float(sensor_data["humidity"]["percentage"])
-                kwargs["current_humidity_timestamp"] = None
+        rooms_and_devices = DevicesResponse.model_validate(self._http.request(request))
 
-        # Tado mode processing
-        if "tadoMode" in data:
-            kwargs["is_away"] = data["tadoMode"] == "AWAY"
-            kwargs["tado_mode"] = data["tadoMode"]
-
-        # Connection and link processing
-        if "link" in data:
-            kwargs["link"] = data["link"]["state"]
-        if "connection" in data:
-            kwargs["connection"] = data["connection"]["state"]
-
-        # Default HVAC action
-        kwargs["current_hvac_action"] = CONST_HVAC_OFF
-
-        # Setting processing
-        if "setting" in data:
-            # X-specific temperature setting
-            if "temperature" in data["setting"] and data["setting"]["temperature"] is not None:
-                kwargs["target_temp"] = float(data["setting"]["temperature"]["value"])
-
-            setting = data["setting"]
-
-            # Reset modes and settings
-            kwargs.update(
-                {
-                    "current_fan_speed": None,
-                    "current_fan_level": None,
-                    "current_hvac_mode": CONST_MODE_OFF,
-                    "current_swing_mode": CONST_MODE_OFF,
-                    "current_vertical_swing_mode": CONST_VERTICAL_SWING_OFF,
-                    "current_horizontal_swing_mode": CONST_HORIZONTAL_SWING_OFF,
-                }
+        room = next(
+            filter(lambda x: x.room_id == self._id, rooms_and_devices.rooms), None
+        )
+        if room is None:
+            raise TadoException(
+                f"Room {self._id} not found in roomsAndDevices response"
             )
 
-            # Power and HVAC action handling
-            power = setting["power"]
-            kwargs["power"] = power
+        return room
 
-            if power == "ON":
-                if data.get("heatingPower", {}).get("percentage", 0) == 0:
-                    kwargs["current_hvac_action"] = CONST_HVAC_IDLE
-                else:
-                    kwargs["current_hvac_action"] = CONST_HVAC_HEAT
+    @cached_property
+    def _home_state(self) -> HomeState:
+        print("Getting home state")
+        return self._home.get_home_state()
 
-                kwargs["heating_power_percentage"] = data["heatingPower"]["percentage"]
-            else:
-                kwargs["heating_power_percentage"] = 0
-                kwargs["current_hvac_action"] = CONST_HVAC_OFF
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the room
+        """
+        return self._raw_room.room_name
 
-            # Manual control termination handling
-            if "manualControlTermination" in data:
-                manual_termination = data["manualControlTermination"]
-                if manual_termination:
-                    kwargs["current_hvac_mode"] = (
-                        CONST_MODE_HEAT if power == "ON" else CONST_MODE_OFF
-                    )
-                    kwargs["overlay_termination_type"] = manual_termination["type"]
-                    kwargs["overlay_termination_timestamp"] = manual_termination["projectedExpiry"]
-                else:
-                    kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
-                    kwargs["overlay_termination_type"] = None
-                    kwargs["overlay_termination_timestamp"] = None
-            else:
-                kwargs["current_hvac_mode"] = CONST_MODE_SMART_SCHEDULE
+    @property
+    def devices(self) -> list[Device]:
+        return self._raw_room.devices
 
-        kwargs["available"] = kwargs.get("connection") != CONST_CONNECTION_OFFLINE
+    @property
+    def current_temp(self) -> float:
+        return self._raw_state.sensor_data_points.inside_temperature.value
 
-        # Termination conditions
-        if "terminationCondition" in data:
-            kwargs["default_overlay_termination_type"] = data["terminationCondition"].get(
-                "type", None
+    @property
+    def target_temp(self) -> float | None:
+        if self._raw_state.setting.temperature:
+            return self._raw_state.setting.temperature.value
+        return None
+
+    @property
+    def current_humidity(self) -> float:
+        return self._raw_state.sensor_data_points.humidity.percentage
+
+    @property
+    def open_window(self) -> bool:
+        if self._raw_state.open_window:
+            return self._raw_state.open_window.activated
+        return False
+
+    @property
+    def open_window_expiry_seconds(self) -> int | None:
+        if self._raw_state.open_window:
+            return self._raw_state.open_window.expiry_in_seconds
+        return None
+
+    @property
+    def current_hvac_mode(self) -> HvacMode:
+        if self.power == Power.ON:
+            if self._raw_state.manual_control_termination or self._raw_state.boost_mode:
+                return HvacMode.HEAT
+            return HvacMode.AUTO
+        return HvacMode.OFF
+
+    @property
+    def current_hvac_action(self) -> HvacAction:
+        if self.power == Power.ON:
+            if self._raw_state.heating_power.percentage > 0:
+                return HvacAction.HEATING
+            return HvacAction.IDLE
+        return HvacAction.OFF
+
+    @property
+    def heating_power_percentage(self) -> float | None:
+        if self._raw_state.heating_power:
+            return self._raw_state.heating_power.percentage
+        return None
+
+    @property
+    def tado_mode(self) -> Presence | None:
+        return self._home_state.presence
+
+    @property
+    def tado_mode_setting(self) -> Presence | None:
+        return self._home_state.presence_setting
+
+    @property
+    def available(self) -> bool:
+        return self._raw_state.connection.state == ConnectionState.CONNECTED
+
+    @property
+    def overlay_termination_type(self) -> OverlayMode | None:
+        if self._raw_state.manual_control_termination:
+            return self._raw_state.manual_control_termination.type
+        if self._raw_state.boost_mode:
+            return self._raw_state.boost_mode.type
+        return None
+
+    @property
+    def overlay_termination_expiry_seconds(self) -> int | None:
+        if self._raw_state.manual_control_termination:
+            return self._raw_state.manual_control_termination.remaining_time_in_seconds
+        if self._raw_state.boost_mode:
+            return self._raw_state.boost_mode.remaining_time_in_seconds
+        return None
+
+    @property
+    def overlay_termination_timestamp(self) -> datetime | None:
+        if self._raw_state.manual_control_termination:
+            return self._raw_state.manual_control_termination.projected_expiry
+        if self._raw_state.boost_mode:
+            return self._raw_state.boost_mode.projected_expiry
+        return None
+
+    @property
+    def default_overlay_termination_type(self) -> OverlayMode:
+        return self._raw_room.device_manual_control_termination.type
+
+    @property
+    def default_overlay_termination_duration(self) -> int | None:
+        return self._raw_room.device_manual_control_termination.durationInSeconds
+
+    @property
+    def boost(self) -> bool:
+        if self._raw_state.boost_mode:
+            return True
+        return False
+
+    @property
+    def next_time_block_start(self) -> datetime | None:
+        if self._raw_state.next_time_block:
+            return self._raw_state.next_time_block.start
+        return None
+
+    @property
+    def overlay_active(self) -> bool:
+        """
+        Check if an overlay is active
+        """
+        return self._raw_state.manual_control_termination is not None
+
+    @property
+    def zone_type(self) -> ZoneType:
+        """
+        Get the zone type
+
+        For Tado X, we always return heating as only heating zones are supported.
+        """
+        return ZoneType.HEATING
+
+    def get_capabilities(self) -> pre_line_x.Capabilities:
+        _LOGGER.warning(
+            "get_capabilities is not supported by Tado X API. "
+            "We currently always return type heating."
+        )
+
+        return pre_line_x.Capabilities(
+            type=ZoneType.HEATING,
+            temperatures=pre_line_x.TemperatureCapability(
+                celsius=TemperatureCapabilitiesValues(
+                    min=const.DEFAULT_TADOX_MIN_TEMP,
+                    max=const.DEFAULT_TADOX_MAX_TEMP,
+                    step=const.DEFAULT_TADOX_PRECISION,
+                )
+            ),
+        )
+
+    @overload
+    def get_schedule(self, timetable: Timetable, day: DayType) -> list[Schedule]: ...
+
+    @overload
+    def get_schedule(self, timetable: Timetable) -> list[Schedule]: ...
+
+    @overload
+    def get_schedule(self) -> ScheduleX: ...
+
+    def get_schedule(
+        self, timetable: Timetable | None = None, day: DayType | None = None
+    ) -> ScheduleX | list[Schedule]:
+        """
+        Get the JSON representation of the schedule for a zone.
+        Zone has 3 different schedules, one for each timetable (see setTimetable)
+        """
+
+        request = TadoXRequest()
+        request.command = f"rooms/{self._id:d}/schedule"
+
+        return ScheduleX.model_validate(self._http.request(request))
+
+    @overload
+    def set_schedule(
+        self, data: list[Schedule], timetable: Timetable, day: DayType
+    ) -> list[Schedule]: ...
+
+    @overload
+    def set_schedule(self, data: SetSchedule) -> None: ...
+
+    def set_schedule(
+        self,
+        data: list[Schedule] | SetSchedule,
+        timetable: Timetable | None = None,
+        day: DayType | None = None,
+    ) -> None | list[Schedule]:
+        if isinstance(data, SetSchedule):
+            request = TadoXRequest()
+            request.command = f"rooms/{self._id:d}/schedule"
+            request.action = Action.SET
+            request.payload = data.model_dump(by_alias=True, exclude_defaults=True)
+            request.mode = Mode.OBJECT
+            self._http.request(request)
+            return None
+        raise TadoException("Invalid data type for set_schedule for Tado X API")
+
+    def reset_zone_overlay(self) -> None:
+        """
+        Delete current overlay
+        """
+
+        request = TadoXRequest()
+        request.command = f"rooms/{self._id:d}/resumeSchedule"
+        request.action = Action.SET
+
+        self._http.request(request)
+
+    @overload
+    def set_zone_overlay(
+        self,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: timedelta | None = None,
+        power: Power = Power.ON,
+        is_boost: bool = False,
+    ) -> None: ...
+
+    @overload
+    def set_zone_overlay(
+        self,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: timedelta | None = None,
+        power: Power = Power.ON,
+        is_boost: bool | None = None,
+        device_type: ZoneType | None = None,
+        mode: HvacMode | None = None,
+        fan_speed: FanSpeed | None = None,
+        swing: Any = None,
+        fan_level: FanLevel | None = None,
+        vertical_swing: VerticalSwing | None = None,
+        horizontal_swing: HorizontalSwing | None = None,
+    ) -> dict[str, Any]: ...
+
+    def set_zone_overlay(
+        self,
+        overlay_mode: OverlayMode,
+        set_temp: float | None = None,
+        duration: timedelta | None = None,
+        power: Power = Power.ON,
+        is_boost: bool | None = None,
+        device_type: ZoneType | None = None,
+        mode: HvacMode | None = None,
+        fan_speed: FanSpeed | None = None,
+        swing: Any = None,
+        fan_level: FanLevel | None = None,
+        vertical_swing: VerticalSwing | None = None,
+        horizontal_swing: HorizontalSwing | None = None,
+    ) -> None | dict[str, Any]:
+        post_data: dict[str, Any] = {
+            "setting": {"power": power},
+            "termination": {"type": overlay_mode},
+        }
+
+        if is_boost is not None:
+            post_data["setting"]["isBoost"] = is_boost
+
+        if set_temp is not None:
+            post_data["setting"]["temperature"] = {
+                "value": set_temp,
+                "valueRaw": float(set_temp),
+                "precision": 0.1,
+            }
+
+        if duration is not None:
+            post_data["termination"]["durationInSeconds"] = round(
+                duration.total_seconds()
             )
-            kwargs["default_overlay_termination_duration"] = data["terminationCondition"].get(
-                "durationInSeconds", None
-            )
 
-        return cls(zone_id=zone_id, **kwargs)
+        request = TadoXRequest()
+        request.command = f"rooms/{self._id:d}/manualControl"
+        request.action = Action.SET
+        request.payload = post_data
+
+        self._http.request(request)
+        return None

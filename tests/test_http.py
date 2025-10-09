@@ -1,10 +1,11 @@
 """Test the Http class."""
 
-from datetime import datetime, timedelta, timezone
 import io
 import json
 import unittest
+from datetime import datetime, timedelta, timezone
 from unittest import mock
+
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
@@ -57,9 +58,7 @@ class TestHttp(unittest.TestCase):
             responses.GET,
             "https://my.tado.com/api/v2/homes/1234/",
             json=json.loads(
-                common.load_fixture(
-                    "home_1234/tadov2.my_api_v2_home_state.json"
-                )
+                common.load_fixture("home_1234/tadov2.my_api_v2_home_state.json")
             ),
             status=200,
         )
@@ -131,9 +130,7 @@ class TestHttp(unittest.TestCase):
                 responses.GET,
                 "https://my.tado.com/api/v2/homes/1234/",
                 json=json.loads(
-                    common.load_fixture(
-                        "home_1234/tadov2.my_api_v2_home_state.json"
-                    )
+                    common.load_fixture("home_1234/tadov2.my_api_v2_home_state.json")
                 ),
                 match=[matchers.header_matcher({"user-agent": "MyCustomAgent/1.0"})],
                 status=200,
@@ -231,7 +228,9 @@ class TestHttp(unittest.TestCase):
         """Test URL configuration for the ME domain."""
         http = Http()
         http._id = 123
-        request = TadoRequest(command="test", domain=Domain.HOME, params={"test": "value"})
+        request = TadoRequest(
+            command="test", domain=Domain.HOME, params={"test": "value"}
+        )
         url = http._configure_url(request)
         self.assertEqual(url, "https://my.tado.com/api/v2/homes/123/test?test=value")
 
@@ -265,34 +264,44 @@ class TestHttp(unittest.TestCase):
             http = Http(token_file_path="path/to/open")
             http._check_device_activation()
 
-        mock_file.assert_called_with("path/to/open", 'w', encoding='utf-8')
+        mock_file.assert_called_with("path/to/open", "w", encoding="utf-8")
         assert mock_open.return_value.getvalue() == '{"refresh_token": "another_value"}'
 
-
     @responses.activate
-    @mock.patch('os.path.exists')
-    @mock.patch('PyTado.http.Http._save_token')
+    @mock.patch("os.path.exists")
+    @mock.patch("PyTado.http.Http._save_token")
     def test_load_refresh_token(self, mock_save, mock_exists):
         """Test if token is loaded."""
+
         def side_effect(filename):
-            if filename == 'path/to/open':
+            if filename == "path/to/open":
                 return True
             else:
                 return False
+
         mock_exists.side_effect = side_effect
 
-        with mock.patch("builtins.open", mock.mock_open(read_data='{"refresh_token": "saved_value"}')) as mock_file:
+        with mock.patch(
+            "builtins.open",
+            mock.mock_open(read_data='{"refresh_token": "saved_value"}'),
+        ) as mock_file:
             http = Http(token_file_path="path/to/open")
 
         mock_save.assert_called_once()
-        mock_file.assert_called_with("path/to/open", encoding='utf-8')
+        mock_file.assert_called_with("path/to/open", encoding="utf-8")
         assert http._device_activation_status == "COMPLETED"
 
     @mock.patch("PyTado.http.Http._refresh_token", return_value=True)
     @mock.patch("PyTado.http.Http._device_ready")
     @mock.patch("PyTado.http.Http._load_token")
     @mock.patch("PyTado.http.Http._login_device_flow")
-    def test_constructor_with_valid_refresh_token(self, mock_load_token, mock_login_device_flow, mock_device_ready, mock_refresh_token):
+    def test_constructor_with_valid_refresh_token(
+        self,
+        mock_load_token,
+        mock_login_device_flow,
+        mock_device_ready,
+        mock_refresh_token,
+    ):
         """
         Test that the Http constructor correctly uses a provided valid refresh token.
         """
@@ -300,7 +309,9 @@ class TestHttp(unittest.TestCase):
 
         Http(saved_refresh_token=refresh_token)
 
-        mock_refresh_token.assert_called_once_with(refresh_token=refresh_token, force_refresh=True)
+        mock_refresh_token.assert_called_once_with(
+            refresh_token=refresh_token, force_refresh=True
+        )
         mock_device_ready.assert_called_once()
         mock_load_token.assert_not_called()
         mock_login_device_flow.assert_not_called()
