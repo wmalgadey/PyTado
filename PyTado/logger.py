@@ -15,7 +15,7 @@ class Logger(logging.Logger):
         Simple formatter that does not remove any information in logs.
         """
 
-    def __init__(self, name: str, level=logging.NOTSET):
+    def __init__(self, name: str, level: int = logging.NOTSET) -> None:
         super().__init__(name)
         log_sh = logging.StreamHandler()
         log_fmt = self.SimpleFormatter(fmt="%(name)s :: %(levelname)-8s :: %(message)s")
