@@ -1,0 +1,4 @@
+loader:
+  type: python
+renderer:
+  type: markdown
