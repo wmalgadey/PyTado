@@ -24,7 +24,7 @@ Select the most appropriate type from the options provided:
 - **General Question**: If you are unsure or have a general question, please join our
   [GitHub Discussions](https://github.com/wmalgadey/PyTado/discussions).
 
-- **Direct Communication**:  
+- **Direct Communication**:
   <iframe src="https://discord.com/widget?id=1347581338366119937&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
 
 After choosing an issue type, a pre-formatted template will appear. Provide as much detail as possible within this
