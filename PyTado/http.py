@@ -100,7 +100,7 @@ class TadoXRequest(TadoRequest):
     def __post_init__(self) -> None:
         self._action = self.action
 
-    @property
+    @property  # type: ignore
     def action(self) -> Action | str:
         """Get request action for Tado X"""
         if self._action == Action.CHANGE:

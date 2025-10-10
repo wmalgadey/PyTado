@@ -65,12 +65,10 @@ class Base(BaseModel):
         cls, data: Any, handler: ModelWrapValidatorHandler[Self]
     ) -> Self:
         """Model validation debug helper.
-
         Logs in the following cases:
             - (Debug) Keys in data that are not in the model
             - (Debug) Keys in the model that are not in the data
             - (Error) Validation errors
-
         (This is just for debugging and development, can be removed if not needed anymore)
         """
         try:

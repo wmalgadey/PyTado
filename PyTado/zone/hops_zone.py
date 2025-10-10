@@ -41,6 +41,8 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
+_LOGGER.setLevel(logging.DEBUG)
+
 
 @final
 class TadoRoom(BaseZone):

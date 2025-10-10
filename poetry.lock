@@ -16,10 +16,9 @@ files = [
 name = "astroid"
 version = "3.3.8"
 description = "An abstract syntax tree for Python with inference support."
+category = "main"
 optional = false
 python-versions = ">=3.9.0"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\""
 files = [
     {file = "astroid-3.3.8-py3-none-any.whl", hash = "sha256:187ccc0c248bfbba564826c26f070494f7bc964fd286b6d9fff4420e55de828c"},
     {file = "astroid-3.3.8.tar.gz", hash = "sha256:a88c7994f914a4ea8572fac479459f4955eeccc877be3f2d959a33273b0cf40b"},
@@ -29,10 +28,9 @@ files = [
 name = "attrs"
 version = "24.3.0"
 description = "Classes Without Boilerplate"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "attrs-24.3.0-py3-none-any.whl", hash = "sha256:ac96cd038792094f438ad1f6ff80837353805ac950cd2aa0e0625ef19850c308"},
     {file = "attrs-24.3.0.tar.gz", hash = "sha256:8f5c07333d543103541ba7be0e2ce16eeee8130cb0b3f9238ab904ce1e85baff"},
@@ -50,9 +48,9 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 name = "certifi"
 version = "2024.12.14"
 description = "Python package for providing Mozilla's CA Bundle."
+category = "main"
 optional = false
 python-versions = ">=3.6"
-groups = ["main"]
 files = [
     {file = "certifi-2024.12.14-py3-none-any.whl", hash = "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56"},
     {file = "certifi-2024.12.14.tar.gz", hash = "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db"},
@@ -62,10 +60,9 @@ files = [
 name = "cfgv"
 version = "3.4.0"
 description = "Validate configuration and produce human readable error messages."
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "cfgv-3.4.0-py2.py3-none-any.whl", hash = "sha256:b7265b1f29fd3316bfcd2b330d63d024f2bfd8bcb8b0272f8e19a504856c48f9"},
     {file = "cfgv-3.4.0.tar.gz", hash = "sha256:e52591d4c5f5dead8e0f673fb16db7949d2cfb3f7da4582893288f0ded8fe560"},
@@ -75,9 +72,9 @@ files = [
 name = "charset-normalizer"
 version = "3.4.1"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
+category = "main"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
 files = [
     {file = "charset_normalizer-3.4.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:91b36a978b5ae0ee86c394f5a54d6ef44db1de0815eb43de826d41d21e4af3de"},
     {file = "charset_normalizer-3.4.1-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7461baadb4dc00fd9e0acbe254e3d7d2112e7f92ced2adc96e54ef6501c5f176"},
@@ -177,6 +174,7 @@ files = [
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 groups = ["main"]
@@ -190,10 +188,9 @@ files = [
 name = "coverage"
 version = "7.10.6"
 description = "Code coverage measurement for Python"
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"test\" or extra == \"all\""
 files = [
     {file = "coverage-7.10.6-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:70e7bfbd57126b5554aa482691145f798d7df77489a177a6bef80de78860a356"},
     {file = "coverage-7.10.6-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e41be6f0f19da64af13403e52f2dec38bbc2937af54df8ecef10850ff8d35301"},
@@ -292,10 +289,9 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 name = "dill"
 version = "0.3.9"
 description = "serialize all of Python"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\""
 files = [
     {file = "dill-0.3.9-py3-none-any.whl", hash = "sha256:468dff3b89520b474c0397703366b7b95eebe6303f108adf9b19da1f702be87a"},
     {file = "dill-0.3.9.tar.gz", hash = "sha256:81aa267dddf68cbfe8029c42ca9ec6a4ab3b22371d1c450abc54422577b4512c"},
@@ -309,10 +305,9 @@ profile = ["gprof2dot (>=2022.7.29)"]
 name = "distlib"
 version = "0.3.9"
 description = "Distribution utilities"
+category = "main"
 optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "distlib-0.3.9-py2.py3-none-any.whl", hash = "sha256:47f8c22fd27c27e25a65601af709b38e4f0a45ea4fc2e710f65755fa8caaaf87"},
     {file = "distlib-0.3.9.tar.gz", hash = "sha256:a60f20dea646b8a33f3e7772f74dc0b2d0772d2837ee1342a00645c81edf9403"},
@@ -322,10 +317,9 @@ files = [
 name = "filelock"
 version = "3.16.1"
 description = "A platform independent file lock."
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "filelock-3.16.1-py3-none-any.whl", hash = "sha256:2082e5703d51fbf98ea75855d9d5527e33d8ff23099bec374a134febee6946b0"},
     {file = "filelock-3.16.1.tar.gz", hash = "sha256:c249fbfcd5db47e5e2d6d62198e565475ee65e4831e2561c8e313fa7eb961435"},
@@ -340,10 +334,9 @@ typing = ["typing-extensions (>=4.12.2) ; python_version < \"3.11\""]
 name = "identify"
 version = "2.6.5"
 description = "File identification library for Python"
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "identify-2.6.5-py2.py3-none-any.whl", hash = "sha256:14181a47091eb75b337af4c23078c9d09225cd4c48929f521f3bf16b09d02566"},
     {file = "identify-2.6.5.tar.gz", hash = "sha256:c10b33f250e5bba374fae86fb57f3adcebf1161bce7cdf92031915fd480c13bc"},
@@ -356,9 +349,9 @@ license = ["ukkonen"]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
+category = "main"
 optional = false
 python-versions = ">=3.6"
-groups = ["main"]
 files = [
     {file = "idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"},
     {file = "idna-3.10.tar.gz", hash = "sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9"},
@@ -371,10 +364,9 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 name = "immutabledict"
 version = "4.2.1"
 description = "Immutable wrapper around dictionaries (a fork of frozendict)"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "immutabledict-4.2.1-py3-none-any.whl", hash = "sha256:c56a26ced38c236f79e74af3ccce53772827cef5c3bce7cab33ff2060f756373"},
     {file = "immutabledict-4.2.1.tar.gz", hash = "sha256:d91017248981c72eb66c8ff9834e99c2f53562346f23e7f51e7a5ebcf66a3bcc"},
@@ -384,10 +376,9 @@ files = [
 name = "importlab"
 version = "0.8.1"
 description = "A library to calculate python dependency graphs."
+category = "main"
 optional = false
 python-versions = ">=3.6.0"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "importlab-0.8.1-py2.py3-none-any.whl", hash = "sha256:124cfa00e8a34fefe8aac1a5e94f56c781b178c9eb61a1d3f60f7e03b77338d3"},
     {file = "importlab-0.8.1.tar.gz", hash = "sha256:b3893853b1f6eb027da509c3b40e6787e95dd66b4b66f1b3613aad77556e1465"},
@@ -400,10 +391,9 @@ networkx = ">=2"
 name = "iniconfig"
 version = "2.0.0"
 description = "brain-dead simple config-ini parsing"
+category = "main"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
-markers = "extra == \"test\" or extra == \"all\""
 files = [
     {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
     {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
@@ -413,10 +403,9 @@ files = [
 name = "isort"
 version = "5.13.2"
 description = "A Python utility / library to sort Python imports."
+category = "main"
 optional = false
 python-versions = ">=3.8.0"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\""
 files = [
     {file = "isort-5.13.2-py3-none-any.whl", hash = "sha256:8ca5e72a8d85860d5a3fa69b8745237f2939afe12dbf656afbcb47fe72d947a6"},
     {file = "isort-5.13.2.tar.gz", hash = "sha256:48fdfcb9face5d58a4f6dde2e72a1fb8dcaf8ab26f95ab49fab84c2ddefb0109"},
@@ -429,10 +418,9 @@ colors = ["colorama (>=0.4.6)"]
 name = "jinja2"
 version = "3.1.5"
 description = "A very fast and expressive template engine."
+category = "main"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "jinja2-3.1.5-py3-none-any.whl", hash = "sha256:aba0f4dc9ed8013c424088f68a5c226f7d6097ed89b246d7749c2ec4175c6adb"},
     {file = "jinja2-3.1.5.tar.gz", hash = "sha256:8fefff8dc3034e27bb80d67c671eb8a9bc424c0ef4c0826edbff304cceff43bb"},
@@ -448,10 +436,9 @@ i18n = ["Babel (>=2.7)"]
 name = "libcst"
 version = "1.6.0"
 description = "A concrete syntax tree with AST-like properties for Python 3.0 through 3.13 programs."
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "libcst-1.6.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2f02d0da6dfbad44e6ec4d1e5791e17afe95d9fe89bce4374bf109fd9c103a50"},
     {file = "libcst-1.6.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:48406225378ee9208edb1e5a10451bea810262473af1a2f2473737fd16d34e3a"},
@@ -501,10 +488,9 @@ dev = ["Sphinx (>=5.1.1)", "black (==24.8.0)", "build (>=0.10.0)", "coverage[tom
 name = "markupsafe"
 version = "3.0.2"
 description = "Safely add untrusted strings to HTML/XML markup."
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "MarkupSafe-3.0.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:7e94c425039cde14257288fd61dcfb01963e658efbc0ff54f5306b06054700f8"},
     {file = "MarkupSafe-3.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:9e2d922824181480953426608b81967de705c3cef4d1af983af849d7bd619158"},
@@ -573,10 +559,9 @@ files = [
 name = "mccabe"
 version = "0.7.0"
 description = "McCabe checker, plugin for flake8"
+category = "main"
 optional = false
 python-versions = ">=3.6"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\""
 files = [
     {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
     {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
@@ -586,10 +571,9 @@ files = [
 name = "msgspec"
 version = "0.19.0"
 description = "A fast serialization and validation library, with builtin support for JSON, MessagePack, YAML, and TOML."
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "msgspec-0.19.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d8dd848ee7ca7c8153462557655570156c2be94e79acec3561cf379581343259"},
     {file = "msgspec-0.19.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:0553bbc77662e5708fe66aa75e7bd3e4b0f209709c48b299afd791d711a93c36"},
@@ -700,6 +684,7 @@ reports = ["lxml"]
 name = "mypy-extensions"
 version = "1.1.0"
 description = "Type system extensions for programs checked with the mypy type checker."
+category = "dev"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
@@ -712,10 +697,9 @@ files = [
 name = "networkx"
 version = "3.4.2"
 description = "Python package for creating and manipulating graphs and networks"
+category = "main"
 optional = false
 python-versions = ">=3.10"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "networkx-3.4.2-py3-none-any.whl", hash = "sha256:df5d4365b724cf81b8c6a7312509d0c22386097011ad1abe274afd5e9d3bbc5f"},
     {file = "networkx-3.4.2.tar.gz", hash = "sha256:307c3669428c5362aab27c8a1260aa8f47c4e91d3891f48be0141738d8d053e1"},
@@ -733,10 +717,9 @@ test = ["pytest (>=7.2)", "pytest-cov (>=4.0)"]
 name = "ninja"
 version = "1.11.1.3"
 description = "Ninja is a small build system with a focus on speed"
+category = "main"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "ninja-1.11.1.3-py3-none-macosx_10_9_universal2.whl", hash = "sha256:2b4879ea3f1169f3d855182c57dcc84d1b5048628c8b7be0d702b81882a37237"},
     {file = "ninja-1.11.1.3-py3-none-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:bc3ebc8b2e47716149f3541742b5cd8e0b08f51013b825c05baca3e34854370d"},
@@ -764,10 +747,9 @@ test = ["coverage (>=4.2)", "importlib_metadata (>=2.0)", "pytest (>=6.0)", "pyt
 name = "nodeenv"
 version = "1.9.1"
 description = "Node.js virtual environment builder"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "nodeenv-1.9.1-py2.py3-none-any.whl", hash = "sha256:ba11c9782d29c27c70ffbdda2d7415098754709be8a7056d79a737cd901155c9"},
     {file = "nodeenv-1.9.1.tar.gz", hash = "sha256:6ec12890a2dab7946721edbfbcd91f3319c6ccc9aec47be7c7e6b7011ee6645f"},
@@ -777,6 +759,7 @@ files = [
 name = "packaging"
 version = "24.2"
 description = "Core utilities for Python packages"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
@@ -802,10 +785,9 @@ files = [
 name = "platformdirs"
 version = "4.3.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\" or extra == \"dev\""
 files = [
     {file = "platformdirs-4.3.6-py3-none-any.whl", hash = "sha256:73e575e1408ab8103900836b97580d5307456908a03e92031bab39e4554cc3fb"},
     {file = "platformdirs-4.3.6.tar.gz", hash = "sha256:357fb2acbc885b0419afd3ce3ed34564c13c9b95c89360cd9563f73aa5e2b907"},
@@ -820,10 +802,9 @@ type = ["mypy (>=1.11.2)"]
 name = "pluggy"
 version = "1.5.0"
 description = "plugin and hook calling mechanisms for python"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"test\" or extra == \"all\""
 files = [
     {file = "pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669"},
     {file = "pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"},
@@ -837,10 +818,9 @@ testing = ["pytest", "pytest-benchmark"]
 name = "pre-commit"
 version = "4.3.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "pre_commit-4.3.0-py2.py3-none-any.whl", hash = "sha256:2b0747ad7e6e967169136edffee14c16e148a778a54e4f967921aa1ebf2308d8"},
     {file = "pre_commit-4.3.0.tar.gz", hash = "sha256:499fe450cc9d42e9d58e606262795ecb64dd05438943c62b66f6a8673da30b16"},
@@ -857,10 +837,9 @@ virtualenv = ">=20.10.0"
 name = "pycnite"
 version = "2024.7.31"
 description = "Python bytecode utilities"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "pycnite-2024.7.31-py3-none-any.whl", hash = "sha256:9ff9c09d35056435b867e14ebf79626ca94b6017923a0bf9935377fa90d4cbb3"},
     {file = "pycnite-2024.7.31.tar.gz", hash = "sha256:5125f1c95aef4a23b9bec3b32fae76873dcd46324fa68e39c10fa852ecdea340"},
@@ -1004,10 +983,9 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 name = "pydot"
 version = "3.0.4"
 description = "Python interface to Graphviz's Dot"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "pydot-3.0.4-py3-none-any.whl", hash = "sha256:bfa9c3fc0c44ba1d132adce131802d7df00429d1a79cc0346b0a5cd374dbe9c6"},
     {file = "pydot-3.0.4.tar.gz", hash = "sha256:3ce88b2558f3808b0376f22bfa6c263909e1c3981e2a7b629b65b451eee4a25d"},
@@ -1041,10 +1019,9 @@ windows-terminal = ["colorama (>=0.4.6)"]
 name = "pylint"
 version = "3.3.9"
 description = "python code static checker"
+category = "main"
 optional = false
 python-versions = ">=3.9.0"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\""
 files = [
     {file = "pylint-3.3.9-py3-none-any.whl", hash = "sha256:01f9b0462c7730f94786c283f3e52a1fbdf0494bbe0971a78d7277ef46a751e7"},
     {file = "pylint-3.3.9.tar.gz", hash = "sha256:d312737d7b25ccf6b01cc4ac629b5dcd14a0fcf3ec392735ac70f137a9d5f83a"},
@@ -1054,6 +1031,7 @@ files = [
 astroid = ">=3.3.8,<=3.4.0.dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\""},
     {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
     {version = ">=0.3.6", markers = "python_version == \"3.11\""},
 ]
@@ -1070,10 +1048,9 @@ testutils = ["gitpython (>3)"]
 name = "pyparsing"
 version = "3.2.1"
 description = "pyparsing module - Classes and methods to define and execute parsing grammars"
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "pyparsing-3.2.1-py3-none-any.whl", hash = "sha256:506ff4f4386c4cec0590ec19e6302d3aedb992fdc02c761e90416f158dacf8e1"},
     {file = "pyparsing-3.2.1.tar.gz", hash = "sha256:61980854fd66de3a90028d679a954d5f2623e83144b5afe5ee86f43d762e5f0a"},
@@ -1086,6 +1063,7 @@ diagrams = ["jinja2", "railroad-diagrams"]
 name = "pytest"
 version = "8.4.2"
 description = "pytest: simple powerful testing with Python"
+category = "main"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
@@ -1109,10 +1087,9 @@ dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "requests
 name = "pytest-cov"
 version = "7.0.0"
 description = "Pytest plugin for measuring coverage."
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "extra == \"test\" or extra == \"all\""
 files = [
     {file = "pytest_cov-7.0.0-py3-none-any.whl", hash = "sha256:3b8e9558b16cc1479da72058bdecf8073661c7f57f7d3c5f22a1c23507f2d861"},
     {file = "pytest_cov-7.0.0.tar.gz", hash = "sha256:33c97eda2e049a0c5298e91f519302a1334c26ac65c1a483d6206fd458361af1"},
@@ -1130,6 +1107,7 @@ testing = ["process-tests", "pytest-xdist", "virtualenv"]
 name = "pytest-mock"
 version = "3.15.1"
 description = "Thin-wrapper around the mock package for easier use with pytest"
+category = "main"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
@@ -1149,10 +1127,9 @@ dev = ["pre-commit", "pytest-asyncio", "tox"]
 name = "pytest-socket"
 version = "0.3.3"
 description = "Pytest Plugin to disable socket calls during tests"
+category = "main"
 optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "extra == \"test\" or extra == \"all\""
 files = [
     {file = "pytest-socket-0.3.3.tar.gz", hash = "sha256:a90401b7a6db7091add1e33fc94a29dae6b449fdc469a725bd7cea303d12a7ed"},
 ]
@@ -1164,10 +1141,9 @@ pytest = ">=3.6.3"
 name = "pytype"
 version = "2024.10.11"
 description = "Python type inferencer"
+category = "main"
 optional = false
 python-versions = ">=3.10"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "pytype-2024.10.11-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:1c5a43b132b19928a38ba1dbcf8f4e3f67a41ea26087ccf26ae371c4076c3809"},
     {file = "pytype-2024.10.11-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5dd9ecb48aa46ecef14b39f1bbe8ff7e586e499639a056c05bd4436ca0b35d82"},
@@ -1200,10 +1176,9 @@ typing-extensions = ">=4.3.0"
 name = "pyyaml"
 version = "6.0.2"
 description = "YAML parser and emitter for Python"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\" or extra == \"test\""
 files = [
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0a9a2848a5b7feac301353437eb7d5957887edbf81d56e903999a75a3d743086"},
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:29717114e51c84ddfba879543fb232a6ed60086602313ca38cce623c1d62cfbf"},
@@ -1264,6 +1239,7 @@ files = [
 name = "requests"
 version = "2.32.5"
 description = "Python HTTP for Humans."
+category = "main"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
@@ -1286,10 +1262,9 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 name = "responses"
 version = "0.25.8"
 description = "A utility library for mocking out the `requests` Python library."
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"test\" or extra == \"all\""
 files = [
     {file = "responses-0.25.8-py3-none-any.whl", hash = "sha256:0c710af92def29c8352ceadff0c3fe340ace27cf5af1bbe46fb71275bcd2831c"},
     {file = "responses-0.25.8.tar.gz", hash = "sha256:9374d047a575c8f781b94454db5cab590b6029505f488d12899ddb10a4af1cf4"},
@@ -1307,10 +1282,9 @@ tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asy
 name = "tabulate"
 version = "0.9.0"
 description = "Pretty-print tabular data"
+category = "main"
 optional = false
 python-versions = ">=3.7"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "tabulate-0.9.0-py3-none-any.whl", hash = "sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f"},
     {file = "tabulate-0.9.0.tar.gz", hash = "sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c"},
@@ -1323,10 +1297,9 @@ widechars = ["wcwidth"]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
+category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
@@ -1336,10 +1309,9 @@ files = [
 name = "tomlkit"
 version = "0.13.2"
 description = "Style preserving TOML library"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"lint\" or extra == \"all\""
 files = [
     {file = "tomlkit-0.13.2-py3-none-any.whl", hash = "sha256:7a974427f6e119197f670fbbbeae7bef749a6c14e793db934baefc1b5f03efde"},
     {file = "tomlkit-0.13.2.tar.gz", hash = "sha256:fff5fe59a87295b278abd31bec92c15d9bc4a06885ab12bcea52c71119392e79"},
@@ -1349,6 +1321,7 @@ files = [
 name = "types-requests"
 version = "2.32.4.20250913"
 description = "Typing stubs for requests"
+category = "main"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
@@ -1365,6 +1338,7 @@ urllib3 = ">=2"
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
@@ -1377,9 +1351,9 @@ files = [
 name = "urllib3"
 version = "2.5.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
+category = "main"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
 files = [
     {file = "urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc"},
     {file = "urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760"},
@@ -1395,10 +1369,9 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "virtualenv"
 version = "20.28.1"
 description = "Virtual Python Environment builder"
+category = "main"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "extra == \"dev\" or extra == \"all\""
 files = [
     {file = "virtualenv-20.28.1-py3-none-any.whl", hash = "sha256:412773c85d4dab0409b83ec36f7a6499e72eaf08c80e81e9576bca61831c71cb"},
     {file = "virtualenv-20.28.1.tar.gz", hash = "sha256:5d34ab240fdb5d21549b76f9e8ff3af28252f5499fb6d6f031adac4e5a8c5329"},
@@ -1420,6 +1393,6 @@ lint = ["pylint"]
 test = ["pytest", "pytest-cov", "pytest-mock", "pytest-socket", "responses"]
 
 [metadata]
-lock-version = "2.1"
+lock-version = "2.0"
 python-versions = ">=3.11"
 content-hash = "038e6396f039a79d6fe4c70c80dce088c037a9fb15616350e1a8f91ec3516230"
