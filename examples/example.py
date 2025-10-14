@@ -1,6 +1,6 @@
 """Example client for PyTado"""
 
-from PyTado.interface.interface import TadoClientInitializer
+from PyTado.factory import TadoClientInitializer
 
 
 def main() -> None:

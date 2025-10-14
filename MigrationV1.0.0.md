@@ -1,13 +1,17 @@
 # Breaking Changes from 0.x.x to 1.0.0
 
 ## Summary
+
 The migration from 0.x.x to 1.0.0 introduces several breaking changes that require updates to your codebase. This document outlines the key changes and provides guidance on how to adapt your code accordingly.
 
 Version 1.0.0 introduces proper support for Tado X and separation of Tado v2/v3/v3+ and Tado X. The Clients both inherit from the `BaseTado` abstract base class and share common functionality to ensure maximum compatibility. Some functions however are only available in one of the two clients, some others have different signatures. Also API-response validation and parsing with pydantic was introduced. Functionality for Zones has been moved to the `Zone` class for Tado v2/v3/v3+ and to the `Room` class for Tado X. Both inherit from `BaseZone` and share common functionality. Like with the clients, some functions are only available in one of the two classes, some others have different signatures.
 
 ## Key Changes
+
 ### 1. Getting the Tado Client
+
 - **Old Code**:
+
   ```python
     from PyTado.interface import Tado
     tado = Tado()
@@ -19,9 +23,11 @@ Version 1.0.0 introduces proper support for Tado X and separation of Tado v2/v3/
     tado.device_activation()
     print("Device activation status: ", tado.device_activation_status()) # prints `DeviceActivationStatus.COMPLETED`
   ```
+
 - **New Code**:
+
   ```python
-    from PyTado.interface import TadoClientInitializer
+    from PyTado.factory import TadoClientInitializer
 
     # get client interactively (i.e. print activation URL to stdout)
     tado = TadoClientInitializer().authenticate_and_get_client()
@@ -33,7 +39,9 @@ Version 1.0.0 introduces proper support for Tado X and separation of Tado v2/v3/
     # then get the client:
     tado = client_initializer.device_activation().get_client()
   ```
+
 It will be automatically determined if the system is Tado v2/v3/v3+ or Tado X. The `TadoClientInitializer` class will handle the authentication process and return the appropriate client instance. If you want to use version-specific functionality it is recommended to check the type of the client instance:
+
 ```python
 from PyTado.interface import TadoClientInitializer
 from PyTado.interface import TadoX
@@ -44,8 +52,9 @@ if not isinstance(tado, TadoX):
 ```
 
 `TadoClientInitializer` can be initialized with following parameters:
+
 ```python
-from PyTado.interface import TadoClientInitializer
+from PyTado.factory import TadoClientInitializer
 client_initializer = TadoClientInitializer(
     debug=False,  # (bool, optional, default False)  enable debug logging
     saved_refresh_token=None, # (str, optional, default None)  use a saved refresh token
@@ -55,7 +64,9 @@ client_initializer = TadoClientInitializer(
 ```
 
 ### 2. Changes to the Client Class
+
 #### Changed: `get_me()`
+
 ```py
 # Old:
 def getMe(self) -> dict[str, Any]: ...
@@ -63,7 +74,9 @@ def get_me(self) -> dict[str, Any]: ...
 # New:
 def get_me(self) -> PyTado.models.User: ...
 ```
+
 #### Changed: `get_devices()`
+
 ```py
 # Old:
 def getDevices(self) -> list[dict[str, Any]]: ...
@@ -73,6 +86,7 @@ def get_devices(self) -> list[PyTado.models.pre_line_x.device.Device] | list[PyT
 ```
 
 #### Changed: `get_zones()`
+
 ```py
 # Old:
 def getZones(self) -> list[dict[str, Any]]: ...
@@ -80,7 +94,9 @@ def get_zones(self) -> list[dict[str, Any]]: ...
 # New:
 def get_zones(self) -> list[PyTado.zone.my_zone.Zone] | list[PyTado.zone.hops_zone.Room]: ...
 ```
+
 #### Changed: `get_zone_states()`
+
 ```py
 # Old:
 def getZoneStates(self) -> list[dict[str, Any]]: ...
@@ -90,6 +106,7 @@ def get_zone_states(self) -> list[PyTado.models.pre_line_x.zone.ZoneState] | lis
 ```
 
 #### Changed: `get_home_state()`
+
 ```py
 # Old:
 def getHomeState(self) -> dict[str, Any]: ...
@@ -99,6 +116,7 @@ def get_home_state(self) -> PyTado.models.home.HomeState: ...
 ```
 
 #### Changed (non-breaking): `get_auto_geofencing_supported()`
+
 ```py
 # Old:
 def getAutoGeofencingSupported(self) -> bool: ...
@@ -108,6 +126,7 @@ def get_auto_geofencing_supported(self) -> bool: ...
 ```
 
 #### Changed (non-breaking): `set_home()`
+
 ```py
 # Old:
 def setHome(self) -> None: ...
@@ -117,6 +136,7 @@ def set_home(self) -> None: ...
 ```
 
 #### Changed (non-breaking): `set_away()`
+
 ```py
 # Old:
 def setAway(self) -> None: ...
@@ -126,6 +146,7 @@ def set_away(self) -> None: ...
 ```
 
 #### Changed: `change_presence()`
+
 ```py
 # Old:
 def changePresence(self, presence: str) -> None: ...
@@ -135,6 +156,7 @@ def change_presence(self, presence: PyTado.types.Presence) -> None: ...
 ```
 
 #### Changed (non-breaking): `set_auto()`
+
 ```py
 # Old:
 def setAuto(self) -> None: ...
@@ -144,6 +166,7 @@ def set_auto(self) -> None: ...
 ```
 
 #### Changed: `get_weather()`
+
 ```py
 # Old:
 def getWeather(self) -> dict[str, Any]: ...
@@ -153,6 +176,7 @@ def get_weather(self) -> PyTado.models.home.Weather: ...
 ```
 
 #### Changed: `get_air_comfort()`
+
 ```py
 # Old:
 def getAirComfort(self) -> dict[str, Any]: ...
@@ -162,6 +186,7 @@ def get_air_comfort(self) -> PyTado.models.home.AirComfort: ...
 ```
 
 #### Changed: `get_users()`
+
 ```py
 # Old:
 def getAppUsers(self) -> list[dict[str, Any]]: ...
@@ -171,6 +196,7 @@ def get_users(self) -> list[PyTado.models.home.User]: ...
 ```
 
 #### Changed: `get_mobile_devices()`
+
 ```py
 # Old:
 def getMobileDevices(self) -> list[dict[str, Any]]: ...
@@ -180,6 +206,7 @@ def get_mobile_devices(self) -> list[PyTado.models.home.MobileDevice]: ...
 ```
 
 #### Changed: `get_running_times()`
+
 ```py
 # Old:
 def getRunningTimes(self, date: str) -> dict[str, Any]: ...
@@ -189,12 +216,14 @@ def get_running_times(self, date: datetime.date) -> PyTado.models.home.RunningTi
 ```
 
 #### New: `get_zone()`
+
 ```py
 # New:
 def get_zone(self, zone: int) -> PyTado.zone.my_zone.Zone | PyTado.zone.hops_zone.Room: ...
 ```
 
 #### Changed: `get_zone_state()`
+
 ```py
 # Old:
 def getZoneState(self, zone: int) -> dict[str, Any]: ...
@@ -204,6 +233,7 @@ def get_zone_state(self, zone: int) -> PyTado.models.pre_line_x.zone.ZoneState |
 ```
 
 #### Changed: `set_child_lock()`
+
 ```py
 # Old:
 def setChildLock(self, device_id: int, enabled: bool) -> None: ...
@@ -213,6 +243,7 @@ def set_child_lock(self, device_id: int, child_lock: bool) -> None: ...
 ```
 
 #### Changed: `get_device_info()`
+
 ```py
 # Old:
 def getDeviceInfo(self, device_id: int, cmd: str) -> dict[str, Any]: ...
@@ -222,6 +253,7 @@ def get_device_info(self, device_id: int) -> PyTado.models.pre_line_x.device.Dev
 ```
 
 #### Changed: `set_temp_offset()`
+
 ```py
 # Old:
 def setTempOffset(self, device_id: int, offset: float, measure: str): ...
@@ -230,8 +262,8 @@ def set_temp_offset(self, device_id: int, offset: float, measure: str): ...
 def set_temp_offset(self, device_id: int, offset: float, measure: str = "celsius") -> None | PyTado.models.return_models.TemperatureOffset: ...
 ```
 
-
 #### Changed: `get_eiq_tariff()`
+
 ```py
 # Old:
 def getEiqTariff(self) -> dict[str, Any]: ...
@@ -241,6 +273,7 @@ def get_eiq_tariff(self) -> PyTado.models.home.EiqTariff: ...
 ```
 
 #### Changed: `get_eiq_meter_readings()`
+
 ```py
 # Old:
 def getEiqMeterReadings(self) -> dict[str, Any]: ...
@@ -250,6 +283,7 @@ def get_eiq_meter_readings(self) -> PyTado.models.home.EiqMeterReadings: ...
 ```
 
 #### Changed: `set_eiq_meter_reading()`
+
 ```py
 # Old:
 def setEiqMeterReading(self, date: str, meter_reading: float) -> dict[str, Any]: ...
@@ -259,6 +293,7 @@ def set_eiq_meter_reading(self, date: datetime.date, meter_reading: float) -> di
 ```
 
 #### Changed: `set_eiq_tariff()`
+
 ```py
 # Old:
 def setEIQTariff(
@@ -289,6 +324,7 @@ def set_eiq_tariff(
 ```
 
 ### 3. Changes to the Zone Classes
+
 The `TadoXZone` class has been renamed to `TadoRoom`. Both `TadoZone` and `TadoRoom` inherit from `BaseZone` and have been heavily refactored.
 
 Before, `TadoXZone` was a subclass of `TadoZone`, now it is a subclass of `BaseZone`.
@@ -296,25 +332,26 @@ Before, `TadoXZone` was a subclass of `TadoZone`, now it is a subclass of `BaseZ
 The properties of `TadoZone` and `TadoRoom` are lazily loaded, meaning that they are only fetched from the API when they are accessed for the first time. This is done to improve performance and reduce the number of API calls.
 To force a refresh of the properties, you can call the `update()` method on the `TadoZone` or `TadoRoom` instance. This will delete the cached properties and fetch them again once they are accessed.
 
-#### Overview:
+#### Overview
+
 | Old `TadoZone`                                             | New `BaseZone`                                                                                      |
-|------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `zone_id: int`                                             | id: int                                                                                             |
 | ---                                                        | `name: str`                                                                                         |
 | ---                                                        | `devices: list[PyTado.models.pre_line_x.device.Device] \| list[PyTado.models.line_x.device.Device]` |
-| `current_temp: float \| None = None`                        | `current_temp: float`                                                                               |
+| `current_temp: float \| None = None`                       | `current_temp: float`                                                                               |
 | `current_temp_timestamp: str \| None = None`               | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
-| `current_humidity: float \| None = None`                    | `current_humidity: float`                                                                           |
+| `current_humidity: float \| None = None`                   | `current_humidity: float`                                                                           |
 | `current_humidity_timestamp: str \| None = None`           | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
 | `is_away: bool \| None = None`                             | removed (use `tado_mode` instead)                                                                   |
 | `current_hvac_action: str = CONST_HVAC_OFF`                | `current_hvac_action: PyTado.types.HvacAction`                                                      |
 | `current_fan_speed: str \| None = None`                    | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
 | `current_fan_level: str \| None = None`                    | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
-| `current_hvac_mode: str \| None = None`                    | `current_hvac_mode: PyTado.types.HvacMode `                                                         |
+| `current_hvac_mode: str \| None = None`                    | `current_hvac_mode: PyTado.types.HvacMode`                                                          |
 | `current_swing_mode: str \| None = None`                   | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
 | `current_vertical_swing_mode: str \| None = None`          | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
 | `current_horizontal_swing_mode: str \| None = None`        | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
-| `target_temp: float \| None = None`                         | `target_temp: float \| None`                                                                        |
+| `target_temp: float \| None = None`                        | `target_temp: float \| None`                                                                        |
 | `available: bool = False`                                  | `available: bool`                                                                                   |
 | `power: str \| None = None`                                | `power: PyTado.types.Power`                                                                         |
 | `link: str \| None = None`                                 | removed                                                                                             |
@@ -323,7 +360,7 @@ To force a refresh of the properties, you can call the `update()` method on the 
 | `heating_power_timestamp: str \| None = None`              | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
 | `ac_power: str \| None = None`                             | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
 | `heating_power: str \| None = None`                        | removed                                                                                             |
-| `heating_power_percentage: float \| None = None`            | `heating_power_percentage: float \| None`                                                           |
+| `heating_power_percentage: float \| None = None`           | `heating_power_percentage: float \| None`                                                           |
 | `tado_mode: str \| None = None`                            | `tado_mode: PyTado.types.Presence \| None`                                                          |
 | ---                                                        | `tado_mode_setting: PyTado.types.Presence \| None`                                                  |
 | `overlay_termination_type: str \| None = None`             | `overlay_termination_type: PyTado.types.OverlayMode \| None`                                        |
@@ -332,18 +369,19 @@ To force a refresh of the properties, you can call the `update()` method on the 
 | `default_overlay_termination_type: str \| None = None`     | `default_overlay_termination_type: PyTado.types.OverlayMode \| None`                                |
 | `default_overlay_termination_duration: str \| None = None` | `default_overlay_termination_duration: int \| None`                                                 |
 | `preparation: bool = False`                                | Only available in `TadoZone` (Tado v2/v3/v3+)                                                       |
-| `open_window: bool = False`                                | `open_window: bool `                                                                                |
+| `open_window: bool = False`                                | `open_window: bool`                                                                                 |
 | ---                                                        | `open_window_expiry_seconds: int \| None`                                                           |
 | `open_window_detected: bool = False`                       | removed                                                                                             |
 | `open_window_attr: dict[str, Any]`                         | removed                                                                                             |
-| `precision: float = DEFAULT_TADO_PRECISION`                 | removed                                                                                             |
+| `precision: float = DEFAULT_TADO_PRECISION`                | removed                                                                                             |
 | ---                                                        | `next_time_block_start: datetime.datetime \| None`                                                  |
 | ---                                                        | `boost: bool`                                                                                       |
 | ---                                                        | `zone_type: PyTado.types.ZoneType`                                                                  |
 | ---                                                        | `setting: PyTado.models.pre_line_x.zone.Setting \| PyTado.models.line_x.room.Setting`               |
 | ---                                                        | `overlay_active: bool`                                                                              |
 
-#### Attributes only available in `TadoZone` (Tado v2/v3/v3+):
+#### Attributes only available in `TadoZone` (Tado v2/v3/v3+)
+
 - `current_temp_timestamp: datetiem.datetime | None`
 - `current_humidity_timestamp: datetiem.datetime | None`
 - `current_fan_level: str | None`
@@ -352,10 +390,13 @@ To force a refresh of the properties, you can call the `update()` method on the 
 - `current_horizontal_swing_mode: HorizontalSwing | None`
 - `current_vertical_swing_mode: VerticalSwing | None`
 
-#### Methods:
+#### Methods
+
 ##### Common Methods
+
 All common methods are available in both `TadoZone` and `TadoRoom`.
 They are also available trough the `Tado` client directly with the same name and `zone: int` as an additional parameter.
+
 ```py
 from PyTado.interface import TadoClientInitializer
 tado = TadoClientInitializer().authenticate_and_get_client()
@@ -363,8 +404,8 @@ zone = tado.get_zone(1)
 assert zone.get_historic(datetime.date.today()) == tado.get_historic(1, datetime.date.today())
 ```
 
-
 All Methods:
+
 ```py
 def get_climate(self) -> PyTado.models.return_models.Climate: ...
 
@@ -449,6 +490,7 @@ def set_zone_overlay(
 ```
 
 ##### TadoZone Methods (Tado v2/v3/v3+ only)
+
 ```py
 def set_open_window(self) -> None: ...
 
