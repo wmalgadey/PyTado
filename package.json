@@ -1,0 +1,48 @@
+{
+  "name": "pytado",
+  "version": "1.0.0",
+  "description": "PyTado is a Python module implementing an interface to the Tado web API. It allows a user to interact with their Tado heating system for the purposes of monitoring or controlling their heating system, beyond what Tado themselves currently offer",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "npx @11ty/eleventy",
+    "build-nocolor": "cross-env NODE_DISABLE_COLORS=1 npx @11ty/eleventy",
+    "build-ghpages": "npx @11ty/eleventy --pathprefix=/PyTado/",
+    "start": "npx @11ty/eleventy --serve --quiet",
+    "start-ghpages": "npx @11ty/eleventy --pathprefix=/PyTado/ --serve --quiet",
+    "debug": "cross-env DEBUG=Eleventy* npx @11ty/eleventy",
+    "debugstart": "cross-env DEBUG=Eleventy* npx @11ty/eleventy --serve --quiet",
+    "benchmark": "cross-env DEBUG=Eleventy:Benchmark* npx @11ty/eleventy"
+  },
+  "keywords": [],
+  "author": "Wolfgang Malgadey",
+  "license": "GPL v3",
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wmalgadey/PyTado.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wmalgadey/PyTado/issues"
+  },
+  "homepage": "https://github.com/wmalgadey/PyTado",
+  "devDependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "@11ty/eleventy-navigation": "^0.3.5",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "cross-env": "^7.0.3",
+    "luxon": "^3.5.0",
+    "zod": "^3.23.8",
+    "zod-validation-error": "^3.3.1"
+  },
+  "dependencies": {
+    "@zachleat/heading-anchors": "^1.0.1"
+  }
+}

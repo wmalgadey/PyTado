@@ -43,6 +43,7 @@ pytest-mock = "*"
 pytest-cov = "*"
 pytest-socket = "*"
 pydantic = "^2.10.6"
+pydoc-markdown = "*"
 
 [tool.poetry.extras]
 dev = ["pre-commit", "pytype", "types-requests"]
@@ -74,3 +75,10 @@ skips = []
 
 [tool.mypy]
 strict = true
+
+[[tool.pydoc-markdown.loaders]]
+type = "python"
+search_path = [ "../PyTado" ]
+
+[tool.pydoc-markdown.renderer]
+type = "markdown"

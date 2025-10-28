@@ -170,3 +170,11 @@ cython_debug/
 .DS_Store
 junit.xml
 token.json
+
+# 11ty
+_site/
+
+# node/npm
+node_modules/
+package-lock.json
+docs/content/api.md
