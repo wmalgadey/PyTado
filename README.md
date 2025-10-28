@@ -10,14 +10,14 @@ PyTado is a Python module implementing an interface to the Tado web API. It allo
 Tado heating system for the purposes of monitoring or controlling their heating system, beyond what Tado themselves
 currently offer.
 
-It is hoped that this module might be used by those who wish to tweak their Tado systems, and further optimise their
+It is hoped that this module might be used by those who wish to tweak their Tado systems, and further optimize their
 heating setups.
 
 ---
 
 Original author: Chris Jewell <chrism0dwk@gmail.com>
 
-Licence: GPL v3
+License: GPL v3
 
 Copyright: Chris Jewell 2016-2018
 
@@ -26,7 +26,7 @@ Copyright: Chris Jewell 2016-2018
 Besides owning a Tado system, I have no connection with the Tado company themselves. PyTado was created for my own use,
 and for others who may wish to experiment with personal Internet of Things systems. I receive no help (financial or
 otherwise) from Tado, and have no business interest with them. This software is provided without warranty, according to
-the GNU Public Licence version 3, and should therefore not be used where it may endanger life, financial stakes, or
+the GNU Public License version 3, and should therefore not be used where it may endanger life, financial stakes, or
 cause discomfort and inconvenience to others.
 
 ## Usage
@@ -54,7 +54,7 @@ It is possible to save the refresh token and reuse to skip the next login.
 
 The following code will use the `refresh_token` file to save the refresh-token after login, and load the refresh-token if you create the Tado interface class again.
 
-If the file doesn't exists, the webbrowser is started and the device authentication url is automatically opened. You can activate the device in the browser. When you restart the program, the refresh-token is reused and no webbrowser will be opened.
+If the file doesn't exists, the web browser is started and the device authentication url is automatically opened. You can activate the device in the browser. When you restart the program, the refresh-token is reused and no web browser will be opened.
 
 ```python
 import webbrowser   # only needed for direct web browser access
@@ -111,7 +111,6 @@ if __name__ == "__main__":
 Note: For developers, there is an `example.py` script in `examples/` which is configured to fetch data from your account.
 You can then invoke `python examples/example.py`.
 
-
 ## Contributing
 
 We are very open to the community's contributions - be it a quick fix of a typo, or a completely new feature!
@@ -143,20 +142,7 @@ git clone https://github.com/yourusername/PyTado.git
 cd PyTado
 ```
 
-Then, to create your development environment and install the project with its dependencies, execute the following
-commands in your terminal:
-
-```bash
-# Create and activate a new virtual environment
-python3 -m venv venv
-source venv/bin/activate
-
-# install all dependencies
-poetry install
-
-# Install pre-commit hooks
-poetry run pre-commit install
-```
+Then, to create your development environment and install the project with its dependencies, execute the `./scripts/bootstrap` script.
 
 ### Coding Guidelines
 
@@ -194,7 +180,6 @@ A message from the original author:
 > Best wishes and a warm winter to all!
 >
 > Chris Jewell
-
 
 [devcontainer-shield]: https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode
 [devcontainer]: https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/wmalgadey/PyTado

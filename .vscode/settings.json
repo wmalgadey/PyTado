@@ -1,8 +1,14 @@
 {
     "python.linting.pylintEnabled": true,
     "cSpell.words": [
-        "Tado"
+        "Tado",
+        "Pythonize",
+        "pypi",
+        "pytado"
     ],
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "python.testing.pytestArgs": [
         "."
     ],
