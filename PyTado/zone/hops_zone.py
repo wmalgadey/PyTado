@@ -39,9 +39,6 @@ if TYPE_CHECKING:
     from PyTado.interface.api.hops_tado import TadoX  # pragma: no cover
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
-
-_LOGGER.setLevel(logging.DEBUG)
 
 
 @final

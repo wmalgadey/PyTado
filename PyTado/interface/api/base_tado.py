@@ -254,7 +254,7 @@ class TadoBase(metaclass=ABCMeta):
             request.command = "presenceLock"
             request.action = Action.RESET
 
-            self._http.request(request)
+            return self._http.request(request)
         else:
             raise TadoNotSupportedException("Auto mode is not known to be supported.")
 
