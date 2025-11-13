@@ -315,3 +315,34 @@ class TestHttp(unittest.TestCase):
         mock_device_ready.assert_called_once()
         mock_load_token.assert_not_called()
         mock_login_device_flow.assert_not_called()
+
+    @mock.patch("PyTado.http.Http._refresh_token", return_value=True)
+    @mock.patch("PyTado.http.Http._device_ready")
+    @mock.patch("PyTado.http.Http._load_token")
+    @mock.patch("PyTado.http.Http._login_device_flow")
+    def test_request_returns_success_for_204_status(
+        self,
+        mock_load_token,
+        mock_login_device_flow,
+        mock_device_ready,
+        mock_refresh_token,
+    ):
+        """
+        Make sure that PyTado returns {"success": True} if Tado returns HTTP 204
+        to ensure that the interface of this library is not changed. Can be removed
+        on the next breaking release.
+        """
+        http = Http()
+        http._id = 1234
+
+        # Tado changed some (all?) APIs from HTTP 200 to HTTP 204.
+        # Mock the session.send method to ensure to be able to handle both responses same.
+        mock_response = mock.Mock()
+        mock_response.status_code = 204
+        mock_response.text = ""
+
+        with mock.patch.object(http._session, "send", return_value=mock_response):
+            request = TadoRequest(command="test", domain=Domain.HOME)
+            result = http.request(request)
+
+        self.assertEqual(result, {"success": True})

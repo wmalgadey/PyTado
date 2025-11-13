@@ -318,6 +318,12 @@ class Http:
             raise TadoException(e) from e
 
         if response.text == "":
+            if response.status_code == 204:
+                # Tado changed some (all?) APIs from HTTP 200 to HTTP 204.
+                # Make sure that PyTado returns {"success": True} if Tado returns HTTP 204
+                # to ensure that the interface of this library is not changed. Can be removed
+                # on the next breaking release.
+                return {"success": True}
             return {}
 
         if response.status_code not in HTTP_CODES_OK:
