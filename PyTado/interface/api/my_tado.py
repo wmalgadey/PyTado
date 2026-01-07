@@ -231,7 +231,7 @@ class Tado:
         request.command = f"zones/{zone:d}/schedule/activeTimetable"
         request.action = Action.CHANGE
         request.payload = {"id": timetable}
-        request.mode = Mode.PLAIN
+        request.mode = Mode.OBJECT
 
         self._http.request(request)
 
@@ -258,7 +258,7 @@ class Tado:
         request.command = f"zones/{zone:d}/schedule/timetables/{timetable:d}/blocks/{day}"
         request.action = Action.CHANGE
         request.payload = data
-        request.mode = Mode.PLAIN
+        request.mode = Mode.OBJECT
 
         return self._http.request(request)
 
