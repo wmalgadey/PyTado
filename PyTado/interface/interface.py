@@ -94,6 +94,10 @@ class Tado:
         """Returns the URL for device verification."""
         return self._http.device_verification_url
 
+    def rate_limit_info(self) -> dict[str, str]:
+        """Retrieve the current rate limit information."""
+        return self._http.rate_limit
+
     def device_activation_status(self) -> DeviceActivationStatus:
         """Returns the status of the device activation."""
         return self._http.device_activation_status

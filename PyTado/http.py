@@ -197,6 +197,8 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
 
+        self._rate_limit: dict[str, str] = {}
+
         if (saved_refresh_token or self._load_token()) and self._refresh_token(
             refresh_token=saved_refresh_token, force_refresh=True
         ):
@@ -255,6 +257,11 @@ class Http:
             str | None: The current refresh token, or None if not available.
         """
         return self._token_refresh
+
+    @property
+    def rate_limit(self) -> dict[str, str]:
+        """Retrieve the current rate limit information."""
+        return self._rate_limit
 
     def _create_session(self) -> requests.Session:
         session = requests.Session()
@@ -317,6 +324,19 @@ class Http:
 
         if response.text is None or response.text == "":
             return {}
+
+        # Retrieve the headers to update the rate limit info
+        # They're stored in the object memory
+        if response.headers.get("RateLimit-Policy") is not None:
+            policy = response.headers["RateLimit-Policy"]
+            rate_limit = response.headers["RateLimit"]
+            # Example: RateLimit-Policy': '"perday";q=20000;w=86400'
+            # Rate limit is stored as follows: 'RateLimit': '"perday";r=15211'
+            self._rate_limit = {
+                "per-day": policy.split(";")[1].split("=")[1],
+                "window-seconds": policy.split(";")[2].split("=")[1],
+                "remaining": rate_limit.split(";")[1].split("=")[1],
+            }
 
         return response.json()
 
