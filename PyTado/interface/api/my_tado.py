@@ -335,7 +335,7 @@ class Tado(TadoBase):
 
     def set_flow_temperature_optimization(
         self, max_flow_temperature: float
-    ) -> FlowTemperatureOptimization:
+    ) -> SuccessResult:
         """
         Set the flow temperature optimization.
 
@@ -348,7 +348,7 @@ class Tado(TadoBase):
         request.command = "flowTemperatureOptimization"
         request.payload = {"maxFlowTemperature": max_flow_temperature}
 
-        return FlowTemperatureOptimization.model_validate(self._http.request(request))
+        return SuccessResult.model_validate(self._http.request(request))
 
     def get_flow_temperature_optimization(self) -> FlowTemperatureOptimization:
         """

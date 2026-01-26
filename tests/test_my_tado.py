@@ -157,9 +157,7 @@ class TadoTestCase(common.TadoBaseTestCase, is_x_line=False):
         """Test the set_flow_temperature_optimization method."""
         with mock.patch(
             "PyTado.http.Http.request",
-            return_value=json.loads(
-                common.load_fixture("set_flow_temperature_optimization_issue_143.json")
-            ),
+            return_value={"success": True},
         ):
             # Set max flow temperature to 50°C
             self.tado_client.set_flow_temperature_optimization(50)
@@ -178,7 +176,7 @@ class TadoTestCase(common.TadoBaseTestCase, is_x_line=False):
             responses.GET,
             "https://my.tado.com/api/v2/homes/1234/flowTemperatureOptimization",
             json=json.loads(
-                common.load_fixture("set_flow_temperature_optimization_issue_143.json")
+                common.load_fixture("get_flow_temperature_optimization_issue_143.json")
             ),
             status=200,
         )
