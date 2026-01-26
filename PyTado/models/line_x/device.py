@@ -38,6 +38,7 @@ class DevicesRooms(Base):
     devices: list[Device]
     zone_controller_assignable: bool | None = None
     zone_controllers: list[Any] | None = None
+    room_link_available: bool | None = None
 
     @model_validator(mode="after")
     def set_device_room(self) -> Self:
