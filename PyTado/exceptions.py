@@ -19,3 +19,7 @@ class TadoNoCredentialsException(TadoCredentialsException):
 
 class TadoWrongCredentialsException(TadoCredentialsException):
     """Exception to indicate wrong credentials"""
+
+
+class TadoRateLimitException(TadoException):
+    """Exception to indicate API rate limit has been exceeded."""

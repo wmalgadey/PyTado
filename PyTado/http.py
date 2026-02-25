@@ -23,7 +23,11 @@ from urllib3.exceptions import MaxRetryError
 
 from PyTado import __version__
 from PyTado.const import CLIENT_ID_DEVICE, HTTP_CODES_OK
-from PyTado.exceptions import TadoException, TadoWrongCredentialsException
+from PyTado.exceptions import (
+    TadoException,
+    TadoRateLimitException,
+    TadoWrongCredentialsException,
+)
 from PyTado.logger import Logger
 
 _LOGGER = Logger(__name__)
@@ -316,6 +320,25 @@ class Http:
         except MaxRetryError as e:
             _LOGGER.error("Max retries exceeded: %s", e)
             raise TadoException(e) from e
+
+        if response.status_code == 429:
+            details = []
+            rate_limit_policy = response.headers.get("RateLimit-Policy")
+            rate_limit = response.headers.get("RateLimit")
+            retry_after = response.headers.get("Retry-After")
+
+            if rate_limit_policy:
+                details.append(f"policy={rate_limit_policy}")
+            if rate_limit:
+                details.append(f"limit={rate_limit}")
+            if retry_after:
+                details.append(f"retry_after={retry_after}")
+
+            message = "Request failed with status code 429"
+            if details:
+                message += f" ({', '.join(details)})"
+
+            raise TadoRateLimitException(message)
 
         if response.text == "":
             if response.status_code == 204:
