@@ -9,7 +9,7 @@ from unittest import mock
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
-from PyTado.exceptions import TadoException
+from PyTado.exceptions import TadoException, TadoRateLimitException
 from PyTado.http import Domain, Endpoint, Http, TadoRequest
 
 from . import common
@@ -346,3 +346,33 @@ class TestHttp(unittest.TestCase):
             result = http.request(request)
 
         self.assertEqual(result, {"success": True})
+
+    @mock.patch("PyTado.http.Http._refresh_token", return_value=True)
+    @mock.patch("PyTado.http.Http._device_ready")
+    @mock.patch("PyTado.http.Http._load_token")
+    @mock.patch("PyTado.http.Http._login_device_flow")
+    def test_request_raises_rate_limit_exception_for_429_status(
+        self,
+        mock_load_token,
+        mock_login_device_flow,
+        mock_device_ready,
+        mock_refresh_token,
+    ):
+        """Raise a clear rate-limit exception for exhausted API quota."""
+        http = Http()
+        http._id = 1234
+
+        mock_response = mock.Mock()
+        mock_response.status_code = 429
+        mock_response.text = ""
+        mock_response.headers = {
+            "RateLimit-Policy": '"perday";q=1000;w=86400',
+            "RateLimit": '"perday";r=0;t=1301',
+        }
+
+        with mock.patch.object(http._session, "send", return_value=mock_response):
+            request = TadoRequest(command="test", domain=Domain.HOME)
+            with self.assertRaises(TadoRateLimitException) as err:
+                http.request(request)
+
+        self.assertIn('"perday";r=0;t=1301', str(err.exception))
