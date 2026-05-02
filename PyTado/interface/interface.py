@@ -58,6 +58,7 @@ class Tado:
         http_session: requests.Session | None = None,
         debug: bool = False,
         user_agent: str | None = None,
+        client_id: str | None = None,
     ):
         """
         Initializes the interface class.
@@ -72,6 +73,8 @@ class Tado:
             debug (bool, optional): Flag to enable or disable debug mode. Defaults to False.
             user_agent (str | None): Optional user-agent header to use for the HTTP requests.
                 If None, a default user-agent PyTado/<PyTado-version> will be used.
+            client_id (str | None): OAuth2 client_id. If None, defaults to CLIENT_ID_DEVICE
+                from PyTado.const. Pass a custom value instead of patching the module global.
         """
 
         self._http = Http(
@@ -80,6 +83,7 @@ class Tado:
             http_session=http_session,
             debug=debug,
             user_agent=user_agent,
+            client_id=client_id,
         )
         self._api: API.Tado | API.TadoX | None = None
         self._debug = debug
