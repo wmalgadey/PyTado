@@ -158,7 +158,7 @@ class TestHttp(unittest.TestCase):
             responses.POST,
             "https://login.tado.com/oauth2/token",
             match=[
-                responses.matchers.query_param_matcher(expected_params),
+                responses.matchers.urlencoded_params_matcher(expected_params),
             ],
             json={
                 "access_token": "new_value",
