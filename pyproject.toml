@@ -59,7 +59,7 @@ include = "PyTado"
 from = "."
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.15.0"
+mypy = ">=1.15,<3.0"
 
 [tool.coverage.report]
 show_missing = true
