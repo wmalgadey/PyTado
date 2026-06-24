@@ -648,9 +648,14 @@ class Http:
         if not isinstance(response, dict):
             raise TadoException("Unexpected response type")
 
-        homes_ = response["homes"]
+        homes_ = response.get("homes")
+        if isinstance(homes_, list) and homes_:
+            return int(homes_[0]["id"])
 
-        return int(homes_[0]["id"])
+        if home_id := response.get("homeId"):
+            return int(home_id)
+
+        raise TadoException("No home id found in response")
 
     def _check_x_line_generation(self) -> bool:
         # get home info
