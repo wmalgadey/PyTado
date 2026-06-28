@@ -74,6 +74,22 @@ class TestHttp(unittest.TestCase):
         self.assertEqual(instance.is_x_line, False)
 
     @responses.activate
+    def test_login_successful_with_home_id_response(self):
+        """Test that login accepts a me response with homeId."""
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/me",
+            json={"homeId": 1234},
+            status=200,
+        )
+
+        instance = Http(debug=True)
+        instance.device_activation()
+
+        self.assertEqual(instance._id, 1234)
+        self.assertEqual(instance.is_x_line, False)
+
+    @responses.activate
     def test_login_failed(self):
         """Test that login fails with appropriate exceptions."""
         responses.replace(
