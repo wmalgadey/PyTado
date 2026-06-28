@@ -600,11 +600,13 @@ class Http:
             token_response = self._session.request(
                 method="post",
                 url="https://login.tado.com/oauth2/token",
-                data=urlencode({
-                    "client_id": self._client_id,
-                    "device_code": self._device_flow_data["device_code"],
-                    "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-                }),
+                data=urlencode(
+                    {
+                        "client_id": self._client_id,
+                        "device_code": self._device_flow_data["device_code"],
+                        "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                    }
+                ),
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
         except requests.exceptions.ConnectionError as e:
