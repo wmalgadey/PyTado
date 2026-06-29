@@ -153,6 +153,7 @@ class Http:
         http_session: requests.Session | None = None,
         debug: bool = False,
         user_agent: str | None = None,
+        client_id: str | None = None,
     ) -> None:
         """
         Initialize the HTTP client for interacting with the Tado API.
@@ -167,6 +168,8 @@ class Http:
             debug (bool): If True, enables debug logging. Defaults to False.
             user_agent (str | None): Optional user-agent header to use for the HTTP requests.
                 If None, a default user-agent PyTado/<PyTado-version> will be used.
+            client_id (str | None): OAuth2 client_id to use for authentication.
+                If None, defaults to CLIENT_ID_DEVICE from PyTado.const.
 
         Returns:
             None
@@ -206,6 +209,7 @@ class Http:
         self._token_refresh: str | None = None
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
+        self._client_id = client_id or CLIENT_ID_DEVICE
 
         self._session.mount("https://", self._http_adapter)
         self._session.mount("http://", self._http_adapter)
@@ -214,7 +218,23 @@ class Http:
             if self._refresh_token(
                 refresh_token=saved_refresh_token, force_refresh=True
             ):
-                self._device_ready()
+                try:
+                    self._device_ready()
+                except Exception as exc:
+                    # Token refresh succeeded but /me failed (e.g. rate-limited empty
+                    # response). Wipe the token and fall back to device flow.
+                    _LOGGER.warning(
+                        "Token refresh succeeded but home ID fetch failed (%s). "
+                        "Starting device flow.",
+                        exc,
+                    )
+                    if self._token_file_path and os.path.exists(self._token_file_path):
+                        os.remove(self._token_file_path)
+                    self._token_refresh = None
+                    self._headers.pop("Authorization", None)
+                    self._device_activation_status = self._login_device_flow()
+            else:
+                self._device_activation_status = self._login_device_flow()
         else:
             self._device_activation_status = self._login_device_flow()
 
@@ -464,7 +484,7 @@ class Http:
 
         url = "https://login.tado.com/oauth2/token"
         data = {
-            "client_id": CLIENT_ID_DEVICE,
+            "client_id": self._client_id,
             "grant_type": "refresh_token",
             "refresh_token": refresh_token or self._token_refresh,
         }
@@ -475,11 +495,10 @@ class Http:
             response = self._session.request(
                 "post",
                 url,
-                params=data,
                 timeout=_DEFAULT_TIMEOUT,
-                data=json.dumps({}).encode("utf8"),
+                data=urlencode(data),
                 headers={
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
                     "Referer": "https://app.tado.com/",
                 },
             )
@@ -534,7 +553,7 @@ class Http:
 
         url = "https://login.tado.com/oauth2/device_authorize"
         data = {
-            "client_id": CLIENT_ID_DEVICE,
+            "client_id": self._client_id,
             "scope": "offline_access",
         }
 
@@ -542,11 +561,10 @@ class Http:
             response = self._session.request(
                 method="post",
                 url=url,
-                params=data,
                 timeout=_DEFAULT_TIMEOUT,
-                data=json.dumps({}).encode("utf8"),
+                data=urlencode(data),
                 headers={
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
                     "Referer": "https://app.tado.com/",
                 },
             )
@@ -561,9 +579,12 @@ class Http:
         self._device_flow_data = response.json()
         _LOGGER.debug("Device flow response: %s", self._device_flow_data)
 
-        user_code = urlencode({"user_code": self._device_flow_data["user_code"]})
-        visit_url = f"{self._device_flow_data['verification_uri']}?{user_code}"
         self._user_code = self._device_flow_data["user_code"]
+        visit_url = (
+            self._device_flow_data["verification_uri"]
+            + "?"
+            + urlencode({"user_code": self._user_code, "client_id": self._client_id})
+        )
         self._device_verification_url = visit_url
 
         _LOGGER.info("Please visit the following URL: %s", visit_url)
@@ -594,7 +615,7 @@ class Http:
                 method="post",
                 url="https://login.tado.com/oauth2/token",
                 params={
-                    "client_id": CLIENT_ID_DEVICE,
+                    "client_id": self._client_id,
                     "device_code": self._device_flow_data["device_code"],
                     "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
                 },
@@ -655,7 +676,13 @@ class Http:
         if home_id := response.get("homeId"):
             return int(home_id)
 
-        raise TadoException("No home id found in response")
+        if isinstance(response.get("home"), dict):
+            return int(response["home"]["id"])
+
+        if home_ids := response.get("homeIds"):
+            return int(home_ids[0])
+
+        raise TadoException(f"No home id found in /me response: {response}")
 
     def _check_x_line_generation(self) -> bool:
         # get home info
