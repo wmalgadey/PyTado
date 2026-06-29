@@ -218,7 +218,21 @@ class Http:
             if self._refresh_token(
                 refresh_token=saved_refresh_token, force_refresh=True
             ):
-                self._device_ready()
+                try:
+                    self._device_ready()
+                except Exception as exc:
+                    # Token refresh succeeded but /me failed (e.g. rate-limited empty
+                    # response). Wipe the token and fall back to device flow.
+                    _LOGGER.warning(
+                        "Token refresh succeeded but home ID fetch failed (%s). "
+                        "Starting device flow.",
+                        exc,
+                    )
+                    if self._token_file_path and os.path.exists(self._token_file_path):
+                        os.remove(self._token_file_path)
+                    self._token_refresh = None
+                    self._headers.pop("Authorization", None)
+                    self._device_activation_status = self._login_device_flow()
             else:
                 self._device_activation_status = self._login_device_flow()
         else:
@@ -600,14 +614,11 @@ class Http:
             token_response = self._session.request(
                 method="post",
                 url="https://login.tado.com/oauth2/token",
-                data=urlencode(
-                    {
-                        "client_id": self._client_id,
-                        "device_code": self._device_flow_data["device_code"],
-                        "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-                    }
-                ),
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                params={
+                    "client_id": self._client_id,
+                    "device_code": self._device_flow_data["device_code"],
+                    "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                },
             )
         except requests.exceptions.ConnectionError as e:
             raise TadoException(e) from e
@@ -665,7 +676,13 @@ class Http:
         if home_id := response.get("homeId"):
             return int(home_id)
 
-        raise TadoException("No home id found in response")
+        if isinstance(response.get("home"), dict):
+            return int(response["home"]["id"])
+
+        if home_ids := response.get("homeIds"):
+            return int(home_ids[0])
+
+        raise TadoException(f"No home id found in /me response: {response}")
 
     def _check_x_line_generation(self) -> bool:
         # get home info
