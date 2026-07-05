@@ -84,7 +84,7 @@ class RoomState(Base):
     connection: Connection
     open_window: XOpenWindow | None
     next_schedule_change: NextScheduleChange | None
-    next_time_block: NextTimeBlock
+    next_time_block: NextTimeBlock | None
     balance_control: str | None = None
     manual_control_termination: ManualControlTermination | None = None
     boost_mode: ManualControlTermination | None = None
