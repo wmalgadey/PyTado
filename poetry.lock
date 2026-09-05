@@ -1726,15 +1726,15 @@ dev = ["pre-commit", "pytest-asyncio", "tox"]
 
 [[package]]
 name = "pytest-socket"
-version = "0.8.0"
+version = "0.8.1"
 description = "Pytest Plugin to disable socket calls during tests"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"test\""
 files = [
-    {file = "pytest_socket-0.8.0-py3-none-any.whl", hash = "sha256:81821ba59f07d7600fe2b551d8714f40b068bd46e8b6704c48664e9d60cdacb8"},
-    {file = "pytest_socket-0.8.0.tar.gz", hash = "sha256:af9bb5f487da72be63573a6194cfac033b6c7a1c1561e150521105970f9e99f2"},
+    {file = "pytest_socket-0.8.1-py3-none-any.whl", hash = "sha256:f9846bed1dcd96eed459e5e14795bbaf96715cf4e827891fe70773817ecb8ed4"},
+    {file = "pytest_socket-0.8.1.tar.gz", hash = "sha256:2f57787914ad2e1308d09ce141b95c3e55741fbb4fb7b7556593a6b063e0c9c7"},
 ]
 
 [package.dependencies]
