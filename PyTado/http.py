@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import pprint
+import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -193,6 +194,8 @@ class Http:
         )
 
         self._refresh_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+        # tado refresh tokens are single use: only one thread may refresh at a time
+        self._refresh_lock = threading.Lock()
         self._session = http_session or self._create_session()
         self._session.hooks["response"].append(self._log_response)
         self._headers = {
@@ -478,7 +481,17 @@ class Http:
             TadoWrongCredentialsException: If the token refresh fails due to invalid credentials
                 and force_refresh is False.
         """
+        # Several threads can reach this at once when the access token expires.
+        # The expiry check runs again under the lock, so the threads that waited
+        # use the token the first thread got instead of refreshing with the
+        # refresh token it just used up (tado answers that with HTTP 400).
+        with self._refresh_lock:
+            return self._refresh_token_locked(refresh_token, force_refresh)
 
+    def _refresh_token_locked(
+        self, refresh_token: str | None, force_refresh: bool
+    ) -> bool:
+        """Refresh the OAuth token; the caller holds the refresh lock."""
         if self._refresh_at >= datetime.now(timezone.utc) and not force_refresh:
             return True
 
