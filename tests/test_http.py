@@ -216,6 +216,53 @@ class TestHttp(unittest.TestCase):
         assert refresh_token.call_count == 1
 
     @responses.activate
+    def test_token_update_callback_gets_every_rotated_token(self):
+        """The callback sees each new refresh token, including the first one."""
+        seen: list[str] = []
+        instance = Http(saved_refresh_token="saved", token_update_callback=seen.append)
+        self.assertEqual(seen, ["another_value"])
+
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            json={"access_token": "a2", "expires_in": 600, "refresh_token": "r2"},
+            status=200,
+        )
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        instance._refresh_token()
+        self.assertEqual(seen, ["another_value", "r2"])
+
+    @responses.activate
+    def test_token_update_callback_runs_before_a_failing_request(self):
+        """The rotated token reaches the callback even if the call then fails."""
+        seen: list[str] = []
+        instance = Http(saved_refresh_token="saved", token_update_callback=seen.append)
+
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            json={"access_token": "a2", "expires_in": 600, "refresh_token": "r2"},
+            status=200,
+        )
+        responses.replace(
+            responses.GET, "https://my.tado.com/api/v2/homes/1234/", body="", status=429
+        )
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        with self.assertRaises(TadoRateLimitException):
+            instance.request(TadoRequest(command="", domain=Domain.HOME))
+        self.assertEqual(seen, ["another_value", "r2"])
+
+    @responses.activate
+    def test_token_update_callback_error_is_logged_not_raised(self):
+        """A broken callback must not break authentication."""
+
+        def broken(token: str) -> None:
+            raise RuntimeError("storage full")
+
+        instance = Http(saved_refresh_token="saved", token_update_callback=broken)
+        self.assertEqual(instance.device_activation_status, "COMPLETED")
+
+    @responses.activate
     def test_configure_url_endpoint_mobile(self):
         """Test URL configuration for the MOBILE endpoint."""
         http = Http()

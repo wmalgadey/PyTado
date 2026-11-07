@@ -8,6 +8,7 @@ import logging
 import os
 import pprint
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from json import dump as json_dump
@@ -154,6 +155,7 @@ class Http:
         debug: bool = False,
         user_agent: str | None = None,
         client_id: str | None = None,
+        token_update_callback: Callable[[str], None] | None = None,
     ) -> None:
         """
         Initialize the HTTP client for interacting with the Tado API.
@@ -170,6 +172,10 @@ class Http:
                 If None, a default user-agent PyTado/<PyTado-version> will be used.
             client_id (str | None): OAuth2 client_id to use for authentication.
                 If None, defaults to CLIENT_ID_DEVICE from PyTado.const.
+            token_update_callback (Callable[[str], None] | None): Called with the new
+                refresh token whenever tado rotates it. tado refresh tokens are single
+                use, so a caller that stores the token itself (instead of using
+                token_file_path) should save it here, not only after its own calls succeed.
 
         Returns:
             None
@@ -210,6 +216,7 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
         self._client_id = client_id or CLIENT_ID_DEVICE
+        self._token_update_callback = token_update_callback
 
         self._session.mount("https://", self._http_adapter)
         self._session.mount("http://", self._http_adapter)
@@ -436,6 +443,12 @@ class Http:
         self._headers["Authorization"] = f"Bearer {access_token}"
 
         self._save_token()
+
+        if self._token_update_callback is not None:
+            try:
+                self._token_update_callback(str(refresh_token))
+            except Exception:  # pylint: disable=broad-exception-caught
+                _LOGGER.exception("Token update callback failed")
 
         return str(refresh_token)
 
