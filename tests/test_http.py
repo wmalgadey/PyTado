@@ -9,7 +9,11 @@ from unittest import mock
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
-from PyTado.exceptions import TadoException, TadoRateLimitException
+from PyTado.exceptions import (
+    TadoException,
+    TadoRateLimitException,
+    TadoWrongCredentialsException,
+)
 from PyTado.http import Domain, Endpoint, Http, TadoRequest
 
 from . import common
@@ -214,6 +218,55 @@ class TestHttp(unittest.TestCase):
             instance._refresh_token()
 
         assert refresh_token.call_count == 1
+
+    @responses.activate
+    def test_constructor_keeps_token_on_temporary_refresh_error(self):
+        """A 429/5xx from the token endpoint is not a credentials problem."""
+        for status in (429, 503):
+            with self.subTest(status=status):
+                responses.replace(
+                    responses.POST,
+                    "https://login.tado.com/oauth2/token",
+                    body="",
+                    status=status,
+                )
+                with self.assertRaises(TadoException) as err:
+                    Http(saved_refresh_token="saved_value")
+                self.assertIn("temporarily", str(err.exception))
+                self.assertNotIsInstance(err.exception, TadoWrongCredentialsException)
+
+    @responses.activate
+    def test_constructor_starts_device_flow_on_rejected_token(self):
+        """A refresh token tado refuses (400) still leads to a new device login."""
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            json={"error": "invalid_grant"},
+            status=400,
+        )
+        http = Http(saved_refresh_token="saved_value")
+        self.assertEqual(http.device_activation_status, "PENDING")
+
+    @responses.activate
+    def test_constructor_keeps_token_when_me_is_rate_limited(self):
+        """/me answering 429 right after the refresh must not drop the new token."""
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/me",
+            body="",
+            status=429,
+            headers={
+                "RateLimit-Policy": '"perday";q=1000;w=86400',
+                "RateLimit": '"perday";r=0;t=1301',
+            },
+        )
+        with mock.patch("PyTado.http.Http._save_token") as mock_save:
+            with mock.patch("PyTado.http.os.remove") as mock_remove:
+                with self.assertRaises(TadoRateLimitException):
+                    Http(token_file_path="path/to/token", saved_refresh_token="saved")
+
+        mock_save.assert_called_once()  # the rotated token was stored
+        mock_remove.assert_not_called()
 
     @responses.activate
     def test_configure_url_endpoint_mobile(self):
