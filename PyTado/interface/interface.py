@@ -146,6 +146,16 @@ class Tado:
         """
         return self._http.refresh_token
 
+    def rate_limit_info(self) -> dict[str, str]:
+        """
+        The daily API quota as tado reported it in the last reply.
+
+        Returns:
+            dict[str, str]: per-day, window-seconds, remaining and (after a 429)
+                reset-seconds; empty until a reply carried the RateLimit headers.
+        """
+        return self._http.rate_limit
+
     def _ensure_api_initialized(self) -> None:
         """
         Ensures the API client is initialized.

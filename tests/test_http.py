@@ -554,6 +554,46 @@ class TestHttp(unittest.TestCase):
 
         self.assertEqual(result, {"success": True})
 
+    @responses.activate
+    def test_rate_limit_is_read_from_every_reply(self):
+        """rate_limit reflects the RateLimit headers of the last reply."""
+        instance = Http(saved_refresh_token="saved")
+        self.assertEqual(instance.rate_limit, {})
+
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/homes/1234/",
+            json={"id": 1234},
+            headers={
+                "RateLimit-Policy": '"perday";q=1000;w=86400',
+                "RateLimit": '"perday";r=987',
+            },
+        )
+        instance.request(TadoRequest(command="", domain=Domain.HOME))
+        self.assertEqual(
+            instance.rate_limit,
+            {"per-day": "1000", "window-seconds": "86400", "remaining": "987"},
+        )
+
+    @responses.activate
+    def test_rate_limit_keeps_reset_time_from_429(self):
+        """A 429 still updates rate_limit, including the seconds to the reset."""
+        instance = Http(saved_refresh_token="saved")
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/homes/1234/",
+            body="",
+            status=429,
+            headers={
+                "RateLimit-Policy": '"perday";q=1000;w=86400',
+                "RateLimit": '"perday";r=0;t=1301',
+            },
+        )
+        with self.assertRaises(TadoRateLimitException):
+            instance.request(TadoRequest(command="", domain=Domain.HOME))
+        self.assertEqual(instance.rate_limit["remaining"], "0")
+        self.assertEqual(instance.rate_limit["reset-seconds"], "1301")
+
     @mock.patch("PyTado.http.Http._refresh_token", return_value=True)
     @mock.patch("PyTado.http.Http._device_ready")
     @mock.patch("PyTado.http.Http._load_token")

@@ -147,3 +147,14 @@ class TestTadoInterface(unittest.TestCase):
         tado = Tado()
         with mock.patch.object(tado._http, "_token_refresh", new="mock_refresh_token"):
             self.assertEqual(tado.get_refresh_token(), "mock_refresh_token")
+
+    def test_rate_limit_info(self):
+        """Test the retrieval of the API quota.
+
+        Verifies that the interface returns the quota the HTTP client read
+        from the last reply's RateLimit headers.
+        """
+        tado = Tado()
+        quota = {"per-day": "1000", "window-seconds": "86400", "remaining": "987"}
+        with mock.patch.object(tado._http, "_rate_limit", new=quota):
+            self.assertEqual(tado.rate_limit_info(), quota)
