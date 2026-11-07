@@ -2,9 +2,12 @@
 
 import io
 import json
+import threading
+import time
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest import mock
+from urllib.parse import parse_qs
 
 import responses
 
@@ -253,6 +256,27 @@ class TestHttp(unittest.TestCase):
         self.assertEqual(seen, ["another_value", "r2"])
 
     @responses.activate
+    def test_token_update_callback_may_call_the_client(self):
+        """A callback that makes a request during a refresh must not deadlock."""
+        results: list[object] = []
+        instance: Http | None = None
+
+        def callback(token: str) -> None:
+            if instance is not None:
+                results.append(
+                    instance.request(TadoRequest(command="", domain=Domain.HOME))
+                )
+
+        instance = Http(saved_refresh_token="saved", token_update_callback=callback)
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+
+        worker = threading.Thread(target=instance._refresh_token, daemon=True)
+        worker.start()
+        worker.join(timeout=5)
+        self.assertFalse(worker.is_alive(), "refresh deadlocked in the callback")
+        self.assertEqual(len(results), 1)
+
+    @responses.activate
     def test_token_update_callback_error_is_logged_not_raised(self):
         """A broken callback must not break authentication."""
 
@@ -261,6 +285,60 @@ class TestHttp(unittest.TestCase):
 
         instance = Http(saved_refresh_token="saved", token_update_callback=broken)
         self.assertEqual(instance.device_activation_status, "COMPLETED")
+
+    @responses.activate
+    def test_parallel_requests_refresh_token_once(self):
+        """Parallel requests at token expiry refresh once and reuse the result.
+
+        tado refresh tokens are single use. Without serialisation every thread
+        sends the same refresh token, all but the first get HTTP 400 and their
+        requests fail with TadoWrongCredentialsException.
+        """
+        instance = Http(debug=True)
+        instance.device_activation()
+
+        valid = {"another_value"}
+        calls = {"refresh": 0, "rejected": 0}
+        lock = threading.Lock()
+
+        def rotate(request):
+            sent = parse_qs(request.body)["refresh_token"][0]
+            time.sleep(0.05)  # a real round trip; lets the other threads catch up
+            with lock:
+                calls["refresh"] += 1
+                if sent not in valid:
+                    calls["rejected"] += 1
+                    return (400, {}, json.dumps({"error": "invalid_grant"}))
+                valid.discard(sent)
+                new = f"refresh_{calls['refresh']}"
+                valid.add(new)
+            body = {"access_token": "new", "expires_in": 600, "refresh_token": new}
+            return (200, {}, json.dumps(body))
+
+        responses.remove(responses.POST, "https://login.tado.com/oauth2/token")
+        responses.add_callback(
+            responses.POST, "https://login.tado.com/oauth2/token", callback=rotate
+        )
+
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        errors: list[Exception] = []
+        barrier = threading.Barrier(6)
+
+        def call() -> None:
+            barrier.wait()
+            try:
+                instance.request(TadoRequest(command="", domain=Domain.HOME))
+            except Exception as err:  # noqa: BLE001
+                errors.append(err)
+
+        threads = [threading.Thread(target=call) for _ in range(6)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        self.assertEqual(errors, [])
+        self.assertEqual(calls, {"refresh": 1, "rejected": 0})
 
     @responses.activate
     def test_configure_url_endpoint_mobile(self):

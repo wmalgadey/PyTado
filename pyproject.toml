@@ -46,10 +46,10 @@ pydantic = "^2.10.6"
 pydoc-markdown = "*"
 
 [tool.poetry.extras]
-dev = ["pre-commit", "pytype", "types-requests"]
+dev = ["pre-commit", "pytype", "types-requests", "pydoc-markdown"]
 lint = ["pylint"]
 test = ["responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
-all = ["pre-commit", "pytype", "types-requests", "pylint", "responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
+all = ["pre-commit", "pytype", "types-requests", "pydoc-markdown", "pylint", "responses", "pytest", "pytest-mock", "pytest-socket", "pytest-cov"]
 
 [tool.poetry.scripts]
 pytado = "PyTado.__main__:main"
