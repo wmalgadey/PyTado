@@ -59,6 +59,7 @@ class Tado:
         debug: bool = False,
         user_agent: str | None = None,
         client_id: str | None = None,
+        token_update_callback: Callable[[str], None] | None = None,
     ):
         """
         Initializes the interface class.
@@ -75,6 +76,8 @@ class Tado:
                 If None, a default user-agent PyTado/<PyTado-version> will be used.
             client_id (str | None): OAuth2 client_id. If None, defaults to CLIENT_ID_DEVICE
                 from PyTado.const. Pass a custom value instead of patching the module global.
+            token_update_callback (Callable[[str], None] | None): Called with the new refresh
+                token every time tado rotates it, so callers can store it at once.
         """
 
         self._http = Http(
@@ -84,6 +87,7 @@ class Tado:
             debug=debug,
             user_agent=user_agent,
             client_id=client_id,
+            token_update_callback=token_update_callback,
         )
         self._api: API.Tado | API.TadoX | None = None
         self._debug = debug
