@@ -9,10 +9,15 @@ from datetime import datetime, timedelta, timezone
 from unittest import mock
 from urllib.parse import parse_qs
 
+import requests
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
-from PyTado.exceptions import TadoException, TadoRateLimitException
+from PyTado.exceptions import (
+    TadoException,
+    TadoRateLimitException,
+    TadoWrongCredentialsException,
+)
 from PyTado.http import Domain, Endpoint, Http, TadoRequest
 
 from . import common
@@ -219,72 +224,65 @@ class TestHttp(unittest.TestCase):
         assert refresh_token.call_count == 1
 
     @responses.activate
-    def test_token_update_callback_gets_every_rotated_token(self):
-        """The callback sees each new refresh token, including the first one."""
-        seen: list[str] = []
-        instance = Http(saved_refresh_token="saved", token_update_callback=seen.append)
-        self.assertEqual(seen, ["another_value"])
-
-        responses.replace(
-            responses.POST,
-            "https://login.tado.com/oauth2/token",
-            json={"access_token": "a2", "expires_in": 600, "refresh_token": "r2"},
-            status=200,
-        )
-        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
-        instance._refresh_token()
-        self.assertEqual(seen, ["another_value", "r2"])
-
-    @responses.activate
-    def test_token_update_callback_runs_before_a_failing_request(self):
-        """The rotated token reaches the callback even if the call then fails."""
-        seen: list[str] = []
-        instance = Http(saved_refresh_token="saved", token_update_callback=seen.append)
-
-        responses.replace(
-            responses.POST,
-            "https://login.tado.com/oauth2/token",
-            json={"access_token": "a2", "expires_in": 600, "refresh_token": "r2"},
-            status=200,
-        )
-        responses.replace(
-            responses.GET, "https://my.tado.com/api/v2/homes/1234/", body="", status=429
-        )
-        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
-        with self.assertRaises(TadoRateLimitException):
-            instance.request(TadoRequest(command="", domain=Domain.HOME))
-        self.assertEqual(seen, ["another_value", "r2"])
-
-    @responses.activate
-    def test_token_update_callback_may_call_the_client(self):
-        """A callback that makes a request during a refresh must not deadlock."""
-        results: list[object] = []
-        instance: Http | None = None
-
-        def callback(token: str) -> None:
-            if instance is not None:
-                results.append(
-                    instance.request(TadoRequest(command="", domain=Domain.HOME))
+    def test_constructor_keeps_token_on_temporary_refresh_error(self):
+        """A 429/5xx from the token endpoint is not a credentials problem."""
+        for status in (429, 503):
+            with self.subTest(status=status):
+                responses.replace(
+                    responses.POST,
+                    "https://login.tado.com/oauth2/token",
+                    body="",
+                    status=status,
                 )
-
-        instance = Http(saved_refresh_token="saved", token_update_callback=callback)
-        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
-
-        worker = threading.Thread(target=instance._refresh_token, daemon=True)
-        worker.start()
-        worker.join(timeout=5)
-        self.assertFalse(worker.is_alive(), "refresh deadlocked in the callback")
-        self.assertEqual(len(results), 1)
+                with self.assertRaises(TadoException) as err:
+                    Http(saved_refresh_token="saved_value")
+                self.assertIn("temporarily", str(err.exception))
+                self.assertNotIsInstance(err.exception, TadoWrongCredentialsException)
 
     @responses.activate
-    def test_token_update_callback_error_is_logged_not_raised(self):
-        """A broken callback must not break authentication."""
+    def test_constructor_keeps_token_on_refresh_timeout(self):
+        """A timeout on the token endpoint raises TadoException, not a re-login."""
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            body=requests.exceptions.ReadTimeout("timed out"),
+        )
+        with self.assertRaises(TadoException) as err:
+            Http(saved_refresh_token="saved_value")
+        self.assertNotIsInstance(err.exception, TadoWrongCredentialsException)
 
-        def broken(token: str) -> None:
-            raise RuntimeError("storage full")
+    @responses.activate
+    def test_constructor_starts_device_flow_on_rejected_token(self):
+        """A refresh token tado refuses (400) still leads to a new device login."""
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            json={"error": "invalid_grant"},
+            status=400,
+        )
+        http = Http(saved_refresh_token="saved_value")
+        self.assertEqual(http.device_activation_status, "PENDING")
 
-        instance = Http(saved_refresh_token="saved", token_update_callback=broken)
-        self.assertEqual(instance.device_activation_status, "COMPLETED")
+    @responses.activate
+    def test_constructor_keeps_token_when_me_is_rate_limited(self):
+        """/me answering 429 right after the refresh must not drop the new token."""
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/me",
+            body="",
+            status=429,
+            headers={
+                "RateLimit-Policy": '"perday";q=1000;w=86400',
+                "RateLimit": '"perday";r=0;t=1301',
+            },
+        )
+        with mock.patch("PyTado.http.Http._save_token") as mock_save:
+            with mock.patch("PyTado.http.os.remove") as mock_remove:
+                with self.assertRaises(TadoRateLimitException):
+                    Http(token_file_path="path/to/token", saved_refresh_token="saved")
+
+        mock_save.assert_called_once()  # the rotated token was stored
+        mock_remove.assert_not_called()
 
     @responses.activate
     def test_parallel_requests_refresh_token_once(self):
@@ -387,6 +385,74 @@ class TestHttp(unittest.TestCase):
         result = http._check_device_activation()
         self.assertTrue(result)
         mock_sleep.assert_called_once_with(5)
+
+    @responses.activate
+    def test_token_update_callback_gets_every_rotated_token(self):
+        """The callback sees each new refresh token, including the first one."""
+        seen: list[str] = []
+        instance = Http(saved_refresh_token="saved", token_update_callback=seen.append)
+        self.assertEqual(seen, ["another_value"])
+
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            json={"access_token": "a2", "expires_in": 600, "refresh_token": "r2"},
+            status=200,
+        )
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        instance._refresh_token()
+        self.assertEqual(seen, ["another_value", "r2"])
+
+    @responses.activate
+    def test_token_update_callback_runs_before_a_failing_request(self):
+        """The rotated token reaches the callback even if the call then fails."""
+        seen: list[str] = []
+        instance = Http(saved_refresh_token="saved", token_update_callback=seen.append)
+
+        responses.replace(
+            responses.POST,
+            "https://login.tado.com/oauth2/token",
+            json={"access_token": "a2", "expires_in": 600, "refresh_token": "r2"},
+            status=200,
+        )
+        responses.replace(
+            responses.GET, "https://my.tado.com/api/v2/homes/1234/", body="", status=429
+        )
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        with self.assertRaises(TadoRateLimitException):
+            instance.request(TadoRequest(command="", domain=Domain.HOME))
+        self.assertEqual(seen, ["another_value", "r2"])
+
+    @responses.activate
+    def test_token_update_callback_may_call_the_client(self):
+        """A callback that makes a request during a refresh must not deadlock."""
+        results: list[object] = []
+        instance: Http | None = None
+
+        def callback(token: str) -> None:
+            if instance is not None:
+                results.append(
+                    instance.request(TadoRequest(command="", domain=Domain.HOME))
+                )
+
+        instance = Http(saved_refresh_token="saved", token_update_callback=callback)
+        instance._refresh_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+
+        worker = threading.Thread(target=instance._refresh_token, daemon=True)
+        worker.start()
+        worker.join(timeout=5)
+        self.assertFalse(worker.is_alive(), "refresh deadlocked in the callback")
+        self.assertEqual(len(results), 1)
+
+    @responses.activate
+    def test_token_update_callback_error_is_logged_not_raised(self):
+        """A broken callback must not break authentication."""
+
+        def broken(token: str) -> None:
+            raise RuntimeError("storage full")
+
+        instance = Http(saved_refresh_token="saved", token_update_callback=broken)
+        self.assertEqual(instance.device_activation_status, "COMPLETED")
 
     @responses.activate
     def test_save_refresh_token(self):

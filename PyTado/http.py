@@ -230,21 +230,11 @@ class Http:
             if self._refresh_token(
                 refresh_token=saved_refresh_token, force_refresh=True
             ):
-                try:
-                    self._device_ready()
-                except Exception as exc:
-                    # Token refresh succeeded but /me failed (e.g. rate-limited empty
-                    # response). Wipe the token and fall back to device flow.
-                    _LOGGER.warning(
-                        "Token refresh succeeded but home ID fetch failed (%s). "
-                        "Starting device flow.",
-                        exc,
-                    )
-                    if self._token_file_path and os.path.exists(self._token_file_path):
-                        os.remove(self._token_file_path)
-                    self._token_refresh = None
-                    self._headers.pop("Authorization", None)
-                    self._device_activation_status = self._login_device_flow()
+                # The refresh worked, so the token is good. If /me fails now (rate
+                # limit, server error) the error is raised and the freshly rotated
+                # token is kept: a new device login would hit the same error and
+                # the user would have to log in again for nothing.
+                self._device_ready()
             else:
                 self._device_activation_status = self._login_device_flow()
         else:
@@ -531,11 +521,12 @@ class Http:
                 },
             )
 
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.RequestException as e:
             _LOGGER.error("Connection error: %s", e)
             raise TadoException(e) from e
 
-        if response.status_code != 200:
+        if response.status_code in (400, 401):
+            # tado refused the refresh token itself (invalid_grant)
             if force_refresh:
                 _LOGGER.error(
                     "Failed to refresh token, probably wrong credentials. Status code: %s",
@@ -546,6 +537,12 @@ class Http:
             raise TadoWrongCredentialsException(
                 "Failed to refresh token, probably wrong credentials. "
                 f"Status code: {response.status_code}"
+            )
+
+        if response.status_code != 200:
+            # 429 or 5xx: tado is busy or down, the refresh token is still valid
+            raise TadoException(
+                f"Token refresh failed temporarily. Status code: {response.status_code}"
             )
 
         self._set_oauth_header(response.json())
