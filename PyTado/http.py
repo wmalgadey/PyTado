@@ -210,10 +210,10 @@ class Http:
 
         self._id: int | None = None
         self._token_refresh: str | None = None
+        self._rate_limit: dict[str, str] = {}
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
         self._client_id = client_id or CLIENT_ID_DEVICE
-        self._rate_limit: dict[str, str] = {}
 
         self._session.mount("https://", self._http_adapter)
         self._session.mount("http://", self._http_adapter)
