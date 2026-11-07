@@ -210,6 +210,7 @@ class Http:
         self._x_api: bool | None = None
         self._token_file_path = token_file_path
         self._client_id = client_id or CLIENT_ID_DEVICE
+        self._rate_limit: dict[str, str] = {}
 
         self._session.mount("https://", self._http_adapter)
         self._session.mount("http://", self._http_adapter)
@@ -290,6 +291,35 @@ class Http:
         """
         return self._token_refresh
 
+    @property
+    def rate_limit(self) -> dict[str, str]:
+        """
+        The daily API quota as tado reported it in the last reply.
+
+        Keys (all strings, absent until a reply carried the headers):
+            per-day: the daily quota, e.g. "1000"
+            window-seconds: the quota window, e.g. "86400"
+            remaining: calls left in the window
+            reset-seconds: seconds until the quota resets (tado sends this on a 429)
+        """
+        return dict(self._rate_limit)
+
+    def _store_rate_limit(self, response: requests.Response) -> None:
+        # RateLimit-Policy: "perday";q=1000;w=86400   RateLimit: "perday";r=0;t=1301
+        policy = response.headers.get("RateLimit-Policy")
+        limit = response.headers.get("RateLimit")
+        if not isinstance(policy, str) or not isinstance(limit, str):
+            return
+        pol = dict(p.split("=", 1) for p in policy.split(";")[1:] if "=" in p)
+        lim = dict(p.split("=", 1) for p in limit.split(";")[1:] if "=" in p)
+        info = {
+            "per-day": pol.get("q"),
+            "window-seconds": pol.get("w"),
+            "remaining": lim.get("r"),
+            "reset-seconds": lim.get("t"),
+        }
+        self._rate_limit = {k: v.strip() for k, v in info.items() if v is not None}
+
     def _create_session(self) -> requests.Session:
         session = requests.Session()
         session.hooks["response"].append(self._log_response)
@@ -340,6 +370,8 @@ class Http:
         except MaxRetryError as e:
             _LOGGER.error("Max retries exceeded: %s", e)
             raise TadoException(e) from e
+
+        self._store_rate_limit(response)
 
         if response.status_code == 429:
             details = []
