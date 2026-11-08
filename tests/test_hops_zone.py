@@ -297,6 +297,28 @@ class TadoZoneTestCase(common.TadoBaseTestCase, is_x_line=True):
         assert len(responses.calls) == 1
 
     @responses.activate
+    def test_set_manual_control(self) -> None:
+        """set_manual_control returns 0 when the API accepts the request."""
+        for status, body in ((204, ""), (200, ""), (200, '{"success": true}')):
+            with self.subTest(status=status, body=body):
+                responses.add(
+                    responses.POST,
+                    "https://hops.tado.com/homes/1234/rooms/1/manualControl",
+                    status=status,
+                    body=body,
+                )
+
+                result = self.tado_client.set_manual_control(
+                    room_id=1,
+                    power="ON",
+                    termination_type="MANUAL",
+                    m_temp=18,
+                    m_sec=60,
+                )
+
+                assert result == 0
+
+    @responses.activate
     def test_reset_zone_overlay(self) -> None:
         self.set_fixture("home_1234/tadox.heating.auto_mode.json")
         room = self.tado_client.get_zone(1)
