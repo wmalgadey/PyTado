@@ -260,6 +260,7 @@ description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},
     {file = "click-7.1.2.tar.gz", hash = "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"},
@@ -421,7 +422,7 @@ description = "Docspec is a JSON object specification for representing API docum
 optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "python_version >= \"3.15\""
+markers = "python_version >= \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "docspec-0.2.0-py3-none-any.whl", hash = "sha256:a5bf4bfe5e940de080b282045db4f2a6aea3e745f639d34262f59791fb18107c"},
     {file = "docspec-0.2.0.tar.gz", hash = "sha256:058894861bff860f7053188c94cbd55d1777d5d0f39f3f8487960965ab098191"},
@@ -438,7 +439,7 @@ description = "Docspec is a JSON object specification for representing API docum
 optional = false
 python-versions = ">=3.6.0,<4.0.0"
 groups = ["main"]
-markers = "python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "docspec-0.2.1-py3-none-any.whl", hash = "sha256:1792cb79d5e6f39aa0c4c17b26b283e2e044b3adb7457151b21e14dca44d5d43"},
     {file = "docspec-0.2.1.tar.gz", hash = "sha256:8ff14da2cdf69a958c3e25c748d629129e38d3145cf5d0c4d55da8e6cfa0cd29"},
@@ -455,6 +456,7 @@ description = "A parser based on lib2to3 producing docspec data from Python sour
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "docspec-python-0.0.7.tar.gz", hash = "sha256:13af366a2dc0efdc7488f7560ad169ee80992f7f792a6b8d7ad0097bba7a27ab"},
     {file = "docspec_python-0.0.7-py3-none-any.whl", hash = "sha256:9949eda3f964aacdf39d5c84e24a72464e7e190d982cbb2714e661124fa03524"},
@@ -471,6 +473,7 @@ description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "filelock-4.2.1-py3-none-any.whl", hash = "sha256:7be2662e9e826b9bba28afc0f843a123280d799a2ea44bb5d35ccec67905ae44"},
     {file = "filelock-4.2.1.tar.gz", hash = "sha256:c4c937ccac2a813cee448e662a56366cfb374c0f8702e75f295c412cc1c5d5a3"},
@@ -1156,6 +1159,7 @@ description = "Useful container datatypes for Python 2 and 3."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.collections-0.0.1.tar.gz", hash = "sha256:ddf38cd6379cac546ce7abdadf024fc01cca75540e11b1d5f1aa701a33817f1c"},
 ]
@@ -1174,6 +1178,7 @@ description = "Bind structured data directly to typed objects."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.databind.core-0.0.22-py2.py3-none-any.whl", hash = "sha256:854a0a0551a0aa5a5acedaa547af930bdaca331bc705b3f26732f6b913491572"},
     {file = "nr.databind.core-0.0.22.tar.gz", hash = "sha256:87fe32d7d8dd91b878a25cd144d056435107ca56a8db7be3030f765334075f77"},
@@ -1192,6 +1197,7 @@ description = "Deserialize JSON into Python objects and reverse."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.databind.json-0.0.14-py2.py3-none-any.whl", hash = "sha256:3765fd581c2ca2ee249ccfd460be0f472cc2bc9e5305e2f415d587a5e27c3b86"},
     {file = "nr.databind.json-0.0.14.tar.gz", hash = "sha256:27c7a7a69f6f703a0c616b898950fdb53a51b39cf9874d412ebc12dea574f20e"},
@@ -1211,6 +1217,7 @@ description = "Filesystem and path manipulation tools."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.fs-1.6.3-py2.py3-none-any.whl", hash = "sha256:64108c168ea2e8077fdf5f0c5417459d1a145fe34cb305fe90faeb75b4e8b421"},
     {file = "nr.fs-1.6.3.tar.gz", hash = "sha256:788aa0a04c4143f95c5245bc8ccc0c0872e932be533bd37780fbb55afcdf124a"},
@@ -1226,6 +1233,7 @@ description = "Interface definitions for Python."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.interface-0.0.5-py2.py3-none-any.whl", hash = "sha256:8287f817297d825641793bf3e860445c43e271f4f87ff34f3e30b94bf1aa79a8"},
     {file = "nr.interface-0.0.5.tar.gz", hash = "sha256:ed6043954813247555299ce3032033bbbcaa2d7906f849e1f8317df4011ade83"},
@@ -1244,6 +1252,7 @@ description = "Metaclass utilities."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.metaclass-0.0.6-py2.py3-none-any.whl", hash = "sha256:d458eb1bddd93373cc74e19981214e7d478c92c9b08fc9732bd430225698a8f0"},
     {file = "nr.metaclass-0.0.6.tar.gz", hash = "sha256:3d52f8e603e3c2944b9135e5a09593c3c36191f26cf1c29a7c71efb192552b10"},
@@ -1256,7 +1265,7 @@ description = "A simple and fast date parsing library. Uses dateutil for timezon
 optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "python_version >= \"3.15\""
+markers = "python_version >= \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "nr.parsing.date-0.4.2-py2.py3-none-any.whl", hash = "sha256:1c9615ed8c29fa890a930724159a0dbc13e6c1a08e4dafffa3a14401ebad35eb"},
     {file = "nr.parsing.date-0.4.2.tar.gz", hash = "sha256:47a3a5bf6ab0eee52067312f2b50d6b966000d3c4d4e730e696a0a982319c615"},
@@ -1273,7 +1282,7 @@ description = "A simple and fast date parsing library. Uses dateutil for timezon
 optional = false
 python-versions = ">=3.5.0,<4.0.0"
 groups = ["main"]
-markers = "python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "nr.parsing.date-0.6.1-py3-none-any.whl", hash = "sha256:8cc5e1bf5d9a28c7e93c2c6417958857eef752bf166f777102c60b304b5f020d"},
     {file = "nr.parsing.date-0.6.1.tar.gz", hash = "sha256:11bf1e2a63397a3f9e039cf6b03a9f54d33d7e14ca230b022722e91fd8344fd8"},
@@ -1289,7 +1298,7 @@ description = "Package description here."
 optional = false
 python-versions = "*"
 groups = ["main"]
-markers = "python_version >= \"3.15\""
+markers = "python_version >= \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "nr.pylang.utils-0.0.3-py3-none-any.whl", hash = "sha256:5346086992162981349ca73911d90bc17540f66e71584bdab25f926f3fb843a8"},
     {file = "nr.pylang.utils-0.0.3.tar.gz", hash = "sha256:b20b731b28dab81c8d498d7955a45afa3aa02e18c7b7398408985d53b5bb2a28"},
@@ -1305,7 +1314,7 @@ description = "Package description here."
 optional = false
 python-versions = ">=3.4.0,<4.0.0"
 groups = ["main"]
-markers = "python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "nr.pylang.utils-0.0.4-py3-none-any.whl", hash = "sha256:cf8c88b9e7821a256e31e83e16dcd506d1fb33ea3cf37578eb163526ab044a27"},
     {file = "nr.pylang.utils-0.0.4.tar.gz", hash = "sha256:48f81167a5f0a7376b0dd1b3db2b88ab1cfa815645a2d4048eb369564f4e2485"},
@@ -1321,6 +1330,7 @@ description = "Use iterators like Java streams."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.stream-0.0.5-py2.py3-none-any.whl", hash = "sha256:cf418a4de3cedb8622286d2baca6007a153c780af48362d1f2ef2c1993525615"},
     {file = "nr.stream-0.0.5.tar.gz", hash = "sha256:3489ce5e8174b70d194a6592248ba341fbbd5bf30c9ec5f1223a351df909f505"},
@@ -1338,6 +1348,7 @@ description = "Sumtypes in Python."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.sumtype-0.0.5-py2.py3-none-any.whl", hash = "sha256:fdc2f73d4f96384ab8ae7b8094c26180c61c6f9b33eeb2e03f44ff2e3afa441d"},
     {file = "nr.sumtype-0.0.5.tar.gz", hash = "sha256:cc01d7aa639260bc6669739ea26e4f05cb0f48ae7be7b28736f35e39e9eeea0a"},
@@ -1354,6 +1365,7 @@ description = "This module provides some utility functions for applying regular 
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "nr.utils.re-0.1.1-py2.py3-none-any.whl", hash = "sha256:eb4e6c10b074e8b296c4e2a83d0299e9a162524fb3e5e6b916dfd194688dbd06"},
     {file = "nr.utils.re-0.1.1.tar.gz", hash = "sha256:71e21300dbf890d914841f1e6d66eb4e7d6a9f01c9a20d8e83e5242c8d3140aa"},
@@ -1397,6 +1409,7 @@ description = "File system general utilities"
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "pathtools-0.1.2.tar.gz", hash = "sha256:7c35c5421a39bb82e58018febd90e3b6e5db34c5443aaaf742b3f33d4655f1c0"},
 ]
@@ -1648,6 +1661,7 @@ description = "Create Python API documentation in Markdown format."
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "pydoc-markdown-3.3.0.tar.gz", hash = "sha256:5a5c97b6d103357a3934be686b4a7648b23e1b51d753e90bc30834a5448222d8"},
     {file = "pydoc_markdown-3.3.0-py3-none-any.whl", hash = "sha256:dba111847f0f85b9efcb4d77a27f360dcae0e5066969d2cdedac2b998c1ddf26"},
@@ -1754,26 +1768,26 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pytest"
-version = "9.1.1"
+version = "9.2.0"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"test\""
 files = [
-    {file = "pytest-9.1.1-py3-none-any.whl", hash = "sha256:37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c"},
-    {file = "pytest-9.1.1.tar.gz", hash = "sha256:1088fbde8f2b49d95a549a195707afa7a76a3ce9bcadc26b6d71f0ffda5fe313"},
+    {file = "pytest-9.2.0-py3-none-any.whl", hash = "sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588"},
+    {file = "pytest-9.2.0.tar.gz", hash = "sha256:97c4f3b1f3c7414aa36465e09b8220f1d03627993bd51b1282e193753c80557b"},
 ]
 
 [package.dependencies]
 colorama = {version = ">=0.4", markers = "sys_platform == \"win32\""}
-iniconfig = ">=1.0.1"
-packaging = ">=22"
-pluggy = ">=1.5,<2"
-pygments = ">=2.7.2"
+iniconfig = ">=2"
+packaging = ">=24"
+pluggy = ">=1.6,<2"
+pygments = ">=2.15"
 
 [package.extras]
-dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "requests", "setuptools", "xmlschema"]
+dev = ["argcomplete", "asynctest ; python_version < \"3.11\"", "attrs (>=23.1)", "coverage (>=7.5)", "hypothesis (>=6.75)", "mock", "numpy (>=1.26)", "pexpect (>=4.9)", "pytest-xdist (>=3.5)", "pyyaml", "requests", "setuptools", "xmlschema"]
 
 [[package]]
 name = "pytest-cov"
@@ -1890,6 +1904,7 @@ description = "YAML parser and emitter for Python"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\" or extra == \"test\""
 files = [
     {file = "PyYAML-5.4.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:3b2b1824fe7112845700f815ff6a489360226a5609b96ec2190a45e62a9fc922"},
     {file = "PyYAML-5.4.1-cp27-cp27m-win32.whl", hash = "sha256:129def1b7c1bf22faffd67b8f3724645203b79d8f4cc81f674654d9902cb4393"},
@@ -2000,6 +2015,7 @@ description = "Python 2 and 3 compatibility utilities"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
     {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
@@ -2028,6 +2044,7 @@ description = "Python Library for Tom's Obvious, Minimal Language"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
     {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
@@ -2134,6 +2151,7 @@ description = "Filesystem events monitoring"
 optional = false
 python-versions = "*"
 groups = ["main"]
+markers = "extra == \"all\" or extra == \"dev\""
 files = [
     {file = "watchdog-0.10.4.tar.gz", hash = "sha256:e38bffc89b15bafe2a131f0e1c74924cf07dcec020c2e0a26cccd208831fcd43"},
 ]
@@ -2145,12 +2163,12 @@ pathtools = ">=0.1.1"
 watchmedo = ["PyYAML (>=3.10)", "argh (>=0.24.1)"]
 
 [extras]
-all = ["pre-commit", "pylint", "pytest", "pytest-cov", "pytest-mock", "pytest-socket", "pytype", "responses", "types-requests"]
-dev = ["pre-commit", "pytype", "types-requests"]
+all = ["pre-commit", "pydoc-markdown", "pylint", "pytest", "pytest-cov", "pytest-mock", "pytest-socket", "pytype", "responses", "types-requests"]
+dev = ["pre-commit", "pydoc-markdown", "pytype", "types-requests"]
 lint = ["pylint"]
 test = ["pytest", "pytest-cov", "pytest-mock", "pytest-socket", "responses"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "7436f25724ab8ebdaa6bee01e485690281f94505f4b06d0a7dcbd324c99a4ab2"
+content-hash = "3d7d2ea9f63cb7ab9665e385ba15aab07d3651ec204fcba4569a31be44dc97ee"
