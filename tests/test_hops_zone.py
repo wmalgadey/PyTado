@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 import responses
 from responses import matchers
 
-from PyTado.exceptions import TadoException
+from PyTado.exceptions import TadoException, TadoNotSupportedException
 from PyTado.interface.api import TadoX
 from PyTado.models.common.schedule import ScheduleElement, Setting
 from PyTado.models.historic import StripeType
@@ -295,6 +295,48 @@ class TadoZoneTestCase(common.TadoBaseTestCase, is_x_line=True):
         )
 
         assert len(responses.calls) == 1
+
+    def _set_manual_control(self, status: int, body: str) -> int:
+        responses.upsert(
+            responses.POST,
+            "https://hops.tado.com/homes/1234/rooms/1/manualControl",
+            status=status,
+            body=body,
+        )
+
+        return self.tado_client.set_manual_control(
+            room_id=1,
+            power="ON",
+            termination_type="MANUAL",
+            m_temp=18,
+            m_sec=60,
+        )
+
+    @responses.activate
+    def test_set_manual_control_success_responses(self) -> None:
+        """set_manual_control returns 0 for every successful response shape."""
+        cases = (
+            ("HTTP 204, empty body", 204, ""),
+            ("HTTP 200, empty body", 200, ""),
+            ("HTTP 200, {}", 200, "{}"),
+            ("HTTP 200, success true", 200, '{"success": true}'),
+        )
+        for name, status, body in cases:
+            with self.subTest(name):
+                assert self._set_manual_control(status, body) == 0
+
+    @responses.activate
+    def test_set_manual_control_numeric_response(self) -> None:
+        """A numeric string response is returned as an int."""
+        assert self._set_manual_control(200, '"42"') == 42
+
+    @responses.activate
+    def test_set_manual_control_unexpected_response(self) -> None:
+        """An explicit failure or non-dict result is not reported as success."""
+        for body in ('{"success": false}', '"ok"'):
+            with self.subTest(body=body):
+                with self.assertRaises(TadoNotSupportedException):
+                    self._set_manual_control(200, body)
 
     @responses.activate
     def test_reset_zone_overlay(self) -> None:

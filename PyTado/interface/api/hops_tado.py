@@ -404,6 +404,12 @@ class TadoX(TadoBase):
         if isinstance(result, str) and result.isdigit():
             return int(result)
 
+        # Error statuses already raise in the HTTP layer. The API answers a
+        # successful request with HTTP 204 (reported as {"success": True}), an
+        # empty HTTP 200 (reported as {}) or {"success": true}.
+        if isinstance(result, dict) and result.get("success", True):
+            return 0
+
         raise TadoNotSupportedException("Unexpected response from set_manual_control")
 
     def get_installation(self) -> Installation:
