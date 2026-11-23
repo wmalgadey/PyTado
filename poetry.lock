@@ -273,7 +273,7 @@ description = "Cross-platform colored terminal text."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 groups = ["main"]
-markers = "sys_platform == \"win32\" and (extra == \"all\" or extra == \"lint\" or extra == \"test\")"
+markers = "(extra == \"all\" or extra == \"lint\" or extra == \"test\") and sys_platform == \"win32\""
 files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
@@ -439,7 +439,7 @@ description = "Docspec is a JSON object specification for representing API docum
 optional = false
 python-versions = ">=3.6.0,<4.0.0"
 groups = ["main"]
-markers = "(extra == \"all\" or extra == \"dev\") and python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "docspec-0.2.1-py3-none-any.whl", hash = "sha256:1792cb79d5e6f39aa0c4c17b26b283e2e044b3adb7457151b21e14dca44d5d43"},
     {file = "docspec-0.2.1.tar.gz", hash = "sha256:8ff14da2cdf69a958c3e25c748d629129e38d3145cf5d0c4d55da8e6cfa0cd29"},
@@ -530,7 +530,7 @@ description = "Immutable wrapper around dictionaries (a fork of frozendict)"
 optional = false
 python-versions = "<4.0,>=3.8"
 groups = ["main"]
-markers = "(extra == \"all\" or extra == \"dev\") and python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "immutabledict-4.2.2-py3-none-any.whl", hash = "sha256:97c31d098a2c850e93a958badeef765e4736ed7942ec73e439facd764a3a7217"},
     {file = "immutabledict-4.2.2.tar.gz", hash = "sha256:cb6ed3090df593148f94cb407d218ca526fd2639694afdb553dc4f50ce6feeca"},
@@ -1282,7 +1282,7 @@ description = "A simple and fast date parsing library. Uses dateutil for timezon
 optional = false
 python-versions = ">=3.5.0,<4.0.0"
 groups = ["main"]
-markers = "(extra == \"all\" or extra == \"dev\") and python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "nr.parsing.date-0.6.1-py3-none-any.whl", hash = "sha256:8cc5e1bf5d9a28c7e93c2c6417958857eef752bf166f777102c60b304b5f020d"},
     {file = "nr.parsing.date-0.6.1.tar.gz", hash = "sha256:11bf1e2a63397a3f9e039cf6b03a9f54d33d7e14ca230b022722e91fd8344fd8"},
@@ -1314,7 +1314,7 @@ description = "Package description here."
 optional = false
 python-versions = ">=3.4.0,<4.0.0"
 groups = ["main"]
-markers = "(extra == \"all\" or extra == \"dev\") and python_version < \"3.15\""
+markers = "python_version < \"3.15\" and (extra == \"all\" or extra == \"dev\")"
 files = [
     {file = "nr.pylang.utils-0.0.4-py3-none-any.whl", hash = "sha256:cf8c88b9e7821a256e31e83e16dcd506d1fb33ea3cf37578eb163526ab044a27"},
     {file = "nr.pylang.utils-0.0.4.tar.gz", hash = "sha256:48f81167a5f0a7376b0dd1b3db2b88ab1cfa815645a2d4048eb369564f4e2485"},
@@ -1726,15 +1726,15 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pylint"
-version = "4.1.3"
+version = "4.1.4"
 description = "python code static checker"
 optional = false
 python-versions = ">=3.10.0"
 groups = ["main"]
 markers = "extra == \"all\" or extra == \"lint\""
 files = [
-    {file = "pylint-4.1.3-py3-none-any.whl", hash = "sha256:a85357cae24f33ad8d86c8f3daaa92c600ae4012b54a57299cee76000e9364cf"},
-    {file = "pylint-4.1.3.tar.gz", hash = "sha256:9928603068edfa0d1a3c167f174b099d4b97c3db75d32d0fcdd029770b4713a9"},
+    {file = "pylint-4.1.4-py3-none-any.whl", hash = "sha256:b39fcc762ec4a7fe385d01b8e170fd996847297cdc0e3850bdda1435c74cfd95"},
+    {file = "pylint-4.1.4.tar.gz", hash = "sha256:4c9176dc6c9f1b98b742195f01899b290369d5a27b4b41d1014c17f2f96b26f1"},
 ]
 
 [package.dependencies]
@@ -1947,7 +1947,7 @@ description = "YAML parser and emitter for Python with support for free-threadin
 optional = false
 python-versions = ">=3.13"
 groups = ["main"]
-markers = "python_version >= \"3.13\" and (extra == \"all\" or extra == \"dev\")"
+markers = "(extra == \"all\" or extra == \"dev\") and python_version >= \"3.13\""
 files = [
     {file = "pyyaml_ft-8.0.0-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:8c1306282bc958bfda31237f900eb52c9bedf9b93a11f82e1aab004c9a5657a6"},
     {file = "pyyaml_ft-8.0.0-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:30c5f1751625786c19de751e3130fc345ebcba6a86f6bddd6e1285342f4bbb69"},
