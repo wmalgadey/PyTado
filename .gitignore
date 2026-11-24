@@ -168,3 +168,4 @@ cython_debug/
 junit.xml
 .envrc.private
 examples/example_dev.py
+dev/prompts_log.md

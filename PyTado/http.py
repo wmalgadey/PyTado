@@ -323,22 +323,34 @@ class Http:
                     raise TadoException(e) from e
 
         if response.text is None or response.text == "":
+            if response.status_code == 429:
+                # Rate-limited responses carry an empty body; capture the
+                # quota headers and fail loudly so callers can back off.
+                self._store_rate_limit(response)
+                rate_limit = response.headers.get("RateLimit", "unknown")
+                raise requests.exceptions.HTTPError(
+                    f"Tado API rate limit reached ({rate_limit})",
+                    response=response,
+                )
             return {}
 
-        # Retrieve the headers to update the rate limit info
-        # They're stored in the object memory
-        if response.headers.get("RateLimit-Policy") is not None:
-            policy = response.headers["RateLimit-Policy"]
-            rate_limit = response.headers["RateLimit"]
-            # Example: RateLimit-Policy': '"perday";q=20000;w=86400'
-            # Rate limit is stored as follows: 'RateLimit': '"perday";r=15211'
-            self._rate_limit = {
-                "per-day": policy.split(";")[1].split("=")[1],
-                "window-seconds": policy.split(";")[2].split("=")[1],
-                "remaining": rate_limit.split(";")[1].split("=")[1],
-            }
+        self._store_rate_limit(response)
 
         return response.json()
+
+    def _store_rate_limit(self, response: requests.Response) -> None:
+        """Store the quota headers of a response in the object memory."""
+        policy = response.headers.get("RateLimit-Policy")
+        rate_limit = response.headers.get("RateLimit")
+        if policy is None or rate_limit is None:
+            return
+        # Example: RateLimit-Policy': '"perday";q=20000;w=86400'
+        # Rate limit is stored as follows: 'RateLimit': '"perday";r=15211'
+        self._rate_limit = {
+            "per-day": policy.split(";")[1].split("=")[1],
+            "window-seconds": policy.split(";")[2].split("=")[1],
+            "remaining": rate_limit.split(";")[1].split("=")[1],
+        }
 
     def _configure_url(self, request: TadoRequest) -> str:
         if request.endpoint == Endpoint.MOBILE:
@@ -599,9 +611,15 @@ class Http:
         request.action = Action.GET
         request.domain = Domain.ME
 
-        homes_ = self.request(request)["homes"]
+        response = self.request(request)
+        if isinstance(response, dict) and "homes" in response:
+            homes_ = response["homes"]
+        elif isinstance(response, list):
+            homes_ = response
+        else:
+            raise TadoException(f"Unexpected response from the /me endpoint: {response}")
 
-        return homes_[0]["id"]
+        return int(homes_[0]["id"])
 
     def _check_x_line_generation(self):
         # get home info

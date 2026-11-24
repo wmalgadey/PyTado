@@ -5,6 +5,7 @@ import io
 import json
 import unittest
 from unittest import mock
+import requests
 import responses
 
 from PyTado.const import CLIENT_ID_DEVICE
@@ -304,3 +305,35 @@ class TestHttp(unittest.TestCase):
         mock_device_ready.assert_called_once()
         mock_load_token.assert_not_called()
         mock_login_device_flow.assert_not_called()
+
+    @responses.activate
+    def test_request_rate_limited_empty_body(self):
+        """A 429 with an empty body raises HTTPError and stores quota headers."""
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/me",
+            body="",
+            status=429,
+            headers={
+                "RateLimit-Policy": '"perday";q=20000;w=86400',
+                "RateLimit": '"perday";r=0',
+            },
+        )
+        http = Http()
+        request = TadoRequest(domain=Domain.ME)
+        with self.assertRaises(requests.exceptions.HTTPError):
+            http.request(request)
+        self.assertEqual(http._rate_limit["remaining"], "0")
+        self.assertEqual(http._rate_limit["per-day"], "20000")
+
+    @responses.activate
+    def test_get_id_list_response(self):
+        """_get_id accepts a bare list of homes in the /me response."""
+        responses.replace(
+            responses.GET,
+            "https://my.tado.com/api/v2/me",
+            json=[{"id": 4321}],
+            status=200,
+        )
+        http = Http()
+        self.assertEqual(http._get_id(), 4321)
